@@ -2,7 +2,7 @@ package auction.manager;
 
 import auction.exception.*;
 import auction.model.*;
-import auction.model.item.ItemType;
+import auction.model.item.*;
 import auction.model.user.Bidder;
 import auction.model.user.Seller;
 import auction.observer.AuctionEvent;
@@ -55,6 +55,7 @@ public class AuctionManager {
     // ── Singleton plumbing ────────────────────────────────────────────────
 
     // TODO: declare private static instance field (lazy or holder-style)
+    private static volatile AuctionManager instance;
 
     private AuctionManager() {
         // TODO: initialise auctions map and observers list
@@ -65,7 +66,15 @@ public class AuctionManager {
      * TODO: implement (basic lazy init is acceptable; holder idiom for extra credit)
      */
     public static AuctionManager getInstance() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        if (instance == null) {
+            synchronized (AuctionManager.class) {
+                if (instance == null) {
+                    instance = new AuctionManager();
+                }
+            }
+        }
+        return instance;
+        // throw new UnsupportedOperationException("Not yet implemented");
     }
 
     // ── Internal state ────────────────────────────────────────────────────
@@ -195,7 +204,7 @@ public class AuctionManager {
      */
     public void reset() {
         // TODO: clear auctions map and observers list
-        throw new UnsupportedOperationException("Not yet implemented");
+        // throw new UnsupportedOperationException("Not yet implemented");
     }
 
     // ── Private helpers ───────────────────────────────────────────────────
