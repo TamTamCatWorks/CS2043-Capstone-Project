@@ -28,6 +28,13 @@ public class AuctionManager {
      * @return the singleton {@link AuctionManager} instance
      */
     public static AuctionManager getInstance() {
-        
+        if (instance == null) {
+            synchronized(AuctionManager.class) {
+                if(instance == null) {
+                    instance = new AuctionManager();
+                }
+            }
+        }
+        return instance;
     }
 }
