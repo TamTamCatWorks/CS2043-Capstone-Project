@@ -1,4 +1,4 @@
-package org.tamtamcatworks.auction;
+package org.tamtamcatworks.auction.model.item;
 
 /**
  * Abstract Item class for all item listings

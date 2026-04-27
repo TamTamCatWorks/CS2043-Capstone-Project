@@ -1,4 +1,4 @@
-package org.tamtamcatworks.auction;
+package org.tamtamcatworks.auction.model;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

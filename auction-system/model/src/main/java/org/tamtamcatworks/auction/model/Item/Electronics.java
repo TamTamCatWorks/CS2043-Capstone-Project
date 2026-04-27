@@ -1,4 +1,4 @@
-package org.tamtamcatworks.auction;
+package org.tamtamcatworks.auction.model.item;
 
 /**
  * Concrete class for electronic items

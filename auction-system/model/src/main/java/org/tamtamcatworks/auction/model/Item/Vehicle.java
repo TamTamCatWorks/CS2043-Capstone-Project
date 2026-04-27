@@ -1,4 +1,4 @@
-package org.tamtamcatworks.auction;
+package org.tamtamcatworks.auction.model.item;
 
 /**
  * Phương tiện: ô tô, xe máy, thuyền, máy bay cá nhân...
