@@ -23,13 +23,13 @@ public abstract class Entity {
      * Unique identifier for this entity, auto-generated as a UUID at construction.
      * Immutable.
      */
-    // TODO: declare entityId (String, final)
+    private final String entityId;
 
     /**
      * Timestamp recording when this entity was created.
      * Immutable.
      */
-    // TODO: declare createdAt (LocalDateTime, final)
+    private final LocalDateTime createdAt;
 
     /**
      * Initializes a new entity by generating a unique {@code entityId}
@@ -41,16 +41,23 @@ public abstract class Entity {
      *           and {@code LocalDateTime.now()} for {@code createdAt}.
      */
     protected Entity() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        this.entityId = UUID.randomUUID().toString();
+        this.createdAt = LocalDateTime.now();
     }
 
+
+    // khi load từ database, chúng ta cần constructor này để set entityid và createdAt từ database
+    protected Entity(String entityId, LocalDateTime createdAt) {
+        this.entityId = entityId;
+        this.createdAt = createdAt;
+    }
     /**
      * Returns the UUID for this entity.
      *
      * @return the UUID string identifying this entity, be sure to check for {@code null}
      */
     public String getEntityId() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return entityId;
     }
 
     /**
@@ -59,7 +66,7 @@ public abstract class Entity {
      * @return the {@link LocalDateTime} of creation, be sure to check for {@code null}
      */
     public LocalDateTime getCreatedAt() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return createdAt;
     }
 
     /**
@@ -70,4 +77,29 @@ public abstract class Entity {
      * @return a string describing this entity
      */
     public abstract String getDisplayInfo();
+
+
+
+    // ── Override Object ──────────────────────────────────────────────────────────
+
+    /**
+     * Hai Entity bằng nhau khi có cùng id
+     * thay vì là có cùng vùng nhớ hay không (theo mặc định của phép equals).
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Entity other)) return false;
+        return entityId != null && entityId.equals(other.entityId);
+    }
+
+    @Override
+    public int hashCode() {
+        return entityId != null ? entityId.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{id='" + entityId + "'}";
+    }
 }

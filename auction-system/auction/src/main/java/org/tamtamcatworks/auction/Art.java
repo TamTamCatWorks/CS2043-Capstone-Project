@@ -1,19 +1,41 @@
 package org.tamtamcatworks.auction;
 
 /**
- * Concrete class for art items 
+ * Concrete class for art items
  */
 public class Art extends Item {
+
     /*
-     * Each art item will have 
-     * artist(string)
-     * yearCreated(int)
-     * medium(string)
-     * 
+     * Each art item will have
+     * artist (String)
+     * yearCreated (int)
+     * medium (String)
+     * hasCertificate (boolean)
      */
 
     /**
-     * Returns the detail of the object
+     * Tạo sản phẩm nghệ thuật mới.
+     *
+     * name: tên sản phẩm
+     * description: mô tả
+     * startingPrice: giá khởi điểm
+     * condition: tình trạng
+     * sellerId: id người bán
+     * artist: tên tác giả
+     * yearCreated: năm sáng tác
+     * medium: chất liệu / kỹ thuật
+     * hasCertificate: có chứng chỉ xác thực không
+     */
+    public Art(
+
+    ){
+        // Gọi super(...) với ItemType.ART
+        // Gán giá trị cho các field
+    }
+
+    /**
+     * Trả về thông tin chuyên biệt của Art.
+     * - Format: "artist | yearCreated | medium | certificate"
      */
     @Override
     public String getDisplayInfo() {
