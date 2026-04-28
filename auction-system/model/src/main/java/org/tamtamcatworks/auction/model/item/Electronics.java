@@ -12,6 +12,10 @@ public class Electronics extends Item {
      * warrantyMonths (int)
      */
 
+    private String brand;
+    private String model;
+    private int warrantyMonths;
+
     /**
      * Tạo sản phẩm điện tử mới.
      *
@@ -25,10 +29,18 @@ public class Electronics extends Item {
      * warrantyMonths: số tháng bảo hành
      */
     public Electronics(
-
-    ){
-        // Gọi super(...) với ItemType.ELECTRONICS
-        // Gán giá trị cho các field
+            String name,
+            String description,
+            double startingPrice,
+            ItemCondition condition,
+            String sellerId,
+            String brand,
+            String model,
+            int warrantyMonths) {
+        super(name, description, startingPrice, ItemType.ELECTRONICS, condition, sellerId);
+        this.brand = brand;
+        this.model = model;
+        this.warrantyMonths = warrantyMonths;
     }
 
     /**
@@ -36,7 +48,9 @@ public class Electronics extends Item {
      * - Format: "brand | model | warranty"
      */
     @Override
-    public String getDisplayInfo() {
-        throw new UnsupportedOperationException("Not yet implemented");
+    public String getSpecificInfo() {
+        return "Hãng: " + brand
+                + " | Model: " + model
+                + " | Bảo hành: " + warrantyMonths + " tháng";
     }
 }

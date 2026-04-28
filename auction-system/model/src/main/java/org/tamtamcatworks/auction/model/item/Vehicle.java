@@ -15,6 +15,13 @@ public class Vehicle extends Item {
      * fuelType (String)
      */
 
+    private String make;
+    private String model;
+    private int year;
+    private int mileageKm;
+    private String color;
+    private String fuelType;
+
     /**
      * Tạo phương tiện mới.
      *
@@ -31,11 +38,27 @@ public class Vehicle extends Item {
      * fuelType: loại nhiên liệu
      */
     public Vehicle(
-
-    ){
-        // Gọi super(...) với ItemType.VEHICLE
-        // Gán giá trị cho các field
-        // Validate cơ bản (vd: mileageKm >= 0)
+            String name,
+            String description,
+            double startingPrice,
+            ItemCondition condition,
+            String sellerId,
+            String make,
+            String model,
+            int year,
+            int mileageKm,
+            String color,
+            String fuelType) {
+        super(name, description, startingPrice, ItemType.VEHICLE, condition, sellerId);
+        if (mileageKm < 0) {
+            throw new IllegalArgumentException("Số km đã đi không được âm.");
+        }
+        this.make = make;
+        this.model = model;
+        this.year = year;
+        this.mileageKm = mileageKm;
+        this.color = color;
+        this.fuelType = fuelType;
     }
 
     /**
@@ -44,7 +67,10 @@ public class Vehicle extends Item {
      *   "make model year | km | color | fuelType"
      */
     @Override
-    public String getDisplayInfo() {
-        throw new UnsupportedOperationException("Not yet implemented");
+    public String getSpecificInfo() {
+        return make + " " + model + " " + year
+                + " | " + mileageKm + " km"
+                + " | Màu: " + color
+                + " | Nhiên liệu: " + fuelType;
     }
 }
