@@ -33,30 +33,15 @@ import java.util.List;
  */
 public class Auction extends Entity {
 
-    // ── Fields ──────────────────────────────────────────────────────────────────
 
-    /** Tiêu đề phiên đấu giá hiển thị cho người dùng.
-     * Có thể thay đổi sau khi tạo (sửa tiêu đề cho hấp dẫn hơn). */
     private String title;
 
-    /** ID của Item đang được đấu giá.
-     * FINAL → không thể thay đổi item sau khi tạo phiên.
-     * Tại sao? Để tránh confusion cho bidder. */
     private final String itemId;
 
-    /** ID của User sở hữu item (Seller).
-     * FINAL → không thể thay đổi seller sau khi tạo.
-     * Tại sao? Để đảm bảo người nhận tiền đúng. */
     private final String sellerId;
 
-    /** Giá khởi điểm của phiên.
-     * FINAL → không thể thay đổi sau khi tạo.
-     * Tại sao? Để đảm bảo công bằng cho bidder. */
     private final double startingPrice;
 
-    /** Giá hiện tại cao nhất.
-     * Ban đầu = startingPrice, tăng lên khi có bid mới.
-     * MUTABLE → thay đổi mỗi khi có bid accepted. */
     private double currentPrice;
 
     /** ID của User đang dẫn đầu phiên.
@@ -67,16 +52,12 @@ public class Auction extends Entity {
      * Lưu snapshot tên tại thời điểm bid (trường hợp user đổi tên sau này). */
     private String leadingBidderName;
 
-    /** Thời điểm bắt đầu phiên.
-     * FINAL → không thể thay đổi sau khi tạo. */
     private final LocalDateTime startTime;
 
     /** Thời điểm kết thúc phiên.
      * MUTABLE → có thể gia hạn (extendEndTime) khi có bid gần hết giờ. */
     private LocalDateTime endTime;
 
-    /** Trạng thái hiện tại của phiên.
-     * MUTABLE → thay đổi theo lifecycle: PENDING → ACTIVE → CLOSED/CANCELLED. */
     private AuctionStatus status;
 
     /** Bước giá tối thiểu mỗi lần bid.
