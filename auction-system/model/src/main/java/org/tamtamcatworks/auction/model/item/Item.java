@@ -17,33 +17,15 @@ import java.time.LocalDateTime;
  */
 public abstract class Item extends Entity {
 
-    // ── Fields ──────────────────────────────────────────────────────────────────
-
-    /** Tên sản phẩm hiển thị trên giao diện. Không được rỗng. */
     private String name;
-
-    /** Mô tả chi tiết: tình trạng, xuất xứ, thông số kỹ thuật... */
     private String description;
-
-    /** Giá khởi điểm — giá thấp nhất để đặt bid đầu tiên. */
     private double startingPrice;
-
-    /** Loại sản phẩm — ELECTRONICS / ART / VEHICLE. */
     private final ItemType type;
-
-    /** Tình trạng vật lý của sản phẩm. */
     private ItemCondition condition;
-
-    /** ID của Seller sở hữu sản phẩm này. */
     private String sellerId;
-
-    /** URL ảnh đại diện sản phẩm (lưu đường dẫn, không lưu file). */
     private String imageUrl;
-
-    /** Thời điểm sản phẩm được thêm vào hệ thống. */
     private LocalDateTime listedAt;
 
-    // ── Constructor ──────────────────────────────────────────────────────────────
 
     /**
      * Tạo Item mới — gọi từ subclass qua super(...).

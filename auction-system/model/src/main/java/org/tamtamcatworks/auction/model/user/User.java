@@ -1,9 +1,6 @@
 package org.tamtamcatworks.auction.model.user;
 
 import org.tamtamcatworks.auction.model.Entity;
-import org.tamtamcatworks.auction.model.role.AuctionRole;
-import org.tamtamcatworks.auction.model.role.BidderRole;
-import org.tamtamcatworks.auction.model.role.SellerRole;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,11 +51,6 @@ public class User extends Entity {
      * MUTABLE → thay đổi khi bid, outbid, thắng, nạp tiền... */
     private double balance;
 
-    /** Map các role đấu giá tạm thời của user.
-     * Key: auctionId, Value: AuctionRole (BidderRole hoặc SellerRole).
-     * MUTABLE → thêm khi join, xóa khi leave.
-     * Tại sao dùng Map? Để O(1) lookup role theo auctionId. */
-    private final Map<String, AuctionRole> auctionRoles = new HashMap<>();
 
     /** Hồ sơ mua hàng (lịch sử lâu dài).
      * Lưu tổng chi, tổng thắng, bidding history.
@@ -104,77 +96,6 @@ public class User extends Entity {
         this.sellerProfile = new SellerProfile(getEntityId());
     }
 
-    // ── Auction Role Management ───────────────────────────────────────────────
-
-    /**
-     * Tham gia phiên đấu giá với vai trò Bidder.
-     *
-     * <p>LOGIC:
-     * 1. Validate: user chưa có role trong phiên này
-     * 2. Tạo BidderRole mới cho user
-     * 3. Đăng ký role vào auctionRoles map
-     * 4. Đăng ký role làm observer của Auction (trong AuctionManager)
-     *
-     * <p>VALIDATION:
-     * - User không thể có 2 role trong cùng 1 phiên
-     * - Một user chỉ có thể là Bidder HOẶC Seller, không được cả hai
-     *
-     * <p>TẠI SAO TRẢ VỀ ROLE:
-     * - Để caller có thể dùng role ngay lập tức
-     * - Để đăng ký observer với Auction
-     *
-     * @param auctionId ID phiên đấu giá muốn tham gia
-     * @return BidderRole vừa tạo
-     * @throws IllegalStateException nếu user đã có role trong phiên
-     */
-    public BidderRole joinAsBidder(String auctionId) {
-        if (auctionRoles.containsKey(auctionId)) throw new IllegalStateException("Đã có role trong phiên này.");
-        BidderRole role = new BidderRole(this, auctionId);
-        auctionRoles.put(auctionId, role);
-        return role;
-    }
-
-    /**
-     * Tạo phiên đấu giá mới với vai trò Seller.
-     *
-     * <p>LOGIC:
-     * 1. Validate: user chưa có role trong phiên này
-     * 2. Tạo SellerRole mới cho user
-     * 3. Đăng ký role vào auctionRoles map
-     *
-     * <p>VALIDATION:
-     * - User không thể tạo 2 phiên với cùng auctionId
-     * - Seller không thể bid trong phiên mình bán (kiểm tra ở BidProcessor)
-     *
-     * @param auctionId ID phiên đấu giá
-     * @param itemId ID item đem đấu giá
-     * @return SellerRole vừa tạo
-     * @throws IllegalStateException nếu user đã có role trong phiên
-     */
-    public SellerRole joinAsSeller(String auctionId, String itemId) {
-        if (auctionRoles.containsKey(auctionId)) throw new IllegalStateException("Đã có role trong phiên này.");
-        SellerRole role = new SellerRole(this, auctionId, itemId);
-        auctionRoles.put(auctionId, role);
-        return role;
-    }
-
-    /**
-     * Rời khỏi phiên đấu giá.
-     *
-     * <p>LOGIC:
-     * - Xóa role khỏi auctionRoles map
-     * - Role sẽ được GC (không còn reference)
-     * - Auction sẽ remove observer khi role bị xóa
-     *
-     * <p>HỒU QUẢ:
-     * - User không còn nhận event từ phiên
-     * - Nếu đang dẫn đầu → sẽ outbid (hoàn tiền)
-     *
-     * @param auctionId ID phiên đấu giá muốn rời
-     */
-    public void leaveAuction(String auctionId) {
-        auctionRoles.remove(auctionId);
-    }
 
     // ── Balance Management ─────────────────────────────────────────────────────
 

@@ -1,12 +1,9 @@
 package org.tamtamcatworks.auction.factory;
 
-import org.tamtamcatworks.auction.model.item.Art;
-import org.tamtamcatworks.auction.model.item.Electronics;
-import org.tamtamcatworks.auction.model.item.Item;
-import org.tamtamcatworks.auction.model.item.ItemCondition;
-import org.tamtamcatworks.auction.model.item.ItemType;
-import org.tamtamcatworks.auction.model.item.Vehicle;
+import org.tamtamcatworks.auction.model.item.*;
 
+import java.util.Map;
+import java.util.HashMap;
 /**
  * Factory Pattern — tạo Item subclass đúng loại mà không lộ constructor.
  *
@@ -28,17 +25,105 @@ import org.tamtamcatworks.auction.model.item.Vehicle;
  *   Item painting = ItemFactory.create(ItemType.ART, params);
  * </pre>
  */
+abstract class ItemCreator {
+
+    public Item create(ItemRequest request) {
+        validate(request);
+        return buildItem(request);
+    }
+
+    protected abstract Item buildItem(ItemRequest request);
+
+    protected void validate(ItemRequest request) {
+        if (request.getName() == null || request.getName().isBlank()) {
+            throw new IllegalArgumentException("Item name is required");
+        }
+    }
+}
+
+
+
+class ElectronicsCreator extends ItemCreator {
+
+    @Override
+    protected Item buildItem(ItemRequest req) {
+        return new Electronics(
+                req.getName(),
+                req.getDescription(),
+                req.getStartingPrice(),
+                req.getCondition(),
+                req.getSellerId(),
+                req.get("brand"),
+                req.get("model"),
+                req.getInt("warrantyMonths")
+        );
+    }
+}
+
+class ArtCreator extends ItemCreator {
+
+    @Override
+    protected Item buildItem(ItemRequest req) {
+        return new Art(
+                req.getName(),
+                req.getDescription(),
+                req.getStartingPrice(),
+                req.getCondition(),
+                req.getSellerId(),
+                req.get("artist"),
+                req.getInt("yearCreated"),
+                req.get("medium"),
+                req.getBoolean("hasCertificate")
+        );
+    }
+}
+
+class VehicleCreator extends ItemCreator {
+
+    @Override
+    protected Item buildItem(ItemRequest req) {
+        return new Vehicle(
+            req.getName(),
+            req.getDescription(),
+            req.getStartingPrice(),
+            req.getCondition(),
+            req.getSellerId(),
+            req.get("make"),
+            req.get("model"),          
+            req.getInt("year"),
+            req.getInt("mileageKm"),
+            req.get("color"),
+            req.get("fuelType")
+        );
+    }
+}
+
 public class ItemFactory {
 
-    // Constructor private — không cho tạo instance (chỉ dùng static methods)
-    private ItemFactory() {}
+    private static final Map<ItemType, ItemCreator> registry = new HashMap<>();
+
+    static {
+        registry.put(ItemType.ELECTRONICS, new ElectronicsCreator());
+        registry.put(ItemType.ART, new ArtCreator());
+        registry.put(ItemType.VEHICLE, new VehicleCreator());
+    }
+
+    public static Item create(ItemType type, ItemRequest request) {
+        ItemCreator creator = registry.get(type);
+
+        if (creator == null) {
+            throw new IllegalArgumentException("Không hỗ trợ kiểu: " + type);
+        }
+
+        return creator.create(request);
+    }
 
     /**
      * Tạo sản phẩm Electronics.
      *
      * @param name           tên sản phẩm
      * @param description    mô tả
-     * @param startingPrice  giá khởi điểm
+     * @param startingPrice  giá khởi điểmc:\Users\Windows XI\AppData\Local\Packages\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\TempState\ScreenClip\{66ABD062-D998-4DB8-9273-31C7D6EDF73E}.png
      * @param condition      tình trạng
      * @param sellerId       id người bán
      * @param brand          hãng sản xuất

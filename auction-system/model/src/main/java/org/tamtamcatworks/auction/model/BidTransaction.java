@@ -25,35 +25,12 @@ public final class BidTransaction {
     /** Loại bid: thủ công hoặc tự động. */
     public enum BidType {MANUAL, AUTO}
 
-    // ── Fields ──────────────────────────────────────────────────────────────────
-
-    /** Định danh duy nhất của transaction này.
-     * UUID sinh tự động khi tạo bid. */
     private final String id;
-
-    /** ID của phiên đấu giá nhận bid này.
-     * FINAL → không thể thay đổi auction sau khi bid. */
     private final String auctionId;
-
-    /** ID của User đặt bid.
-     * FINAL → không thể thay đổi bidder sau khi bid. */
     private final String bidderId;
-
-    /** Tên hiển thị của bidder tại thời điểm đặt.
-     * SNAPSHOT → lưu tên tại thời điểm bid (không đổi nếu user đổi tên sau này).
-     * Tại sao? Để hiển thị chính xác trong lịch sử. */
     private final String bidderName;
-
-    /** Số tiền bid.
-     * FINAL → không thể sửa giá sau khi đặt. */
     private final double amount;
-
-    /** Thời điểm bid được đặt.
-     * FINAL → ghi chính xác thời gian đặt. */
     private final LocalDateTime timestamp;
-
-    /** Loại bid (thủ công hoặc tự động).
-     * FINAL → không thể thay đổi loại sau khi đặt. */
     private final BidType bidType;
 
     // ── Constructors ─────────────────────────────────────────────────────────────

@@ -1,63 +1,19 @@
 package org.tamtamcatworks.auction.model;
 
-import org.tamtamcatworks.auction.observer.AuctionEvent;
-import org.tamtamcatworks.auction.observer.AuctionEventType;
-import org.tamtamcatworks.auction.observer.AuctionObserver;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-/**
- * Phiên đấu giá — Subject trong Observer Pattern.
- *
- * <p>INHERITANCE (Sự kế thừa):
- * - Auction kế thừa Entity → có sẵn entityId, createdAt, getDisplayInfo()
- * - Implement getDisplayInfo() để hiển thị thông tin phiên đấu giá
- *
- * <p>OBSERVER PATTERN (Mẫu Observer):
- * - Auction là Subject → giữ danh sách observers (BidderRole, SellerRole)
- * - Khi có sự kiện (bid mới, mở phiên, đóng phiên...) → notifyObservers()
- * - Observers nhận event realtime và cập nhật state của mình
- *
- * <p>THREAD SAFETY (An toàn luồng):
- * - Các method thay đổi state (open, recordBid, close...) đều synchronized
- * - Đảm bảo không có race condition khi nhiều bidder đặt giá cùng lúc
- * - observers list cũng được bảo vệ bằng synchronized
- *
- * <p>STATE MACHINE (Máy trạng thái):
- * - PENDING → ACTIVE → CLOSED (luồng bình thường)
- * - PENDING/ACTIVE → CANCELLED (có thể hủy bất kỳ lúc nào)
- * - Không thể chuyển từ CLOSED/CANCELLED sang trạng thái khác
- */
 public class Auction extends Entity {
 
 
     private String title;
-
     private final String itemId;
-
     private final String sellerId;
-
     private final double startingPrice;
-
     private double currentPrice;
-
-    /** ID của User đang dẫn đầu phiên.
-     * null khi chưa có bid nào. */
     private String leadingBidderId;
-
-    /** Tên hiển thị của bidder đang dẫn đầu.
-     * Lưu snapshot tên tại thời điểm bid (trường hợp user đổi tên sau này). */
     private String leadingBidderName;
-
     private final LocalDateTime startTime;
-
-    /** Thời điểm kết thúc phiên.
-     * MUTABLE → có thể gia hạn (extendEndTime) khi có bid gần hết giờ. */
     private LocalDateTime endTime;
-
     private AuctionStatus status;
 
     /** Bước giá tối thiểu mỗi lần bid.
@@ -65,15 +21,6 @@ public class Auction extends Entity {
      * Tại sao? Để tránh spam bid với giá tăng quá ít. */
     private double minimumIncrement;
 
-    /** Lịch sử tất cả các bid đã được chấp nhận.
-     * FINAL list → không thể thay đổi, chỉ thêm mới.
-     * Dùng cho audit trail và thống kê. */
-    private final List<BidTransaction> bidHistory;
-
-    /** Danh sách observers đang theo dõi phiên này.
-     * Bao gồm BidderRole và SellerRole.
-     * MUTABLE → thêm khi user join, xóa khi user leave. */
-    private final List<AuctionObserver> observers;
 
     // ── Constructor ───────────────────────────────────────────────────────────
 
@@ -120,8 +67,6 @@ public class Auction extends Entity {
         this.endTime          = endTime;
         this.status           = AuctionStatus.PENDING;  // Mặc định là chờ mở
         this.minimumIncrement = 1_000;  // Bước giá mặc định
-        this.bidHistory       = new ArrayList<>();
-        this.observers        = new ArrayList<>();
     }
 
     // ── Override getDisplayInfo ────────────────────────────────────────────────
@@ -150,73 +95,10 @@ public class Auction extends Entity {
                 + " | Giá khởi: " + String.format("%,.0f VNĐ", startingPrice)
                 + " | Giá hiện tại: " + String.format("%,.0f VNĐ", currentPrice)
                 + " | Dẫn đầu: " + (leadingBidderName != null ? leadingBidderName : "—")
-                + " | Tổng bid: " + bidHistory.size()
                 + " | Kết thúc: " + endTime;
     }
 
-    // ── Observer Pattern Methods ────────────────────────────────────────────────
 
-    /**
-     * Đăng ký observer để nhận event từ phiên đấu giá.
-     *
-     * <p>TẠI SAO SYNCHRONIZED:
-     * - observers list có thể được truy cập từ nhiều thread
-     * - Tránh ConcurrentModificationException khi add/remove cùng lúc
-     *
-     * <p>LOGIC:
-     * - Chỉ thêm nếu observer chưa tồn tại (tránh duplicate)
-     * - Khi user joinAsBidder/joinAsSeller → gọi method này
-     *
-     * @param obs observer muốn đăng ký (BidderRole hoặc SellerRole)
-     */
-    public synchronized void registerObserver(AuctionObserver obs) {
-        if (!observers.contains(obs)) observers.add(obs);
-    }
-
-    /**
-     * Hủy đăng ký observer.
-     *
-     * <p>TẠI SAO SYNCHRONIZED:
-     * - Tương tự registerObserver, cần thread-safe
-     *
-     * <p>LOGIC:
-     * - Khi user leaveAuction() → gọi method này
-     * - Observer không còn nhận event sau khi remove
-     *
-     * @param obs observer muốn hủy đăng ký
-     */
-    public synchronized void removeObserver(AuctionObserver obs) {
-        observers.remove(obs);
-    }
-
-    /**
-     * Thông báo event cho tất cả observers.
-     *
-     * <p>TẠI SAO SYNCHRONIZED:
-     * - Đảm bảo không có observer bị bỏ sót hoặc nhận event trùng lặp
-     *
-     * <p>LOGIC:
-     * - Duyệt qua tất cả observers
-     * - Gọi onAuctionEvent() cho từng observer
-     * - Try-catch để một observer lỗi không ảnh hưởng observer khác
-     *
-     * <p>EVENT TYPES:
-     * - AUCTION_STARTED: khi open()
-     * - BID_PLACED: khi recordBid()
-     * - AUCTION_CLOSED: khi close()
-     * - AUCTION_CANCELLED: khi cancel()
-     * - AUCTION_EXTENDED: khi extendEndTime()
-     *
-     * @param event event cần thông báo
-     */
-    public synchronized void notifyObservers(AuctionEvent event) {
-        for (AuctionObserver obs : observers) {
-            try { obs.onAuctionEvent(event); }
-            catch (Exception e) {
-                System.err.println("[WARN] Observer error: " + e.getMessage());
-            }
-        }
-    }
 
     // ── Business Logic Methods ─────────────────────────────────────────────────
 
@@ -241,9 +123,6 @@ public class Auction extends Entity {
         if (status != AuctionStatus.PENDING)
             throw new IllegalStateException("Chỉ mở được phiên PENDING.");
         status = AuctionStatus.ACTIVE;
-        notifyObservers(new AuctionEvent.Builder(AuctionEventType.AUCTION_STARTED, getEntityId())
-                .message("Phiên '" + title + "' bắt đầu!")
-                .data("startingPrice", startingPrice).build());
     }
 
     /**
@@ -266,17 +145,9 @@ public class Auction extends Entity {
      * @param tx transaction bid đã được validate
      */
     public synchronized void recordBid(BidTransaction tx) {
-        bidHistory.add(tx);
         currentPrice        = tx.getAmount();
         leadingBidderId     = tx.getBidderId();
         leadingBidderName   = tx.getBidderName();
-        notifyObservers(new AuctionEvent.Builder(AuctionEventType.BID_PLACED, getEntityId())
-                .message(tx.getBidderName() + " đặt "
-                        + String.format("%,.0f VNĐ", tx.getAmount()))
-                .data("bidAmount",   tx.getAmount())
-                .data("bidderId",    tx.getBidderId())
-                .data("bidderName",  tx.getBidderName())
-                .data("timestamp",   tx.getTimestamp().toString()).build());
     }
 
     /**
@@ -300,13 +171,6 @@ public class Auction extends Entity {
         if (status != AuctionStatus.ACTIVE)
             throw new IllegalStateException("Chỉ đóng được phiên ACTIVE.");
         status = AuctionStatus.CLOSED;
-        notifyObservers(new AuctionEvent.Builder(AuctionEventType.AUCTION_CLOSED, getEntityId())
-                .message(leadingBidderName != null
-                        ? "Người thắng: " + leadingBidderName
-                        : "Không có bid nào.")
-                .data("winnerId",    leadingBidderId)
-                .data("winnerName",  leadingBidderName)
-                .data("finalPrice",  currentPrice).build());
     }
 
     /**
@@ -332,9 +196,6 @@ public class Auction extends Entity {
         if (status.isFinished())
             throw new IllegalStateException("Phiên đã kết thúc rồi.");
         status = AuctionStatus.CANCELLED;
-        notifyObservers(new AuctionEvent.Builder(AuctionEventType.AUCTION_CANCELLED, getEntityId())
-                .message("Phiên bị hủy: " + reason)
-                .data("reason", reason).build());
     }
 
     /**
@@ -355,9 +216,6 @@ public class Auction extends Entity {
      */
     public synchronized void extendEndTime(int extraSeconds) {
         endTime = endTime.plusSeconds(extraSeconds);
-        notifyObservers(new AuctionEvent.Builder(AuctionEventType.AUCTION_EXTENDED, getEntityId())
-                .message("Gia hạn thêm " + extraSeconds + " giây.")
-                .data("newEndTime", endTime.toString()).build());
     }
 
     /**
@@ -395,23 +253,7 @@ public class Auction extends Entity {
     public LocalDateTime getEndTime()       { return endTime; }
     public AuctionStatus getStatus()        { return status; }
     public double getMinimumIncrement()     { return minimumIncrement; }
-    public int getBidCount()               { return bidHistory.size(); }
     public boolean isAcceptingBids()        { return status.isAcceptingBids(); }
-    public boolean hasBids()               { return !bidHistory.isEmpty(); }
-
-    /**
-     * Lấy lịch sử bid (read-only).
-     *
-     * <p>TẠI SAO UNMODIFIABLE:
-     * - bidHistory là append-only, không cho phép sửa từ bên ngoài
-     * - Tránh client code thêm/xóa bid không qua recordBid()
-     * - Đảm bảo integrity của lịch sử
-     *
-     * @return list read-only của các bid transaction
-     */
-    public List<BidTransaction> getBidHistory() {
-        return Collections.unmodifiableList(bidHistory);
-    }
 
     /**
      * Cập nhật tiêu đề phiên đấu giá.

@@ -30,21 +30,6 @@ import java.util.UUID;
  */
 public abstract class Entity {
 
-    // ── Fields ──────────────────────────────────────────────────────────────────
-
-    /**
-     * Định danh duy nhất cho entity này.
-     *
-     * <p>TẠI SAO DÙNG UUID:
-     * - Đảm bảo duy nhất toàn cầu, không trùng lặp
-     * - Không phụ thuộc vào database (có sinh trước khi lưu DB)
-     * - Phù hợp cho distributed system
-     *
-     * <p>IMMUTABLE (Bất biến):
-     * - final → không thể thay đổi sau khi gán
-     * - Dùng làm primary key trong database
-     * - Nếu cần thay đổi ID → tạo entity mới
-     */
     private final String entityId;
 
     /**
