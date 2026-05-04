@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>auction-system</artifactId>
+    <groupId>org.tamtamcatworks.auction</groupId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.tamtamcatworks.auction</groupId>
+  <artifactId>persist</artifactId>
+
+  <name>persist</name>
+
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+  <dependencies>
+
+    <!-- Domain models -->
+    <!-- <dependency>
+      <groupId>org.tamtamcatworks.auction</groupId>
+      <artifactId>model</artifactId>
+    </dependency> -->
+
+    <!-- MongoDB -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-mongodb</artifactId>
+    </dependency>
+
+  </dependencies>
+
+<!-- using it to test for now -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
