@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.tamtamcatworks.auction.model.BaseEntity;
+
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+
 /**
  * Hồ sơ Seller — lưu DB vĩnh viễn, liên kết 1-1 với User qua userId.
  *
@@ -14,30 +19,20 @@ import java.util.List;
  * SellerProfile tồn tại vĩnh viễn và tích lũy qua nhiều phiên.
  */
 
-@Embeddable
-public class SellerProfile {
-
-    private final String userId;
-
-    private final List<String> listings;
+@Entity
+public class SellerProfile extends BaseEntity {
 
     private double rating;
-
     private int ratingCount;
-
     private double totalRevenue;
-
     private int totalSold;
 
-    // ── Constructor ───────────────────────────────────────────────────────────
+    @ElementCollection
+    private List<String> listings;
 
-    public SellerProfile(String userId) {
-        this.userId       = userId;
-        this.listings     = new ArrayList<>();
-        this.rating       = 0.0;
-        this.ratingCount  = 0;
-        this.totalRevenue = 0.0;
-        this.totalSold    = 0;
+    public SellerProfile() {
+        this.rating = 0.0;
+        this.totalSold = 0;
     }
 
     // ── Business methods ──────────────────────────────────────────────────────
@@ -66,7 +61,7 @@ public class SellerProfile {
 
     @Override
     public String toString() {
-        return "SellerProfile{userId='" + userId
+        return ""
                 + "', rating=" + String.format("%.1f", rating)
                 + " (" + ratingCount + " đánh giá)"
                 + ", sold=" + totalSold
@@ -75,7 +70,6 @@ public class SellerProfile {
 
     // ── Getters / Setters ─────────────────────────────────────────────────────
 
-    public String getUserId()               { return userId; }
     public List<String> getListings()       { return Collections.unmodifiableList(listings); }
     public double getRating()               { return rating; }
     public int getRatingCount()             { return ratingCount; }

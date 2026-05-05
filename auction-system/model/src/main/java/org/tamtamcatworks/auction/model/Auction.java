@@ -2,8 +2,7 @@ package org.tamtamcatworks.auction.model;
 
 import java.time.LocalDateTime;
 
-public class Auction extends Entity {
-
+public class Auction extends BaseEntity {
 
     private String title;
     private final String itemId;

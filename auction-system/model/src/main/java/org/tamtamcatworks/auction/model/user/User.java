@@ -1,34 +1,18 @@
 package org.tamtamcatworks.auction.model.user;
 
-import org.tamtamcatworks.auction.model.Entity;
+import org.tamtamcatworks.auction.model.BaseEntity;
 
-/**
- * Người dùng trong hệ thống đấu giá.
- *
- * <p>INHERITANCE (Sự kế thừa):
- * - User kế thừa Entity → có sẵn entityId, createdAt, getDisplayInfo()
- * - Implement getDisplayInfo() để hiển thị thông tin user
- *
- * <p>BALANCE MANAGEMENT (Quản lý số dư):
- * - balance là số tiền hiện có trong tài khoản
- * - Khi bid: balance giảm (đóng băng vào holdAmount)
- * - Khi outbid: balance được hoàn lại từ holdAmount
- * - Khi thắng: holdAmount chuyển cho seller, không hoàn lại
- *
- * <p>AUCTION ROLES (Các vai trò đấu giá):
- * - auctionRoles là Map lưu các role tạm thời của user
- * - Key: auctionId, Value: AuctionRole (BidderRole hoặc SellerRole)
- * - Role chỉ tồn trên RAM, tạo khi join, xóa khi leave
- *
- * <p>PROFILES (Hồ sơ):
- * - buyerProfile: lịch sử mua hàng lâu dài (lưu DB)
- * - sellerProfile: lịch sử bán hàng lâu dài (lưu DB)
- * - Khác với role tạm thời, profile tồn tại vĩnh viễn
- */
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.CascadeType;
+
 
 @Entity
 @Table(name = "Users")
-public class User extends Entity {
+public class User extends BaseEntity {
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
@@ -45,10 +29,12 @@ public class User extends Entity {
     @Column(nullable = false)
     private double balance;
 
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "buyer_profile_id")
     private BuyerProfile buyerProfile;
 
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "seller_profile_id")
     private SellerProfile sellerProfile;
 
     // ── Constructor ─────────────────────────────────────────────────────────────
@@ -73,17 +59,14 @@ public class User extends Entity {
      * @param initialBalance số dư ban đầu
      */
     public User(String username, String email, String passwordHash, String fullName, double initialBalance) {
-        super();
         this.username = username;
         this.email = email;
         this.passwordHash = passwordHash;
         this.fullName = fullName;
         this.balance = initialBalance;
-
-        // Tạo profile rỗng cho user mới
-        this.buyerProfile = new BuyerProfile(getEntityId());
-        this.sellerProfile = new SellerProfile(getEntityId());
     }
+
+    protected User() {} // for JPA
 
 
     // ── Balance Management ─────────────────────────────────────────────────────

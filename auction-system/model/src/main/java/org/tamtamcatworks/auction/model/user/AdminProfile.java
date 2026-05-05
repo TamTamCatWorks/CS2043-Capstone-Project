@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.tamtamcatworks.auction.model.BaseEntity;
+
+import jakarta.persistence.Entity;
+
 /**
  * Hồ sơ Admin — lưu DB vĩnh viễn, liên kết 1-1 với User qua userId.
  *
@@ -18,8 +22,8 @@ import java.util.List;
  *                     MANAGE_AUCTIONS, VIEW_LOGS, MANAGE_ADMINS
  */
 
-@Embeddable
-public class AdminProfile {
+@Entity
+public class AdminProfile extends BaseEntity {
 
     private final String userId;
 

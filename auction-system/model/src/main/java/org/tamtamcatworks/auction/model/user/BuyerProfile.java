@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.tamtamcatworks.auction.model.BaseEntity;
+
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
 /**
  * Hồ sơ Buyer — lưu DB vĩnh viễn, liên kết 1-1 với User qua userId.
  *
@@ -15,27 +19,21 @@ import java.util.List;
  * chỉ tồn tại trên RAM trong thời gian 1 phiên.
  */
 
-@Embeddable
-public class BuyerProfile {
-
-    private final String userId;
-
-    private final List<String> biddingHistory;
-
-    private final List<String> watchlist;
+@Entity
+public class BuyerProfile extends BaseEntity {
 
     private int totalWins;
-
     private double totalSpent;
 
-    // ── Constructor ───────────────────────────────────────────────────────────
+    @ElementCollection
+    private List<String> biddingHistory;
 
-    public BuyerProfile(String userId) {
-        this.userId         = userId;
-        this.biddingHistory = new ArrayList<>();
-        this.watchlist      = new ArrayList<>();
-        this.totalWins      = 0;
-        this.totalSpent     = 0.0;
+    @ElementCollection
+    private List<String> watchlist;
+
+    public BuyerProfile() {
+        this.totalWins = 0;
+        this.totalSpent = 0.0;
     }
 
     // ── Business methods ──────────────────────────────────────────────────────
@@ -68,14 +66,13 @@ public class BuyerProfile {
 
     @Override
     public String toString() {
-        return "BuyerProfile{userId='" + userId
+        return ""
                 + "', wins=" + totalWins
                 + ", totalSpent=" + String.format("%,.0f", totalSpent) + " VNĐ}";
     }
 
     // ── Getters / Setters ─────────────────────────────────────────────────────
 
-    public String getUserId()                   { return userId; }
     public List<String> getBiddingHistory()     { return Collections.unmodifiableList(biddingHistory); }
     public List<String> getWatchlist()          { return Collections.unmodifiableList(watchlist); }
     public int getTotalWins()                   { return totalWins; }
