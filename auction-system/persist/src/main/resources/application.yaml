@@ -1,7 +1,5 @@
 spring:
   data:
-    mongodb:
-      uri: mongodb://localhost:27017/tamtamcatworks
       # postgreSQL
     datasource:
       url: ${DB_URL:jdbc:postgresql://localhost:5432/tamtamcatworks}
