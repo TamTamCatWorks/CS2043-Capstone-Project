@@ -6,18 +6,22 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-// seeder to init database, from spring's docs
+import org.tamtamcatworks.auction.model.user.User;
+import org.tamtamcatworks.auction.persist.repository.UserRepository;
+
 @Configuration
 public class LoadDatabase {
 
-  private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
+    private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
 
-  @Bean
-  CommandLineRunner initDatabase(repository) {
+    @Bean
+    CommandLineRunner initDatabase(UserRepository userRepository) {
+        return args -> {
+            User user = new User("testuser", "test@example.com", "hashed123", "Test User", 1000.0);
+            user.setBuyerProfile(new BuyerProfile());
+            user.setSellerProfile(new SellerProfile());
 
-    return args -> {
-      log.info("Preloading " + repository.save(new Employee("Bilbo Baggins", "burglar")));
-      log.info("Preloading " + repository.save(new Employee("Frodo Baggins", "thief")));
-    };
-  }
+            log.info("Preloading " + userRepository.save(user));
+        };
+    }
 }
