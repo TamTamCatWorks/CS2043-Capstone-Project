@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.tamtamcatworks.auction.model.BaseEntity;
+
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+
 /**
  * Hồ sơ Seller — lưu DB vĩnh viễn, liên kết 1-1 với User qua userId.
  *
@@ -13,34 +18,21 @@ import java.util.List;
  * Khác SellerRole (RAM, tạm thời trong 1 phiên) —
  * SellerProfile tồn tại vĩnh viễn và tích lũy qua nhiều phiên.
  */
-public class SellerProfile {
 
-    private final String userId;
+@Entity
+public class SellerProfile extends BaseEntity {
 
-    // Danh sách auctionId các phiên đã tạo ra (mọi trạng thái)
-    private final List<String> listings;
-
-    // Điểm uy tín trung bình (1.0 – 5.0), tính từ đánh giá của Buyer
     private double rating;
-
-    // Số lượt đánh giá — dùng để tính lại rating trung bình
     private int ratingCount;
-
-    // Tổng doanh thu từ các phiên đã CLOSED thành công
     private double totalRevenue;
-
-    // Tổng số phiên đã bán thành công (có người thắng)
     private int totalSold;
 
-    // ── Constructor ───────────────────────────────────────────────────────────
+    @ElementCollection
+    private List<String> listings;
 
-    public SellerProfile(String userId) {
-        this.userId       = userId;
-        this.listings     = new ArrayList<>();
-        this.rating       = 0.0;
-        this.ratingCount  = 0;
-        this.totalRevenue = 0.0;
-        this.totalSold    = 0;
+    public SellerProfile() {
+        this.rating = 0.0;
+        this.totalSold = 0;
     }
 
     // ── Business methods ──────────────────────────────────────────────────────
@@ -69,7 +61,7 @@ public class SellerProfile {
 
     @Override
     public String toString() {
-        return "SellerProfile{userId='" + userId
+        return ""
                 + "', rating=" + String.format("%.1f", rating)
                 + " (" + ratingCount + " đánh giá)"
                 + ", sold=" + totalSold
@@ -78,7 +70,6 @@ public class SellerProfile {
 
     // ── Getters / Setters ─────────────────────────────────────────────────────
 
-    public String getUserId()               { return userId; }
     public List<String> getListings()       { return Collections.unmodifiableList(listings); }
     public double getRating()               { return rating; }
     public int getRatingCount()             { return ratingCount; }

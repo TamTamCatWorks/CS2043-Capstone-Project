@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class EntityTest {
     // Minimal subclass for testing — Engineering should not modify this
-    static class TestEntity extends Entity {
+    static class TestEntity extends BaseEntity {
         @Override
         public String getDisplayInfo() {
             return "TestEntity[" + getEntityId() + "]";
