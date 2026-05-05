@@ -17,10 +17,10 @@
   <dependencies>
 
     <!-- Domain models -->
-    <!-- <dependency>
+    <dependency>
       <groupId>org.tamtamcatworks.auction</groupId>
       <artifactId>model</artifactId>
-    </dependency> -->
+    </dependency>
 
     <!-- MongoDB -->
     <dependency>

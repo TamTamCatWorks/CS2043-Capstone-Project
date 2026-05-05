@@ -22,9 +22,15 @@
   <dependencyManagement>
   <!-- auto tracking for child modules -->
     <dependencies>
-        <dependency>
+      <dependency>
         <groupId>org.tamtamcatworks.auction</groupId>
         <artifactId>persist</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>  
+        <groupId>org.tamtamcatworks.auction</groupId>
+        <artifactId>model</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
