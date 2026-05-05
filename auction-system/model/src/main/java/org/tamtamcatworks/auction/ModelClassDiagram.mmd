@@ -1,0 +1,184 @@
+---
+config:
+  layout: dagre
+  theme: mc
+---
+classDiagram
+direction TB
+	class Entity {
+	    -String entityId
+	    -LocalDateTime createdAt
+	    +getDisplayInfo() String*
+    }
+
+    class Item {
+	    -String name
+	    -String description
+	    -double startingPrice
+	    -ItemType type
+	    -ItemCondition condition
+	    -String sellerId
+	    -String imageUrl
+	    -LocalDateTime listedAt
+	    +getDisplayInfo() String
+	    +getSpecificInfo() String*
+    }
+
+    class User {
+	    -String username
+	    -String email
+	    -String passwordHash
+	    -String fullName
+	    -double balance
+	    -BuyerProfile buyerProfile
+	    -SellerProfile sellerProfile
+	    +deductBalance(double amount)
+	    +refundBalance(double amount)
+	    +getDisplayInfo() String
+    }
+
+    class Auction {
+	    -String title
+	    -String itemId
+	    -String sellerId
+	    -double startingPrice
+	    -double currentPrice
+	    -String leadingBidderId
+	    -String leadingBidderName
+	    -LocalDateTime startTime
+	    -LocalDateTime endTime
+	    -AuctionStatus status
+	    -double minimumIncrement
+	    +getDisplayInfo() String
+	    +open()
+	    +recordBid(BidTransaction tx)
+	    +close()
+	    +cancel()
+	    +extendEndTime(int extraSeconds)
+	    +isValidBidAmount(double amount) boolean
+	    +setMininumIncrement(double inc)
+    }
+
+	namespace Profile {
+        class AdminProfile {
+	        -String userId
+	        -List~String~ permissions
+	        -List~String~ actionLog
+	        +hasPermission(String permission) boolean
+	        +grantPermission(String permission)
+	        +revokePermission(String permission)
+	        +logAction(String action)
+        }
+
+        class BuyerProfile {
+	        -String userId
+	        -List~String~ biddingHistory
+	        -List~String~ watchlist
+	        -int totalWins
+	        -double totalSpent
+	        +addToBiddingHistory(String auctionId)
+	        +addToWatchlist(String auctionId)
+	        +removeFromWatchlist(String auctionId)
+	        +recordWin(String auctionId, double finalPrice)
+        }
+
+        class SellerProfile {
+	        -String userId;
+	        -List~String~ listings;
+	        -double rating;
+	        -int ratingCount;
+	        -double totalRevenue;
+	        -int totalSold;
+	        +addListing(String auctionId)
+	        +recordSale(String auctionId, double salePrice)
+	        +addRating(double newRating)
+        }
+
+	}
+
+
+	namespace ConcreteItem {
+        class Art {
+	        -String artist
+	        -int yearCreated
+	        -String medium
+	        -String dimensions
+	        -boolean hasCertificate
+        }
+
+        class Electronics {
+	        -String brand
+	        -String model
+	        -int warrantyMonths
+        }
+
+        class Vehicle {
+	        -String make
+	        -String model
+	        -int year
+	        -int mileageKm
+	        -String color
+	        -String fuelType
+        }
+
+	}
+
+    
+namespace ItemAttribute {
+    class ItemCondition {
+	    NEW
+	    LIKE_NEW
+	    GOOD
+	    FAIR
+	    POOR
+    }
+
+    class ItemType {
+	    ART
+	    VEHICLE
+	    ELECTRONICS
+    }
+}
+
+
+    class AuctionStatus {
+	    PENDING
+	    ACTIVE
+	    CLOSED
+	    CANCELLED
+	    +isAcceptingBids() boolean
+	    +isFinished() boolean
+    }
+
+	class BidTransaction{
+	-String id
+	-String auctionId
+	-String bidderId
+	-String bidderName
+	-double amount
+	-LocalDateTime timestamp
+	-BidType bidType
+	+isAutoBid() boolean
+	+toString() String
+}
+
+
+	<<abstract>> Entity
+	<<abstract>> Item
+	<<enumeration>> ItemCondition
+	<<enumeration>> ItemType
+	<<enumeration>> AuctionStatus
+
+    Entity <|-- Item
+    Entity <|-- User
+    Entity <|-- Auction
+    User *-- AdminProfile
+    User *-- BuyerProfile 
+    User *-- SellerProfile
+    Item <|-- Art
+    Item <|-- Electronics
+    Item <|-- Vehicle
+    Item *-- ItemCondition
+    Item *-- ItemType
+    Auction *-- AuctionStatus
+	Auction *-- BidTransaction
