@@ -120,6 +120,12 @@ public class User extends BaseEntity {
         return username;
     }
 
+
+     public void setBuyerProfile(BuyerProfile buyerProfile)   { this.buyerProfile = buyerProfile; }
+    public void setSellerProfile(SellerProfile sellerProfile) { this.sellerProfile = sellerProfile; }
+
+
+
     /**
      * Hiển thị thông tin tóm tắt của user.
      *
@@ -132,6 +138,10 @@ public class User extends BaseEntity {
      *
      * @return chuỗi mô tả user
      */
+
+
+
+    
     @Override
     public String getDisplayInfo() {
         return "User: " + username + " | ID: " + getEntityId() + " | Balance: " + balance;

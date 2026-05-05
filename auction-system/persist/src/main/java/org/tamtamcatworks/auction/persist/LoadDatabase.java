@@ -6,6 +6,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.tamtamcatworks.auction.model.user.BuyerProfile;
+import org.tamtamcatworks.auction.model.user.SellerProfile;
 import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
 
