@@ -17,14 +17,14 @@ import java.util.List;
  * Các giá trị hợp lệ: MANAGE_USERS, MANAGE_ITEMS,
  *                     MANAGE_AUCTIONS, VIEW_LOGS, MANAGE_ADMINS
  */
+
+@Embeddable
 public class AdminProfile {
 
     private final String userId;
 
-    // Danh sách quyền hạn — lưu dạng String để dễ serialize DB
     private final List<String> permissions;
 
-    // Log các hành động quản trị — append-only
     private final List<String> actionLog;
 
     // ── Constructor ───────────────────────────────────────────────────────────

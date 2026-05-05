@@ -1,8 +1,6 @@
 package org.tamtamcatworks.auction.model.user;
 
 import org.tamtamcatworks.auction.model.Entity;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Người dùng trong hệ thống đấu giá.
@@ -27,39 +25,30 @@ import java.util.Map;
  * - sellerProfile: lịch sử bán hàng lâu dài (lưu DB)
  * - Khác với role tạm thời, profile tồn tại vĩnh viễn
  */
+
+@Entity
+@Table(name = "Users")
 public class User extends Entity {
 
-    // ── Fields ──────────────────────────────────────────────────────────────────
-
-    /** Tên đăng nhập (unique).
-     * Dùng để xác thực user. */
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    /** Email của user (unique).
-     * Dùng để khôi phục mật khẩu và thông báo. */
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    /** Mật khẩu đã được hash (không lưu plain text).
-     * Tại sao hash? Để bảo mật nếu DB bị leak. */
+    @Column(nullable = false)
     private String passwordHash;
 
-    /** Tên đầy đủ hiển thị.
-     * Có thể thay đổi sau khi tạo tài khoản. */
+    @Column(nullable = false)
     private String fullName;
 
-    /** Số dư tài khoản hiện tại.
-     * MUTABLE → thay đổi khi bid, outbid, thắng, nạp tiền... */
+    @Column(nullable = false)
     private double balance;
 
-
-    /** Hồ sơ mua hàng (lịch sử lâu dài).
-     * Lưu tổng chi, tổng thắng, bidding history.
-     * Tồn tại vĩnh viễn trong DB. */
+    @Embedded
     private BuyerProfile buyerProfile;
 
-    /** Hồ sơ bán hàng (lịch sử lâu dài).
-     * Lưu doanh thu, rating, số lượng đã bán.
-     * Tồn tại vĩnh viễn trong DB. */
+    @Embedded
     private SellerProfile sellerProfile;
 
     // ── Constructor ─────────────────────────────────────────────────────────────

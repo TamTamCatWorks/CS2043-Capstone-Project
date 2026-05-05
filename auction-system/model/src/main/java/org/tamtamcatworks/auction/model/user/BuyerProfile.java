@@ -14,21 +14,18 @@ import java.util.List;
  * Dữ liệu ở đây là lịch sử LÂU DÀI — khác với BidderRole
  * chỉ tồn tại trên RAM trong thời gian 1 phiên.
  */
+
+@Embeddable
 public class BuyerProfile {
 
-    // userId của User sở hữu profile này — FK trong DB
     private final String userId;
 
-    // Danh sách auctionId các phiên đã tham gia đặt giá (kể cả thua)
     private final List<String> biddingHistory;
 
-    // Danh sách auctionId đang theo dõi để nhận thông báo
     private final List<String> watchlist;
 
-    // Tổng số phiên đã thắng
     private int totalWins;
 
-    // Tổng tiền đã chi mua hàng thành công
     private double totalSpent;
 
     // ── Constructor ───────────────────────────────────────────────────────────

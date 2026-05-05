@@ -13,23 +13,20 @@ import java.util.List;
  * Khác SellerRole (RAM, tạm thời trong 1 phiên) —
  * SellerProfile tồn tại vĩnh viễn và tích lũy qua nhiều phiên.
  */
+
+@Embeddable
 public class SellerProfile {
 
     private final String userId;
 
-    // Danh sách auctionId các phiên đã tạo ra (mọi trạng thái)
     private final List<String> listings;
 
-    // Điểm uy tín trung bình (1.0 – 5.0), tính từ đánh giá của Buyer
     private double rating;
 
-    // Số lượt đánh giá — dùng để tính lại rating trung bình
     private int ratingCount;
 
-    // Tổng doanh thu từ các phiên đã CLOSED thành công
     private double totalRevenue;
 
-    // Tổng số phiên đã bán thành công (có người thắng)
     private int totalSold;
 
     // ── Constructor ───────────────────────────────────────────────────────────
