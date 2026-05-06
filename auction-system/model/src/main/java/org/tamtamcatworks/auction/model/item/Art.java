@@ -1,8 +1,13 @@
 package org.tamtamcatworks.auction.model.item;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
 /**
  * Concrete class for art items
  */
+@Entity
+@DiscriminatorValue("ART")
 public class Art extends Item {
 
     /*

@@ -37,6 +37,11 @@ public class User extends BaseEntity {
     @JoinColumn(name = "seller_profile_id")
     private SellerProfile sellerProfile;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "admin_profile_id")
+    private AdminProfile adminProfile;
+
+
     // ── Constructor ─────────────────────────────────────────────────────────────
 
     /**

@@ -3,6 +3,14 @@ package org.tamtamcatworks.auction.model.item;
 /**
  * Concrete class for electronic items
  */
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+/**
+ * Concrete class for art items
+ */
+@Entity
+@DiscriminatorValue("ELECTRONICS")
 public class Electronics extends Item {
 
     /*

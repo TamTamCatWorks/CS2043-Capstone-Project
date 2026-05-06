@@ -1,6 +1,7 @@
 package org.tamtamcatworks.auction.model.item;
 
 import org.tamtamcatworks.auction.model.BaseEntity;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
@@ -15,6 +16,9 @@ import java.time.LocalDateTime;
  * <p>ENCAPSULATION: Tất cả field là private, chỉ thay đổi qua setter
  * có kiểm tra hợp lệ (ví dụ: startingPrice không âm).
  */
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "item_type")
 public abstract class Item extends BaseEntity {
 
     private String name;

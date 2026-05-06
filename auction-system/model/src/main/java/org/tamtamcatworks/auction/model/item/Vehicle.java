@@ -1,8 +1,12 @@
 package org.tamtamcatworks.auction.model.item;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.DiscriminatorValue;
 /**
  * Phương tiện: ô tô, xe máy, thuyền, máy bay cá nhân...
  */
+@Entity
+@DiscriminatorValue("VEHICLE")
 public class Vehicle extends Item {
 
     /*
