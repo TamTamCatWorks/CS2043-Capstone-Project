@@ -1,6 +1,7 @@
 package org.tamtamcatworks.auction.api.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,7 +41,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable String id) {
+    public ResponseEntity<UserResponse> getUser(@PathVariable @NonNull String id) {
         return ResponseEntity.ok(UserResponse.from(userService.findById(id)));
     }
 }
