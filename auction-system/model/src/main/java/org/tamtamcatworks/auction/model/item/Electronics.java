@@ -1,27 +1,24 @@
 package org.tamtamcatworks.auction.model.item;
 
-/**
- * Concrete class for electronic items
- */
+import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.Table;
 
-/**
- * Concrete class for art items
- */
 @Entity
+@Table(name = "electronics_items")
 @DiscriminatorValue("ELECTRONICS")
+@PrimaryKeyJoinColumn(name = "item_id")
 public class Electronics extends Item {
 
-    /*
-     * Each electronic item will have
-     * brand (String)
-     * model (String)
-     * warrantyMonths (int)
-     */
-
+    @Column(nullable = false)
     private String brand;
+
+    @Column(nullable = false)
     private String model;
+
+    @Column(nullable = false)
     private int warrantyMonths;
 
     /**

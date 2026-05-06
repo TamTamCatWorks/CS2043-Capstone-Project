@@ -1,26 +1,30 @@
 package org.tamtamcatworks.auction.model.item;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.Table;
 
-/**
- * Concrete class for art items
- */
 @Entity
+@Table(name = "art_items")
 @DiscriminatorValue("ART")
+@PrimaryKeyJoinColumn(name = "item_id")
 public class Art extends Item {
 
-    /*
-     * Each art item will have
-     * artist (String)
-     * yearCreated (int)
-     * medium (String)
-     * hasCertificate (boolean)
-     */
+     @Column(nullable = false)
     private String artist;
+
+     @Column(nullable = false)
     private int yearCreated;
+
+     @Column(nullable = false)
     private String medium;
+
+     @Column(nullable = false)
     private String dimensions;
+
+     @Column(nullable = false)
     private boolean hasCertificate;
 
     /**
