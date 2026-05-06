@@ -129,6 +129,10 @@ public class User extends BaseEntity {
         return fullName;
     }
 
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
 
     public void setBuyerProfile(BuyerProfile buyerProfile)   { this.buyerProfile = buyerProfile; }
     public void setSellerProfile(SellerProfile sellerProfile) { this.sellerProfile = sellerProfile; }

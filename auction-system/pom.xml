@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
-<!-- spring frame work import -->
+  <!-- spring frame work import -->
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>3.2.5</version>
   </parent>
-
   <groupId>org.tamtamcatworks.auction</groupId>
   <artifactId>auction-system</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -20,22 +18,25 @@
     <java.version>21</java.version>
   </properties>
   <dependencyManagement>
-  <!-- auto tracking for child modules -->
+    <!-- auto tracking for child modules -->
     <dependencies>
       <dependency>
         <groupId>org.tamtamcatworks.auction</groupId>
         <artifactId>persist</artifactId>
         <version>${project.version}</version>
       </dependency>
-
-      <dependency>  
+      <dependency>
         <groupId>org.tamtamcatworks.auction</groupId>
         <artifactId>model</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.tamtamcatworks.auction</groupId>
+        <artifactId>service</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
-
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -48,13 +49,12 @@
       <artifactId>junit-jupiter-params</artifactId>
       <scope>test</scope>
     </dependency>
-<!-- spring's test -->
+    <!-- spring's test -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
   <build>
     <pluginManagement>
@@ -117,8 +117,8 @@
     </pluginManagement>
   </build>
   <modules>
-    <module>auction</module>
     <module>model</module>
     <module>persist</module>
+    <module>service</module>
   </modules>
 </project>
