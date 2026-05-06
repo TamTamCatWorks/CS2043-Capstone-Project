@@ -1,6 +1,8 @@
-package org.tamtamcatworks.auction.model.item;
+package org.tamtamcatworks.auction.api.dto;
 
 import java.util.Map;
+
+import org.tamtamcatworks.auction.model.item.ItemCondition;
 
 public class ItemRequest {
     public String id;
@@ -35,17 +37,14 @@ public class ItemRequest {
         return sellerId;
     }
 
-    //electronics
     public String brand;
     public int warrantyMonths;
 
-    //art
     public String artist;
     public int yearCreated;
     public String medium;
     public boolean hasCertificate;
 
-    //vehicle
     public String make;
     public int year;
     public int mileageKm;

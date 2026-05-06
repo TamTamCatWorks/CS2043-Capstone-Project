@@ -1,6 +1,5 @@
 package org.tamtamcatworks.auction.model.user;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

@@ -1,5 +1,7 @@
 package org.tamtamcatworks.auction.model.item;
 
+import org.tamtamcatworks.auction.model.user.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -27,30 +29,17 @@ public class Art extends Item {
      @Column(nullable = false)
     private boolean hasCertificate;
 
-    /**
-     * Tạo sản phẩm nghệ thuật mới.
-     * <p>
-     * name: tên sản phẩm
-     * description: mô tả
-     * startingPrice: giá khởi điểm
-     * condition: tình trạng
-     * sellerId: id người bán
-     * artist: tên tác giả
-     * yearCreated: năm sáng tác
-     * medium: chất liệu / kỹ thuật
-     * hasCertificate: có chứng chỉ xác thực không
-     */
     public Art(
             String name,
             String description,
             double startingPrice,
             ItemCondition condition,
-            String sellerId,
+            User seller,
             String artist,
             int yearCreated,
             String medium,
             boolean hasCertificate) {
-        super(name, description, startingPrice, ItemType.ART, condition, sellerId);
+        super(name, description, startingPrice, condition, seller);
         this.artist = artist;
         this.yearCreated = yearCreated;
         this.medium = medium;
@@ -58,11 +47,6 @@ public class Art extends Item {
     }
     
     protected Art() {}
-
-    /**
-     * Trả về thông tin chuyên biệt của Art.
-     * - Format: "artist | yearCreated | medium | certificate"
-     */
 
     @Override
     public String getSpecificInfo() {
@@ -72,7 +56,6 @@ public class Art extends Item {
                 + " | Chất liệu: " + medium
                 + " | " + cert;
     }
-    // ── Getters & Setters ────────────────────────────────────────────────────────
 
     public String getArtist() {
         return artist;

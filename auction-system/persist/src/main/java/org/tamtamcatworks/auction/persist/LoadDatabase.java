@@ -67,9 +67,9 @@ public class LoadDatabase {
             Art art = new Art(
                 "testArt",
                 "testArtTest",
-                1000,
+                1000.0,
                 ItemCondition.FAIR,
-                seller.getId(),
+                seller,
                 "testArtist",
                 1999,
                 "testMedium",

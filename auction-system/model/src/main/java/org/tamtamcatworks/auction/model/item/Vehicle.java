@@ -3,6 +3,9 @@ package org.tamtamcatworks.auction.model.item;
 import jakarta.persistence.Entity;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
+
+import org.tamtamcatworks.auction.model.user.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 
@@ -30,34 +33,19 @@ public class Vehicle extends Item {
     @Column(nullable = false)
     private String fuelType;
 
-    /**
-     * Tạo phương tiện mới.
-     *
-     * name: tên hiển thị (vd: "Toyota Camry 2022")
-     * description: mô tả
-     * startingPrice: giá khởi điểm
-     * condition: tình trạng
-     * sellerId: id người bán
-     * make: hãng xe
-     * model: dòng xe
-     * year: năm sản xuất
-     * mileageKm: số km đã đi
-     * color: màu xe
-     * fuelType: loại nhiên liệu
-     */
     public Vehicle(
             String name,
             String description,
             double startingPrice,
             ItemCondition condition,
-            String sellerId,
+            User seller,
             String make,
             String model,
             int year,
             int mileageKm,
             String color,
             String fuelType) {
-        super(name, description, startingPrice, ItemType.VEHICLE, condition, sellerId);
+        super(name, description, startingPrice, condition, seller);
         if (mileageKm < 0) {
             throw new IllegalArgumentException("Số km đã đi không được âm.");
         }
@@ -69,11 +57,6 @@ public class Vehicle extends Item {
         this.fuelType = fuelType;
     }
 
-    /**
-     * Trả về thông tin chuyên biệt của Vehicle.
-     * - Format:
-     *   "make model year | km | color | fuelType"
-     */
     @Override
     public String getSpecificInfo() {
         return make + " " + model + " " + year
