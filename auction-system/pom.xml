@@ -35,6 +35,11 @@
         <artifactId>service</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.tamtamcatworks.auction</groupId>
+        <artifactId>api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
@@ -120,5 +125,6 @@
     <module>model</module>
     <module>persist</module>
     <module>service</module>
+    <module>api</module>
   </modules>
 </project>

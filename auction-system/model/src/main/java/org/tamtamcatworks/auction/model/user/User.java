@@ -133,6 +133,10 @@ public class User extends BaseEntity {
         return passwordHash;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
 
     public void setBuyerProfile(BuyerProfile buyerProfile)   { this.buyerProfile = buyerProfile; }
     public void setSellerProfile(SellerProfile sellerProfile) { this.sellerProfile = sellerProfile; }
