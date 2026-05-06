@@ -56,6 +56,8 @@ public class Art extends Item {
         this.medium = medium;
         this.hasCertificate = hasCertificate;
     }
+    
+    protected Art() {}
 
     /**
      * Trả về thông tin chuyên biệt của Art.

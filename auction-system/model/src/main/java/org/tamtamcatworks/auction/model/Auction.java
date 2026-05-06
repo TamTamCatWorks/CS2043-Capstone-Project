@@ -118,8 +118,8 @@ public class Auction extends BaseEntity {
                 + " | Trạng thái: " + status
                 + " | Giá khởi: " + String.format("%,.0f VNĐ", startingPrice)
                 + " | Giá hiện tại: " + String.format("%,.0f VNĐ", currentPrice)
-                + " | Dẫn đầu: " + (leadingBidder.getFullName() != null ? leadingBidder.getFullName() : "—")
-                + " | Tổng bid: " + bidHistory.size()
+                + " | Dẫn đầu: " + (leadingBidder != null ? leadingBidder.getFullName() : "—")
+                // + " | Tổng bid: " + bidHistory.size()
                 + " | Kết thúc: " + endTime;
     }
 

@@ -31,7 +31,7 @@ public class BidTransaction extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "auction_id", nullable = false)
-    private final Auction auction;
+    private Auction auction;
 
     @ManyToOne
     @JoinColumn(name = "bidder_id", nullable = false)
@@ -40,7 +40,7 @@ public class BidTransaction extends BaseEntity {
     private double amount;
 
     @Enumerated(EnumType.STRING)
-    private final BidType bidType;
+    private BidType bidType;
 
     /**
      * Tạo bid transaction mới.
@@ -69,6 +69,7 @@ public class BidTransaction extends BaseEntity {
         this.bidType = bidType;
     }
 
+    protected BidTransaction () { }
 
     // ── Getters ──────────────────────────────────────────────────────────────────
     // Vì class là immutable, chỉ có getters, không có setters

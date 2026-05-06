@@ -1,6 +1,7 @@
 package org.tamtamcatworks.auction.model.item;
 
 import org.tamtamcatworks.auction.model.BaseEntity;
+import org.tamtamcatworks.auction.model.user.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -20,13 +21,16 @@ public abstract class Item extends BaseEntity {
     private double startingPrice;
     
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, insertable = false, updatable = false)
-    private final ItemType type;
+    @Column(nullable = false)
+    private ItemType type;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ItemCondition condition;
 
+    // @ManyToOne
+    // @JoinColumn(name = "seller_id", nullable = false)
+    // private User seller;
     @Column(nullable = false)
     private String sellerId;
 
@@ -53,6 +57,7 @@ public abstract class Item extends BaseEntity {
             double startingPrice,
             ItemType type,
             ItemCondition condition,
+            // User seller
             String sellerId) {
         super(); // gọi Entity() → sinh id, ghi createdAt
         setName(name);
@@ -60,9 +65,12 @@ public abstract class Item extends BaseEntity {
         this.description = description;
         this.type = type;
         this.condition = condition;
+        // this.seller = seller;
         this.sellerId = sellerId;
         this.listedAt = java.time.LocalDateTime.now();
     }
+
+    protected Item() { };
 
 
     // ── Abstract methods ─────────────────────────────────────────────────────────
@@ -101,7 +109,7 @@ public abstract class Item extends BaseEntity {
     public double getStartingPrice() { return startingPrice; }
     public ItemType getType() { return type; }
     public ItemCondition getCondition() { return condition; }
-    public String getSellerId() { return sellerId; }
+    public String getSellerId() { return sellerId;}
     public String getImageUrl() { return imageUrl; }
     public LocalDateTime getListedAt() { return listedAt; }
 

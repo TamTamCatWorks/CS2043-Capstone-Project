@@ -57,6 +57,8 @@ public abstract class BaseEntity {
         return creationDate;
     }
 
+    protected BaseEntity() { }
+
 
     // ── Override Object methods ─────────────────────────────────────────────────
 
