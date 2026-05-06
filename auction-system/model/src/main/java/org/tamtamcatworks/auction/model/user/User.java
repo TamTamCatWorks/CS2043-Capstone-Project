@@ -152,7 +152,7 @@ public class User extends BaseEntity {
 
     
     @Override
-    public String getDisplayInfo() {
+    public String toString() {
         return "User: " + username + " | ID: " + getId() + " | Balance: " + balance;
     }
 }

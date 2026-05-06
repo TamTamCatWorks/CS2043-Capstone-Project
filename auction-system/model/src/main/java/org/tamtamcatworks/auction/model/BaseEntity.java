@@ -58,8 +58,6 @@ public abstract class BaseEntity {
     }
 
 
-    public abstract String getDisplayInfo();
-
     // ── Override Object methods ─────────────────────────────────────────────────
 
     /**

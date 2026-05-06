@@ -71,11 +71,6 @@ public class BuyerProfile extends BaseEntity {
                 + ", totalSpent=" + String.format("%,.0f", totalSpent) + " VNĐ}";
     }
 
-    @Override
-    public String getDisplayInfo() {
-        return toString();
-    }
-
     // ── Getters / Setters ─────────────────────────────────────────────────────
 
     public List<String> getBiddingHistory()     { return Collections.unmodifiableList(biddingHistory); }

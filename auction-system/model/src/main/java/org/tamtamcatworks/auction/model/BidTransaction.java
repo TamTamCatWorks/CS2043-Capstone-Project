@@ -95,11 +95,6 @@ public class BidTransaction extends BaseEntity {
 
 
     @Override
-    public String getDisplayInfo() {
-        return toString();
-    }
-
-    @Override
     public String toString() {
         return String.format("BidTransaction{bidder='%s', amount=%,.0f VNĐ, type=%s}",
                 bidder.getFullName(), amount, bidType);

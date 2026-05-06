@@ -112,7 +112,7 @@ public class Auction extends BaseEntity {
      * @return chuỗi mô tả phiên đấu giá
      */
     @Override
-    public String getDisplayInfo() {
+    public String toString() {
         return "Auction: " + title
                 + " | ID: " + getId()
                 + " | Trạng thái: " + status

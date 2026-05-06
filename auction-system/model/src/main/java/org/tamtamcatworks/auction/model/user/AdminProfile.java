@@ -88,11 +88,6 @@ public class AdminProfile extends BaseEntity {
                 + "', permissions=" + permissions + "}";
     }
 
-    @Override
-    public String getDisplayInfo() {
-        return toString();
-    }
-
     public List<String> getPermissions() {
         return Collections.unmodifiableList(permissions);
     }

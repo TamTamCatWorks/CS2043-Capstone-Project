@@ -68,10 +68,6 @@ public class SellerProfile extends BaseEntity {
                 + ", revenue=" + String.format("%,.0f", totalRevenue) + " VNĐ}";
     }
 
-    @Override
-    public String getDisplayInfo() {
-        return toString();
-    }
 
     // ── Getters / Setters ─────────────────────────────────────────────────────
 

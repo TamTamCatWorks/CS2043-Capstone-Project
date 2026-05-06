@@ -9,7 +9,7 @@ public class EntityTest {
     // Minimal subclass for testing — Engineering should not modify this
     static class TestEntity extends BaseEntity {
         @Override
-        public String getDisplayInfo() {
+        public String toString() {
             return "TestEntity[" + getId() + "]";
         }
     }

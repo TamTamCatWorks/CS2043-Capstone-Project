@@ -78,7 +78,7 @@ public abstract class Item extends BaseEntity {
      * Gọi getSpecificInfo() để hiển thị phần thông tin chuyên biệt.
      */
     @Override
-    public String getDisplayInfo() {
+    public String toString() {
         return "[" + type.getDisplayName() + "] " + name
                 + " | ID: " + getId()
                 + " | Mô tả: " + description
