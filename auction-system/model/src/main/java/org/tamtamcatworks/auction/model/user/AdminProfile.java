@@ -82,6 +82,11 @@ public class AdminProfile extends BaseEntity {
                 + "', permissions=" + permissions + "}";
     }
 
+    @Override
+    public String getDisplayInfo() {
+        return toString();
+    }
+
     // ── Getters / Setters ─────────────────────────────────────────────────────
 
     public String getUserId() {
