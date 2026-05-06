@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.tamtamcatworks.auction.model.BaseEntity;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 
 /**
  * Hồ sơ Admin — lưu DB vĩnh viễn, liên kết 1-1 với User qua userId.
@@ -23,30 +23,36 @@ import jakarta.persistence.Entity;
  */
 
 @Entity
+@Table(name = "admin_profiles")
 public class AdminProfile extends BaseEntity {
 
-    private final String userId;
+    @OneToOne(mappedBy = "adminProfile")
+    private User user;
 
-    private final List<String> permissions;
 
-    private final List<String> actionLog;
+    @ElementCollection
+    @CollectionTable(name = "admin_permissions", joinColumns = @JoinColumn(name = "admin_id"))
+    private List<String> permissions = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "admin_action_log", joinColumns = @JoinColumn(name = "admin_id"))
+    private List<String> actionLog = new ArrayList<>();
 
     // ── Constructor ───────────────────────────────────────────────────────────
+    protected AdminProfile() {}
 
-    public AdminProfile(String userId, List<String> permissions) {
-        this.userId = userId;
+    public AdminProfile(List<String> permissions) {
         this.permissions = new ArrayList<>(permissions);
-        this.actionLog = new ArrayList<>();
     }
 
     // Super admin — có toàn bộ quyền
-    public static AdminProfile superAdmin(String userId) {
-        return new AdminProfile(userId, List.of(
-                "MANAGE_USERS",
-                "MANAGE_ITEMS",
-                "MANAGE_AUCTIONS",
-                "VIEW_LOGS",
-                "MANAGE_ADMINS"
+    public static AdminProfile superAdmin() {
+        return new AdminProfile(List.of(
+            "MANAGE_USERS",
+            "MANAGE_ITEMS",
+            "MANAGE_AUCTIONS",
+            "VIEW_LOGS",
+            "MANAGE_ADMINS"
         ));
     }
 
@@ -78,19 +84,13 @@ public class AdminProfile extends BaseEntity {
 
     @Override
     public String toString() {
-        return "AdminProfile{userId='" + userId
+        return ""
                 + "', permissions=" + permissions + "}";
     }
 
     @Override
     public String getDisplayInfo() {
         return toString();
-    }
-
-    // ── Getters / Setters ─────────────────────────────────────────────────────
-
-    public String getUserId() {
-        return userId;
     }
 
     public List<String> getPermissions() {

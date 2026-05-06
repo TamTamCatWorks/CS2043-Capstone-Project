@@ -120,8 +120,12 @@ public class User extends BaseEntity {
         return username;
     }
 
+    public String getFullName() {
+        return fullName;
+    }
 
-     public void setBuyerProfile(BuyerProfile buyerProfile)   { this.buyerProfile = buyerProfile; }
+
+    public void setBuyerProfile(BuyerProfile buyerProfile)   { this.buyerProfile = buyerProfile; }
     public void setSellerProfile(SellerProfile sellerProfile) { this.sellerProfile = sellerProfile; }
 
 
@@ -144,6 +148,6 @@ public class User extends BaseEntity {
     
     @Override
     public String getDisplayInfo() {
-        return "User: " + username + " | ID: " + getEntityId() + " | Balance: " + balance;
+        return "User: " + username + " | ID: " + getId() + " | Balance: " + balance;
     }
 }

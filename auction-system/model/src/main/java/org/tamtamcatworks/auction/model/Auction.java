@@ -1,28 +1,53 @@
 package org.tamtamcatworks.auction.model;
 
+import org.tamtamcatworks.auction.model.item.Item;
+import org.tamtamcatworks.auction.model.user.User;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name="auctions")
 public class Auction extends BaseEntity {
 
     private String title;
-    private final String itemId;
-    private final String sellerId;
-    private final double startingPrice;
+
+    @ManyToOne
+    @JoinColumn(name = "seller_id", nullable = false)
+    private User seller;
+
+    @OneToOne
+    @JoinColumn(name = "item_id", nullable = false)
+    private Item item;
+
+    private double startingPrice;
     private double currentPrice;
-    private String leadingBidderId;
-    private String leadingBidderName;
-    private final LocalDateTime startTime;
+    private double minimumIncrement;
+
+    @ManyToOne
+    @JoinColumn(name = "leading_bidder_id")
+    private User leadingBidder;
+
+    private LocalDateTime startTime;
     private LocalDateTime endTime;
+
+    @Enumerated(EnumType.STRING)
     private AuctionStatus status;
 
-    /** Bước giá tối thiểu mỗi lần bid.
-     * Mặc định 1,000 VNĐ, có thể thay đổi.
-     * Tại sao? Để tránh spam bid với giá tăng quá ít. */
-    private double minimumIncrement;
+    @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL)
+    private List<BidTransaction> bidHistory = new ArrayList<>();
+
+    // optimistic locking
+    @Version
+    private Long version; 
+
 
 
     // ── Constructor ───────────────────────────────────────────────────────────
 
+    protected Auction() {};
     /**
      * Tạo phiên đấu giá mới.
      *
@@ -48,7 +73,7 @@ public class Auction extends BaseEntity {
      * @param endTime thời điểm kết thúc (phải sau startTime)
      * @throws IllegalArgumentException nếu startingPrice <= 0 hoặc endTime <= startTime
      */
-    public Auction(String title, String itemId, String sellerId,
+    public Auction(String title, User seller, Item item,
                    double startingPrice,
                    LocalDateTime startTime, LocalDateTime endTime) {
         super();  // Gọi Entity() để sinh UUID và timestamp
@@ -58,8 +83,8 @@ public class Auction extends BaseEntity {
             throw new IllegalArgumentException("endTime phải sau startTime.");
 
         this.title            = title;
-        this.itemId           = itemId;
-        this.sellerId         = sellerId;
+        this.seller           = seller;
+        this.item             = item;
         this.startingPrice    = startingPrice;
         this.currentPrice     = startingPrice;  // Ban đầu = giá khởi điểm
         this.startTime        = startTime;
@@ -89,11 +114,12 @@ public class Auction extends BaseEntity {
     @Override
     public String getDisplayInfo() {
         return "Auction: " + title
-                + " | ID: " + getEntityId()
+                + " | ID: " + getId()
                 + " | Trạng thái: " + status
                 + " | Giá khởi: " + String.format("%,.0f VNĐ", startingPrice)
                 + " | Giá hiện tại: " + String.format("%,.0f VNĐ", currentPrice)
-                + " | Dẫn đầu: " + (leadingBidderName != null ? leadingBidderName : "—")
+                + " | Dẫn đầu: " + (leadingBidder.getFullName() != null ? leadingBidder.getFullName() : "—")
+                + " | Tổng bid: " + bidHistory.size()
                 + " | Kết thúc: " + endTime;
     }
 
@@ -144,9 +170,9 @@ public class Auction extends BaseEntity {
      * @param tx transaction bid đã được validate
      */
     public synchronized void recordBid(BidTransaction tx) {
+        bidHistory.add(tx);
         currentPrice        = tx.getAmount();
-        leadingBidderId     = tx.getBidderId();
-        leadingBidderName   = tx.getBidderName();
+        leadingBidder     = tx.getBidder();
     }
 
     /**
@@ -241,13 +267,16 @@ public class Auction extends BaseEntity {
 
     // ── Getters / Setters ─────────────────────────────────────────────────────
 
+    public List<BidTransaction> getBidHistory() {
+        return Collections.unmodifiableList(bidHistory);
+    }
+
     public String getTitle()                { return title; }
-    public String getItemId()               { return itemId; }
-    public String getSellerId()             { return sellerId; }
+    public User getSeller()                 { return seller; }
+    public Item getItem()                   { return item; }
     public double getStartingPrice()        { return startingPrice; }
     public double getCurrentPrice()         { return currentPrice; }
-    public String getLeadingBidderId()      { return leadingBidderId; }
-    public String getLeadingBidderName()    { return leadingBidderName; }
+    public User getLeadingBidder()          { return leadingBidder; }
     public LocalDateTime getStartTime()     { return startTime; }
     public LocalDateTime getEndTime()       { return endTime; }
     public AuctionStatus getStatus()        { return status; }

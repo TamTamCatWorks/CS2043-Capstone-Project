@@ -48,7 +48,7 @@ public abstract class BaseEntity {
         this.creationDate = LocalDateTime.now();
     }
 
-    public String getEntityId() {
+    public String getId() {
         return id;
     }
 
