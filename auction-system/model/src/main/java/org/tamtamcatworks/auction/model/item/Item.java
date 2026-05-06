@@ -54,27 +54,6 @@ public abstract class Item extends BaseEntity {
         this.listedAt = java.time.LocalDateTime.now();
     }
 
-    /**
-     * Constructor load từ database — có id và createdAt sẵn.
-     */
-    protected Item(
-            String id,
-            LocalDateTime createdAt,
-            String name,
-            String description,
-            double startingPrice,
-            ItemType type,
-            ItemCondition condition,
-            String sellerId) {
-        super(id, createdAt);
-        setName(name);
-        setStartingPrice(startingPrice);
-        this.description = description;
-        this.type = type;
-        this.condition = condition;
-        this.sellerId = sellerId;
-        this.listedAt = createdAt;
-    }
 
     // ── Abstract methods ─────────────────────────────────────────────────────────
 
@@ -97,7 +76,7 @@ public abstract class Item extends BaseEntity {
     @Override
     public String getDisplayInfo() {
         return "[" + type.getDisplayName() + "] " + name
-                + " | ID: " + getEntityId()
+                + " | ID: " + getId()
                 + " | Mô tả: " + description
                 + " | Tình trạng: " + condition.getDisplayName()
                 + " | Giá khởi: " + String.format("%,.0f VNĐ", startingPrice)

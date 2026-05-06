@@ -1,11 +1,9 @@
 spring:
-  data:
-      # postgreSQL
-    datasource:
-      url: ${DB_URL:jdbc:postgresql://localhost:5432/tamtamcatworks}
-      username: ${DB_USER:postgres}
-      password: ${DB_PASS:postgres}
-    jpa:
-      hibernate:
-        ddl-auto: update
-      show-sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tamtamcatworks
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true

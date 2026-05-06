@@ -2,7 +2,6 @@ package org.tamtamcatworks.auction.model;
 
 import jakarta.persistence.*;
 import org.tamtamcatworks.auction.model.user.User;
-import org.tamtamcatworks.auction.model.Auction;
 
 /**
  * Bản ghi BẤT BIẾN (immutable) của một lần đặt giá.

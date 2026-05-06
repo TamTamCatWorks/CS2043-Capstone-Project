@@ -2,6 +2,7 @@ package org.tamtamcatworks.auction.persist;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,7 @@ import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
 
 @Configuration
+@EntityScan("org.tamtamcatworks.auction")
 public class LoadDatabase {
 
     private static final Logger log = LoggerFactory.getLogger(LoadDatabase.class);
