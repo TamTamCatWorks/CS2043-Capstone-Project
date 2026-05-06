@@ -46,6 +46,12 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new NoSuchElementException("User not found."));
+    }
+
+    @Transactional(readOnly = true)
     public User findById(@NonNull String id) {
         return userRepository.findById(id)
             .orElseThrow(() -> new NoSuchElementException("User not found."));

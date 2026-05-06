@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.AuthenticationException;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.time.LocalDateTime;
@@ -21,6 +22,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleBadRequest(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(errorBody(ex.getMessage(), HttpStatus.BAD_REQUEST));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Map<String, Object>> handleUnauthorized(AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(errorBody(ex.getMessage(), HttpStatus.UNAUTHORIZED));
     }
 
     private Map<String, Object> errorBody(String message, HttpStatus status) {
