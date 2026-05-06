@@ -4,30 +4,36 @@ import org.tamtamcatworks.auction.model.BaseEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-/**
- * Lớp trừu tượng đại diện cho mọi sản phẩm đấu giá.
- *
- * <p>INHERITANCE: Item kế thừa Entity → có sẵn id, createdAt, printInfo().
- * Electronics, Art, Vehicle kế thừa Item → có thêm thuộc tính chuyên biệt.
- *
- * <p>ABSTRACTION: Item không thể tạo trực tiếp (abstract).
- * Phải tạo qua ItemFactory để đảm bảo đúng loại.
- *
- * <p>ENCAPSULATION: Tất cả field là private, chỉ thay đổi qua setter
- * có kiểm tra hợp lệ (ví dụ: startingPrice không âm).
- */
 @Entity
+@Table(name = "items")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "item_type")
 public abstract class Item extends BaseEntity {
 
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
     private String description;
+
+    @Column(nullable = false)
     private double startingPrice;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, insertable = false, updatable = false)
     private final ItemType type;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ItemCondition condition;
+
+    @Column(nullable = false)
     private String sellerId;
+
+    @Column(nullable = false)
     private String imageUrl;
+
+    @Column(nullable = false)
     private LocalDateTime listedAt;
 
 
