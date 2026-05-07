@@ -34,6 +34,12 @@
         <scope>runtime</scope>
     </dependency>
 
+    <!-- REST controllers -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
     <!-- H2 for JPA tests -->
     <dependency>
         <groupId>com.h2database</groupId>
