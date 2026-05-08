@@ -11,11 +11,19 @@ import org.tamtamcatworks.auction.persist.repository.UserRepository;
 
 public abstract class ItemCreator {
 
+    public Item create(String name, String description,
+                   double startingPrice, ItemCondition condition,
+                   User seller, Map<String, Object> details) {
+        validate(name, description, startingPrice, condition, seller, details);
+        return buildItem(name, description, startingPrice, condition, seller, details);
+    };
+    
     protected abstract Item buildItem(String name, String description,
                                    double startingPrice, ItemCondition condition,
                                    User seller, Map<String, Object> details);
 
     protected abstract Item buildItem(ItemRequest req, User seller);
+
 
     protected void validate(ItemRequest req) {
         if (req.name() == null || req.name().isBlank())
