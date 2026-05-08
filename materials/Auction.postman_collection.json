@@ -1,0 +1,90 @@
+{
+	"info": {
+		"_postman_id": "36e2f348-80b6-4882-9244-3338524fd8ce",
+		"name": "Auction",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "53778269",
+		"_collection_link": "https://tt-eaves-6240234.postman.co/workspace/Capstone~5e8e2a38-a64c-48fd-8408-39c14d5c556b/collection/53778269-36e2f348-80b6-4882-9244-3338524fd8ce?action=share&source=collection_link&creator=53778269"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"vu\",\n  \"email\": \"vunguyenhoang@gmail.com\",\n  \"password\": \"vunguyenvunguyen\",\n  \"fullName\": \"Nguyen Hoang Vu\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/admin/api/register",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"admin",
+								"api",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"vunguyenhoang@gmail.com\",\n  \"password\": \"vunguyenvunguyen\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/login",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
