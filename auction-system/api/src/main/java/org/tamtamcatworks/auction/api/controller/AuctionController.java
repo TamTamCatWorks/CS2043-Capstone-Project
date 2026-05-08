@@ -18,7 +18,7 @@ import org.tamtamcatworks.auction.model.AuctionStatus;
 import org.tamtamcatworks.auction.service.auction.AuctionService;
 import org.tamtamcatworks.auction.api.dto.AuctionResponse;
 import org.tamtamcatworks.auction.api.dto.AuctionRequest;
-import org.tamtamcatworks.auction.api.dto.CreateAuctionRequest;
+import org.tamtamcatworks.auction.service.auction.CreateAuctionRequest;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -81,6 +81,6 @@ public class AuctionController {
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<AuctionResponse> cancel(@PathVariable String id,
                                                   @RequestParam String reason) {
-        return ResponseEntity.ok(AuctionResponse.from(auctionService.cancel(id)));
+        return ResponseEntity.ok(AuctionResponse.from(auctionService.cancel(id,reason)));
     }
 }

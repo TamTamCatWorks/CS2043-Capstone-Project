@@ -9,7 +9,6 @@ import org.tamtamcatworks.auction.model.item.Item;
 import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.persist.repository.AuctionRepository;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
-import org.tamtamcatworks.auction.api.dto.CreateAuctionRequest;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -22,24 +21,24 @@ public class AuctionService {
    // private final ItemService itemService;
     private final UserRepository userRepository;
 
-    @Transactional
-    public Auction createWithItem(String sellerId, CreateAuctionRequest req) {
-       Item item = itemService.create(req.item());
-        User seller = userRepository.findById(sellerId)
-                .orElseThrow(() -> new NoSuchElementException("User not found"));
-        return auctionRepository.save(new Auction(req.title(), seller, item,
-                req.item().startingPrice(), req.startTime(), req.endTime()));
-    }
+//  @Transactional
+//  public Auction createWithItem(String sellerId, CreateAuctionRequest req) {
+//      Item item = itemService.create(req.item());
+//      User seller = userRepository.findById(sellerId)
+//              .orElseThrow(() -> new NoSuchElementException("User not found"));
+//      return auctionRepository.save(new Auction(req.title(), seller, item,
+//              req.item().startingPrice(), req.startTime(), req.endTime()));
+//  }
 
-    @Transactional
-    public Auction create(String sellerId, String itemId, String title,
-                          double startingPrice, LocalDateTime startTime, LocalDateTime endTime) {
-        User seller = userRepository.findById(sellerId)
-                .orElseThrow(() -> new NoSuchElementException("User not found"));
-        Item item = itemService.findById(itemId);
-        return auctionRepository.save(new Auction(title, seller, item, startingPrice, startTime, endTime));
-    }
-
+//  @Transactional
+//  public Auction create(String sellerId, String itemId, String title,
+//                        double startingPrice, LocalDateTime startTime, LocalDateTime endTime) {
+//      User seller = userRepository.findById(sellerId)
+//              .orElseThrow(() -> new NoSuchElementException("User not found"));
+//      Item item = itemService.findById(itemId);
+//      return auctionRepository.save(new Auction(title, seller, item, startingPrice, startTime, endTime));
+//  }
+//
     @Transactional
     public Auction open(String auctionId) {
         Auction auction = auctionRepository.findById(auctionId)
@@ -57,10 +56,10 @@ public class AuctionService {
     }
 
     @Transactional
-    public Auction cancel(String auctionId) {
+    public Auction cancel(String auctionId, String reason) {
         Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new NoSuchElementException("Auction not found"));
-        auction.cancel();
+        auction.cancel(reason);
         return auctionRepository.save(auction);
     }
 
