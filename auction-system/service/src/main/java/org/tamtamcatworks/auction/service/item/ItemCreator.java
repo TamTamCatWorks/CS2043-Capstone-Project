@@ -1,9 +1,19 @@
+package org.tamtamcatworks.auction.service.item;
+
+import java.util.Map;
+
+
+import org.tamtamcatworks.auction.model.item.Item;
+import org.tamtamcatworks.auction.model.item.ItemCondition;
+import org.tamtamcatworks.auction.model.user.User;
+import org.tamtamcatworks.auction.persist.repository.ItemRepository;
+import org.tamtamcatworks.auction.persist.repository.UserRepository;
+
 public abstract class ItemCreator {
 
-    public Item create(ItemRequest req, User seller) {
-        validate(req);
-        return buildItem(req, seller);
-    }
+    protected abstract Item buildItem(String name, String description,
+                                   double startingPrice, ItemCondition condition,
+                                   User seller, Map<String, Object> details);
 
     protected abstract Item buildItem(ItemRequest req, User seller);
 

@@ -1,11 +1,11 @@
-public class VehicleCreator extends ItemCreator {
+package org.tamtamcatworks.auction.service.item;
+public class ArtCreator extends ItemCreator {
     @Override
     protected Item buildItem(ItemRequest req, User seller) {
         Map<String, Object> d = req.details();
-        return new Vehicle(
+        return new Art(
             req.name(), req.description(), req.startingPrice(), req.condition(), seller,
-            get(d, "make"), get(d, "model"), getInt(d, "year"),
-            getInt(d, "mileageKm"), get(d, "color"), get(d, "fuelType")
+            get(d, "artist"), getInt(d, "yearCreated"), get(d, "medium"), getBoolean(d, "hasCertificate")
         );
     }
 }
