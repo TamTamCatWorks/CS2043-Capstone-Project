@@ -14,21 +14,13 @@ public class VehicleCreator extends ItemCreator {
 
     @Override
     protected Item buildItem(
-
-            String name,
-
-            String description,
-
-            double startingPrice,
-
-            ItemCondition condition,
-
-            String imageUrl,
-
-            User seller,
-
-            Map<String, Object> details
-
+        String name,
+        String description,
+        double startingPrice,
+        ItemCondition condition,
+        String imageUrl,
+        User seller,
+        Map<String, Object> details
     ) {
 
         return new Vehicle(
@@ -49,6 +41,7 @@ public class VehicleCreator extends ItemCreator {
 
     @Override
     public String supports() {
+        
         return "VEHICLE";
     }
 }

@@ -14,47 +14,31 @@ public class ElectronicsCreator extends ItemCreator {
 
     @Override
     protected Item buildItem(
-
-            String name,
-
-            String description,
-
-            double startingPrice,
-
-            ItemCondition condition,
-
-            String imageUrl,
-
-            User seller,
-
-            Map<String, Object> details
-
+        String name,
+        String description,
+        double startingPrice,
+        ItemCondition condition,
+        String imageUrl,
+        User seller,
+        Map<String, Object> details
     ) {
 
         return new Electronics(
-
-                name,
-
-                description,
-
-                startingPrice,
-
-                condition,
-
-                imageUrl,
-
-                seller,
-
-                get(details, "brand"),
-
-                get(details, "model"),
-
-                getInt(details, "warrantyMonths")
+            name,
+            description,
+            startingPrice,
+            condition,
+            imageUrl,
+            seller,
+            get(details, "brand"),
+            get(details, "model"),
+            getInt(details, "warrantyMonths")
         );
     }
 
     @Override
     public String supports() {
+        
         return "ELECTRONICS";
     }
 }

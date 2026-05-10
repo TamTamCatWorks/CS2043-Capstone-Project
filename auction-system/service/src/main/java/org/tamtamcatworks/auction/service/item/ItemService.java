@@ -21,27 +21,18 @@ import org.tamtamcatworks.auction.persist.repository.UserRepository;
 public class ItemService {
 
     private final ItemRepository itemRepository;
-
     private final UserRepository userRepository;
-
     private final List<ItemCreator> creators;
-
     private Map<String, ItemCreator> registry;
 
     public ItemService(
-
-            ItemRepository itemRepository,
-
-            UserRepository userRepository,
-
-            List<ItemCreator> creators
-
+        ItemRepository itemRepository,
+        UserRepository userRepository,
+        List<ItemCreator> creators
     ) {
 
         this.itemRepository = itemRepository;
-
         this.userRepository = userRepository;
-
         this.creators = creators;
     }
 
@@ -53,10 +44,8 @@ public class ItemService {
         for (ItemCreator creator : creators) {
 
             registry.put(
-
-                    creator.supports(),
-
-                    creator
+                creator.supports(),
+                creator
             );
         }
     }
@@ -79,45 +68,34 @@ public class ItemService {
         }
 
         if (itemType == null || itemType.isBlank()) {
+
             throw new IllegalArgumentException("Item type is required.");
         }
 
         User seller = userRepository
             .findById(sellerId)
             .orElseThrow(() ->
-                    new NoSuchElementException(
-                            "Seller not found."
-                    )
+                    new NoSuchElementException("Seller not found.")
             );
 
         ItemCreator creator = registry.get(itemType);
 
         if (creator == null) {
 
-            throw new IllegalArgumentException(
-                    "Unknown item type: " + itemType
-            );
+            throw new IllegalArgumentException("Unknown item type: " + itemType);
         }
 
         Item item = creator.create(
-
-                name,
-
-                description,
-
-                startingPrice,
-
-                condition,
-
-                imageUrl,
-
-                seller,
-
-                details
+            name,
+            description,
+            startingPrice,
+            condition,
+            imageUrl,
+            seller,
+            details
         );
 
         return itemRepository.save(
-
             java.util.Objects.requireNonNull(
                 item,
                 "Item must not be null"
@@ -129,14 +107,14 @@ public class ItemService {
     public Item findById(String id) {
 
         if (id == null || id.isBlank()) {
+
             throw new IllegalArgumentException("Item ID is required.");
         }
 
-        return itemRepository.findById(id)
+        return itemRepository
+            .findById(id)
             .orElseThrow(() ->
-                    new NoSuchElementException(
-                            "Item not found."
-                    )
+                    new NoSuchElementException("Item not found.")
             );
     }
 }
