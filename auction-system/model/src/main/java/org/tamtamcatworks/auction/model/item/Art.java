@@ -30,21 +30,34 @@ public class Art extends Item {
     private boolean hasCertificate;
 
     public Art(
-            String name,
-            String description,
-            double startingPrice,
-            ItemCondition condition,
-            User seller,
-            String artist,
-            int yearCreated,
-            String medium,
-            boolean hasCertificate) {
-        super(name, description, startingPrice, condition, seller);
-        this.artist = artist;
-        this.yearCreated = yearCreated;
-        this.medium = medium;
-        this.hasCertificate = hasCertificate;
-    }
+        String name,
+        String description,
+        double startingPrice,
+        ItemCondition condition,
+        String imageUrl,
+        User seller,
+        String artist,
+        int yearCreated,
+        String medium,
+        String dimensions,
+        boolean hasCertificate
+) {
+
+    super(
+        name,
+        description,
+        startingPrice,
+        condition,
+        imageUrl,
+        seller
+    );
+
+    setArtist(artist);
+    setYearCreated(yearCreated);
+    setMedium(medium);
+    setDimensions(dimensions);
+    setHasCertificate(hasCertificate);
+}
     
     protected Art() {}
 
@@ -62,7 +75,12 @@ public class Art extends Item {
     }
 
     public void setArtist(String artist) {
-        this.artist = artist;
+
+        if (artist == null || artist.isBlank()) {
+            throw new IllegalArgumentException("Artist is required.");
+        }
+
+        this.artist = artist.trim();
     }
 
     public int getYearCreated() {
@@ -70,6 +88,11 @@ public class Art extends Item {
     }
 
     public void setYearCreated(int yearCreated) {
+
+        if (yearCreated <= 0) {
+            throw new IllegalArgumentException("Invalid year created.");
+        }
+
         this.yearCreated = yearCreated;
     }
 
@@ -78,7 +101,12 @@ public class Art extends Item {
     }
 
     public void setMedium(String medium) {
-        this.medium = medium;
+
+        if (medium == null || medium.isBlank()) {
+            throw new IllegalArgumentException("Medium is required.");
+        }
+
+        this.medium = medium.trim();
     }
 
     public String getDimensions() {
@@ -86,7 +114,12 @@ public class Art extends Item {
     }
 
     public void setDimensions(String dimensions) {
-        this.dimensions = dimensions;
+
+        if (dimensions == null || dimensions.isBlank()) {
+            throw new IllegalArgumentException("Dimensions are required.");
+        }
+
+        this.dimensions = dimensions.trim();
     }
 
     public boolean isHasCertificate() {

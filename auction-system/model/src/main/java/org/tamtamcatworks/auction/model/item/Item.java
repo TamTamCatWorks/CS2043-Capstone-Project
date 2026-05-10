@@ -39,12 +39,14 @@ public abstract class Item extends BaseEntity {
             String description,
             double startingPrice,
             ItemCondition condition,
+            String imageUrl,
             User seller) {
         super(); 
         setName(name);
         setStartingPrice(startingPrice);
-        this.description = description;
-        this.condition = condition;
+        setDescription(description);
+        setCondition(condition);
+        setImageUrl(imageUrl);
         this.seller = seller;
         this.listedAt = java.time.LocalDateTime.now();
     }
@@ -82,7 +84,15 @@ public abstract class Item extends BaseEntity {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+
+        if (description == null) {
+
+            this.description = "";
+
+            return;
+        }
+
+        this.description = description.trim();
     }
 
     public void setStartingPrice(double startingPrice) {
@@ -92,6 +102,22 @@ public abstract class Item extends BaseEntity {
         this.startingPrice = startingPrice;
     }
 
-    public void setCondition(ItemCondition condition) { this.condition = condition; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setCondition(ItemCondition condition) {
+
+        if (condition == null) {
+
+            throw new IllegalArgumentException("Condition is required.");
+        }
+
+        this.condition = condition;
+    }
+    public void setImageUrl(String imageUrl) {
+
+        if (imageUrl == null || imageUrl.isBlank()) {
+
+            throw new IllegalArgumentException("Image URL cannot be empty.");
+        }
+
+        this.imageUrl = imageUrl.trim();
+    }
 }
