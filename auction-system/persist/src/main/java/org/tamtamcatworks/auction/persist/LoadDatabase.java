@@ -1,6 +1,7 @@
 package org.tamtamcatworks.auction.persist;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,17 +63,21 @@ public class LoadDatabase {
     CommandLineRunner initItems(UserRepository userRepository,
                                 ItemRepository itemRepository) {
         return args -> {
-            User seller = userRepository.findById(SELLER_ID).orElse(null);
+            User seller = userRepository.findById(
+                Objects.requireNonNull(SELLER_ID)
+            ).orElseThrow();
 
             Art art = new Art(
                 "testArt",
                 "testArtTest",
-                1000,
+                1000.0,
                 ItemCondition.FAIR,
-                seller.getId(),
+                "https://example.com/test-art.jpg",
+                seller,
                 "testArtist",
                 1999,
                 "testMedium",
+                "100cm x 80cm",
                 false);
             art.setDimensions("100cm x 80cm");
             art.setImageUrl("https://example.com/test-art.jpg");
@@ -89,8 +94,12 @@ public class LoadDatabase {
                                 ItemRepository itemRepository,
                                 AuctionRepository auctionRepository) {
         return args -> {
-            User seller = userRepository.findById(SELLER_ID).orElse(null);
-            Item item = itemRepository.findById(ITEM_ID).orElse(null); // or findByName if you have it
+            User seller = userRepository.findById(
+                Objects.requireNonNull(SELLER_ID)
+            ).orElseThrow();
+            Item item = itemRepository.findById(
+                Objects.requireNonNull(ITEM_ID)
+            ).orElseThrow();
 
             Auction auction = new Auction("testAuction", seller, item,
                 1000, LocalDateTime.now(), LocalDateTime.now().plusDays(7));
@@ -107,10 +116,17 @@ public class LoadDatabase {
                                         BidTransactionRepository bidTransactionRepository,
                                         PlatformTransactionManager transactionManager) {
         return args -> {
-            TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+            TransactionTemplate transactionTemplate =
+                new TransactionTemplate(
+                    Objects.requireNonNull(transactionManager)
+                );
             transactionTemplate.execute(status -> {
-                User bidder = userRepository.findById(BIDDER_ID).orElse(null);
-                Auction auction = auctionRepository.findById(AUCTION_ID).orElse(null);
+                User bidder = userRepository.findById(
+                    Objects.requireNonNull(BIDDER_ID)
+                ).orElseThrow();
+                Auction auction = auctionRepository.findById(
+                    Objects.requireNonNull(AUCTION_ID)
+                ).orElseThrow();
                 auction.open();
 
                 BidTransaction bidTransaction = new BidTransaction(auction, bidder, 2000, BidTransaction.BidType.MANUAL);

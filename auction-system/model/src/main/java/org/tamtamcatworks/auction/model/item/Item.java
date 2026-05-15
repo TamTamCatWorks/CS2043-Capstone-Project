@@ -22,17 +22,11 @@ public abstract class Item extends BaseEntity {
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ItemType type;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ItemCondition condition;
 
-    // @ManyToOne
-    // @JoinColumn(name = "seller_id", nullable = false)
-    // private User seller;
-    @Column(nullable = false)
-    private String sellerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id", nullable = false)
+    private User seller;
 
     @Column(nullable = false)
     private String imageUrl;
@@ -40,87 +34,48 @@ public abstract class Item extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime listedAt;
 
-
-    /**
-     * Tạo Item mới — gọi từ subclass qua super(...).
-     *
-     * @param name          tên sản phẩm (không rỗng)
-     * @param description   mô tả chi tiết
-     * @param startingPrice giá khởi điểm (phải > 0)
-     * @param type          loại sản phẩm
-     * @param condition     tình trạng
-     * @param sellerId      id của người bán
-     */
     protected Item(
             String name,
             String description,
             double startingPrice,
-            ItemType type,
             ItemCondition condition,
-            // User seller
-            String sellerId) {
-        super(); // gọi Entity() → sinh id, ghi createdAt
+            String imageUrl,
+            User seller) {
+        super(); 
         setName(name);
         setStartingPrice(startingPrice);
-        this.description = description;
-        this.type = type;
-        this.condition = condition;
-        // this.seller = seller;
-        this.sellerId = sellerId;
+        setDescription(description);
+        setCondition(condition);
+        setImageUrl(imageUrl);
+        this.seller = seller;
         this.listedAt = java.time.LocalDateTime.now();
     }
 
     protected Item() { };
 
-
-    // ── Abstract methods ─────────────────────────────────────────────────────────
-
-    /**
-     * Trả về tóm tắt thông tin chuyên biệt của từng loại sản phẩm.
-     *
-     * <p>POLYMORPHISM: Electronics trả về "Brand: Apple | Bảo hành: 12 tháng",
-     * Art trả về "Họa sĩ: Picasso | Năm: 1932", v.v.
-     *
-     * @return chuỗi mô tả đặc trưng của subclass
-     */
     public abstract String getSpecificInfo();
 
-    // ── getDisplayInfo — override từ Entity ───────────────────────────────────────
-
-    /**
-     * In đầy đủ thông tin sản phẩm ra console.
-     * Gọi getSpecificInfo() để hiển thị phần thông tin chuyên biệt.
-     */
     @Override
     public String toString() {
-        return "[" + type.getDisplayName() + "] " + name
+        String typeName = this.getClass().getSimpleName();
+
+        return "[" + typeName + "] " + name
                 + " | ID: " + getId()
                 + " | Mô tả: " + description
                 + " | Tình trạng: " + condition.getDisplayName()
                 + " | Giá khởi: " + String.format("%,.0f VNĐ", startingPrice)
-                + " | Người bán: " + sellerId
+                + " | Người bán: " + seller
                 + " | " + getSpecificInfo();
     }
-
-    // ── Getters ──────────────────────────────────────────────────────────────────
 
     public String getName() { return name; }
     public String getDescription() { return description; }
     public double getStartingPrice() { return startingPrice; }
-    public ItemType getType() { return type; }
     public ItemCondition getCondition() { return condition; }
-    public String getSellerId() { return sellerId;}
+    public User getSeller() { return seller;}
     public String getImageUrl() { return imageUrl; }
     public LocalDateTime getListedAt() { return listedAt; }
 
-    // ── Setters có kiểm tra hợp lệ ───────────────────────────────────────────────
-
-    /**
-     * Cập nhật tên sản phẩm.
-     *
-     * @param name tên mới (không được null hoặc rỗng)
-     * @throws IllegalArgumentException nếu tên rỗng
-     */
     public void setName(String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Tên sản phẩm không được để trống.");
@@ -129,15 +84,17 @@ public abstract class Item extends BaseEntity {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+
+        if (description == null) {
+
+            this.description = "";
+
+            return;
+        }
+
+        this.description = description.trim();
     }
 
-    /**
-     * Cập nhật giá khởi điểm.
-     *
-     * @param startingPrice giá mới (phải > 0)
-     * @throws IllegalArgumentException nếu giá <= 0
-     */
     public void setStartingPrice(double startingPrice) {
         if (startingPrice <= 0) {
             throw new IllegalArgumentException("Giá khởi điểm phải lớn hơn 0.");
@@ -145,6 +102,22 @@ public abstract class Item extends BaseEntity {
         this.startingPrice = startingPrice;
     }
 
-    public void setCondition(ItemCondition condition) { this.condition = condition; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setCondition(ItemCondition condition) {
+
+        if (condition == null) {
+
+            throw new IllegalArgumentException("Condition is required.");
+        }
+
+        this.condition = condition;
+    }
+    public void setImageUrl(String imageUrl) {
+
+        if (imageUrl == null || imageUrl.isBlank()) {
+
+            throw new IllegalArgumentException("Image URL cannot be empty.");
+        }
+
+        this.imageUrl = imageUrl.trim();
+    }
 }
