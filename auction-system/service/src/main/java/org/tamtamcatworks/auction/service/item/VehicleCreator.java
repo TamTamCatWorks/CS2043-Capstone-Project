@@ -40,8 +40,8 @@ public class VehicleCreator extends ItemCreator {
     }
 
     @Override
-    public String supports() {
-        
-        return "VEHICLE";
+    public ItemType supports() {
+
+        return ItemType.VEHICLE;
     }
 }

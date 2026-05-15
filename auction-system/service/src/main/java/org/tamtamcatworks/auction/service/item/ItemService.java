@@ -23,7 +23,7 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final List<ItemCreator> creators;
-    private Map<String, ItemCreator> registry;
+    private Map<ItemType, ItemCreator> registry;
 
     public ItemService(
         ItemRepository itemRepository,
@@ -68,7 +68,6 @@ public class ItemService {
         }
 
         if (itemType == null || itemType.isBlank()) {
-
             throw new IllegalArgumentException("Item type is required.");
         }
 
@@ -78,10 +77,11 @@ public class ItemService {
                     new NoSuchElementException("Seller not found.")
             );
 
-        ItemCreator creator = registry.get(itemType);
+        ItemType type = ItemType.fromKey(itemType);
+
+        ItemCreator creator = registry.get(type);
 
         if (creator == null) {
-
             throw new IllegalArgumentException("Unknown item type: " + itemType);
         }
 

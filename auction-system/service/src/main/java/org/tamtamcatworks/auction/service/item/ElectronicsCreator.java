@@ -37,8 +37,8 @@ public class ElectronicsCreator extends ItemCreator {
     }
 
     @Override
-    public String supports() {
-        
-        return "ELECTRONICS";
+    public ItemType supports() {
+
+        return ItemType.ELECTRONICS;
     }
 }

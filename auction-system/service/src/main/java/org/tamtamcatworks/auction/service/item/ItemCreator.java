@@ -149,5 +149,5 @@ public abstract class ItemCreator {
         return bool;
     }
 
-    public abstract String supports();
+    public abstract ItemType supports();
 }

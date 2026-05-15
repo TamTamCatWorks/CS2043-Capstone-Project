@@ -39,8 +39,8 @@ public class ArtCreator extends ItemCreator {
     }
 
     @Override
-    public String supports() {
-        
-        return "ART";
+    public ItemType supports() {
+
+        return ItemType.ART;
     }
 }
