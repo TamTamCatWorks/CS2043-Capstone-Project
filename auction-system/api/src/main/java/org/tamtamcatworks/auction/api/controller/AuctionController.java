@@ -16,8 +16,11 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.AuctionStatus;
 import org.tamtamcatworks.auction.service.auction.AuctionService;
+import org.tamtamcatworks.auction.service.auction.BidService;
 import org.tamtamcatworks.auction.api.dto.AuctionResponse;
 import org.tamtamcatworks.auction.api.dto.AuctionRequest;
+import org.tamtamcatworks.auction.api.dto.BidRequest;
+import org.tamtamcatworks.auction.api.dto.BidResponse;
 import org.tamtamcatworks.auction.service.auction.CreateAuctionRequest;
 
 import java.util.List;
@@ -28,9 +31,11 @@ import java.util.stream.Collectors;
 public class AuctionController {
 
     private final AuctionService auctionService;
+    private final BidService bidService;
 
-    public AuctionController(AuctionService auctionService) {
+    public AuctionController(AuctionService auctionService, BidService bidService) {
         this.auctionService = auctionService;
+        this.bidService = bidService;
     }
 
     // seller flow — one form creates both item and auction
@@ -82,5 +87,22 @@ public class AuctionController {
     public ResponseEntity<AuctionResponse> cancel(@PathVariable String id,
                                                   @RequestParam String reason) {
         return ResponseEntity.ok(AuctionResponse.from(auctionService.cancel(id,reason)));
+    }
+
+    // bidderId comes from session, not request body
+    @PostMapping("/{id}/bids")
+    public ResponseEntity<BidResponse> placeBid(@PathVariable String id,
+                                                @RequestBody BidRequest req,
+                                                HttpSession session) {
+        String bidderId = (String) session.getAttribute("userId");
+        return ResponseEntity.status(HttpStatus.CREATED).body(BidResponse.from(
+                bidService.placeBid(id, bidderId, req.amount(), req.bidType())
+        ));
+    }
+
+    @GetMapping("/{id}/bids")
+    public ResponseEntity<List<BidResponse>> getBids(@PathVariable String id) {
+        return ResponseEntity.ok(bidService.findByAuction(id)
+                .stream().map(BidResponse::from).toList());
     }
 }
