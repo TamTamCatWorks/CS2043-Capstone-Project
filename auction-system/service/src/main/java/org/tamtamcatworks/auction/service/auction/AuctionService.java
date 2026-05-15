@@ -9,6 +9,7 @@ import org.tamtamcatworks.auction.model.item.Item;
 import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.persist.repository.AuctionRepository;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
+import org.tamtamcatworks.auction.service.item.ItemService;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -20,6 +21,13 @@ public class AuctionService {
     private final AuctionRepository auctionRepository;
    // private final ItemService itemService;
     private final UserRepository userRepository;
+    private final ItemService itemService;
+
+    public AuctionService(AuctionRepository auctionRepository, UserRepository userRepository, ItemService itemService) {
+        this.auctionRepository = auctionRepository;
+        this.userRepository = userRepository;
+        this.itemService = itemService;
+    }
 
 //  @Transactional
 //  public Auction createWithItem(String sellerId, CreateAuctionRequest req) {
@@ -30,15 +38,15 @@ public class AuctionService {
 //              req.item().startingPrice(), req.startTime(), req.endTime()));
 //  }
 
-//  @Transactional
-//  public Auction create(String sellerId, String itemId, String title,
-//                        double startingPrice, LocalDateTime startTime, LocalDateTime endTime) {
-//      User seller = userRepository.findById(sellerId)
-//              .orElseThrow(() -> new NoSuchElementException("User not found"));
-//      Item item = itemService.findById(itemId);
-//      return auctionRepository.save(new Auction(title, seller, item, startingPrice, startTime, endTime));
-//  }
-//
+    @Transactional
+    public Auction create(String sellerId, String itemId, String title,
+                        double startingPrice, LocalDateTime startTime, LocalDateTime endTime) {
+        User seller = userRepository.findById(sellerId)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+        Item item = itemService.findById(itemId);
+        return auctionRepository.save(new Auction(title, seller, item, startingPrice, startTime, endTime));
+    }
+
     @Transactional
     public Auction open(String auctionId) {
         Auction auction = auctionRepository.findById(auctionId)

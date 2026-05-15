@@ -31,9 +31,7 @@ public class ItemController {
     public ResponseEntity<ItemResponse> create(
 
             @RequestBody ItemRequest req,
-
             HttpSession session
-
     ) {
 
         String sellerId =
@@ -43,23 +41,14 @@ public class ItemController {
                 .status(HttpStatus.CREATED)
                 .body(
                         ItemResponse.from(
-
                                 itemService.create(
-
                                         req.itemType(),
-
                                         req.name(),
-
                                         req.description(),
-
                                         req.startingPrice(),
-
                                         req.condition(),
-
                                         req.imageUrl(),
-
                                         req.details(),
-
                                         sellerId
                                 )
                         )

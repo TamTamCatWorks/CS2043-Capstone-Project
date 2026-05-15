@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.web.context.SecurityContextRepository;
 
 import org.tamtamcatworks.auction.service.member.UserService;
+import org.tamtamcatworks.auction.model.user.User;
 
 import org.tamtamcatworks.auction.api.dto.UserResponse;
 import org.tamtamcatworks.auction.api.dto.RegisterRequest;
@@ -56,6 +57,7 @@ public class UserController {
         HttpServletRequest request,
         HttpServletResponse response
     ) {
+        User user = userService.findByEmail(req.email());
         Authentication authenticationRequest =
             UsernamePasswordAuthenticationToken.unauthenticated(req.email(), req.password());
         Authentication authenticationResponse =
@@ -65,9 +67,10 @@ public class UserController {
         context.setAuthentication(authenticationResponse);
         request.getSession(true);
         request.changeSessionId();
+        request.getSession().setAttribute("userId", user.getId());
         securityContextRepository.saveContext(context, request, response);
 
-        return ResponseEntity.ok(UserResponse.from(userService.findByEmail(req.email())));
+        return ResponseEntity.ok(UserResponse.from(user));
     }
 
     @GetMapping("/{id}")

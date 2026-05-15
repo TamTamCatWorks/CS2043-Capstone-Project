@@ -34,14 +34,14 @@ public class AuctionController {
     }
 
     // seller flow — one form creates both item and auction
-    @PostMapping
-    public ResponseEntity<AuctionResponse> create(@RequestBody CreateAuctionRequest req,
-                                                  HttpSession session) {
-        String sellerId = (String) session.getAttribute("userId");
-        return ResponseEntity.status(HttpStatus.CREATED).body(AuctionResponse.from(
-                auctionService.createWithItem(sellerId, req)
-        ));
-    }
+    // @PostMapping
+    // public ResponseEntity<AuctionResponse> create(@RequestBody CreateAuctionRequest req,
+    //                                               HttpSession session) {
+    //     String sellerId = (String) session.getAttribute("userId");
+    //     return ResponseEntity.status(HttpStatus.CREATED).body(AuctionResponse.from(
+    //             auctionService.createWithItem(sellerId, req)
+    //     ));
+    // }
 
     // advanced flow — auction for an already existing item
     @PostMapping("/existing-item")

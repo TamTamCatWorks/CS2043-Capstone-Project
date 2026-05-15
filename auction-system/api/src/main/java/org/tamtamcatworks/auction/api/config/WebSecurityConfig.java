@@ -60,7 +60,12 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/users/register", "/users/login"))
+            .csrf(csrf -> csrf.ignoringRequestMatchers(
+                "/users/register",
+                "/users/login",
+                "/items",
+                "/auctions/existing-item"
+            ))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .securityContext(context -> context.securityContextRepository(securityContextRepository()))
             .exceptionHandling(exception -> exception
