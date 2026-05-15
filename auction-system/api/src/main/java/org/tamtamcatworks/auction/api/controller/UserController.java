@@ -19,11 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.web.context.SecurityContextRepository;
 
 import org.tamtamcatworks.auction.service.member.UserService;
+import org.tamtamcatworks.auction.shared.request.LoginRequest;
+import org.tamtamcatworks.auction.shared.request.RegisterRequest;
+import org.tamtamcatworks.auction.shared.response.UserResponse;
 import org.tamtamcatworks.auction.model.user.User;
-
-import org.tamtamcatworks.auction.api.dto.UserResponse;
-import org.tamtamcatworks.auction.api.dto.RegisterRequest;
-import org.tamtamcatworks.auction.api.dto.LoginRequest;
 
 
 @RestController
