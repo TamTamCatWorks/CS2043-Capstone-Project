@@ -64,7 +64,11 @@ public class WebSecurityConfig {
                 "/users/register",
                 "/users/login",
                 "/items",
-                "/auctions/existing-item"
+                "/auctions/existing-item",
+                "/auctions/*/open",
+                "/auctions/*/close",
+                "/auctions/*/cancel",
+                "/auctions/*/bids"
             ))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .securityContext(context -> context.securityContextRepository(securityContextRepository()))

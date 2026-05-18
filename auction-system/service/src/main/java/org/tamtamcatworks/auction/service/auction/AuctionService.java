@@ -22,7 +22,6 @@ import java.util.NoSuchElementException;
 @Service
 public class AuctionService {
     private final AuctionRepository auctionRepository;
-    private final UserRepository userRepository;
     private final ItemService itemService;
     private final UserRepository userRepository;
 
