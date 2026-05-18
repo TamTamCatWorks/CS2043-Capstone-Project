@@ -15,12 +15,14 @@ import org.tamtamcatworks.auction.service.item.ItemService;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Map;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
 public class AuctionService {
     private final AuctionRepository auctionRepository;
+    private final UserRepository userRepository;
     private final ItemService itemService;
     private final UserRepository userRepository;
 
