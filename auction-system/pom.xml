@@ -19,6 +19,14 @@
     <jacoco.version>0.8.12</jacoco.version>
     <checkstyle.version>3.6.0</checkstyle.version>
   </properties>
+
+  <scm>
+    <connection>scm:git:https://github.com/TamTamCatWorks/CS2043-Capstone-Project.git</connection>
+    <developerConnection>scm:git:git@github.com:TamTamCatWorks/CS2043-Capstone-Project.git</developerConnection>
+    <url>https://github.com/TamTamCatWorks/CS2043-Capstone-Project</url>
+    <tag>HEAD</tag>
+  </scm>
+
   <dependencyManagement>
     <!-- auto tracking for child modules -->
     <dependencies>
@@ -133,6 +141,7 @@
         <tagNameFormat>v@{project.version}</tagNameFormat>
         <scmCommentPrefix>[release]</scmCommentPrefix>
         <prepareGoals>clean verify</prepareGoals>
+        <autoVersionSubmodules>true</autoVersionSubmodules> 
       </configuration>
       </plugin>
 
