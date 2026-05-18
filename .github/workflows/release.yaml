@@ -3,11 +3,14 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'                   # fires when a v* tag is pushed
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write          # needed to create GitHub release
 
     steps:
       - name: Checkout
@@ -21,9 +24,10 @@ jobs:
           cache: maven
 
       - name: Build release JAR
+        working-directory: auction-system    
         run: mvn clean package -DskipTests
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: api/target/*.jar    # attaches the fat JAR to the release
+          files: auction-system/api/target/api-*.jar     
