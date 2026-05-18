@@ -11,11 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import org.tamtamcatworks.auction.api.dto.ItemRequest;
-import org.tamtamcatworks.auction.api.dto.ItemResponse;
-
 import org.tamtamcatworks.auction.service.item.ItemService;
+import org.tamtamcatworks.auction.shared.request.ItemRequest;
+import org.tamtamcatworks.auction.shared.response.ItemResponse;
 
 @RestController
 @RequestMapping("/items")

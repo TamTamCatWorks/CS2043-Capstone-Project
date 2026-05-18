@@ -16,12 +16,9 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.AuctionStatus;
 import org.tamtamcatworks.auction.service.auction.AuctionService;
-import org.tamtamcatworks.auction.service.auction.BidService;
-import org.tamtamcatworks.auction.api.dto.AuctionResponse;
-import org.tamtamcatworks.auction.api.dto.AuctionRequest;
-import org.tamtamcatworks.auction.api.dto.BidRequest;
-import org.tamtamcatworks.auction.api.dto.BidResponse;
 import org.tamtamcatworks.auction.service.auction.CreateAuctionRequest;
+import org.tamtamcatworks.auction.shared.request.AuctionRequest;
+import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 
 import java.util.List;
 import java.util.stream.Collectors;

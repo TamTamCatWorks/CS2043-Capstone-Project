@@ -1,4 +1,4 @@
-package org.tamtamcatworks.auction.api.dto;
+package org.tamtamcatworks.auction.shared.request;
 
 import java.time.LocalDateTime;
 
