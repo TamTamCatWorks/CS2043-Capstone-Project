@@ -6,22 +6,25 @@ import org.springframework.stereotype.Service;
 import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.AuctionStatus;
 import org.tamtamcatworks.auction.model.item.Item;
+import org.tamtamcatworks.auction.model.item.ItemCondition;
 import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.persist.repository.AuctionRepository;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
 import org.tamtamcatworks.auction.service.item.ItemService;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Map;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
 public class AuctionService {
     private final AuctionRepository auctionRepository;
-   // private final ItemService itemService;
     private final UserRepository userRepository;
     private final ItemService itemService;
+    private final UserRepository userRepository;
 
     public AuctionService(AuctionRepository auctionRepository, UserRepository userRepository, ItemService itemService) {
         this.auctionRepository = auctionRepository;
@@ -29,14 +32,23 @@ public class AuctionService {
         this.itemService = itemService;
     }
 
-//  @Transactional
-//  public Auction createWithItem(String sellerId, CreateAuctionRequest req) {
-//      Item item = itemService.create(req.item());
-//      User seller = userRepository.findById(sellerId)
-//              .orElseThrow(() -> new NoSuchElementException("User not found"));
-//      return auctionRepository.save(new Auction(req.title(), seller, item,
-//              req.item().startingPrice(), req.startTime(), req.endTime()));
-//  }
+      @Transactional
+      public Auction createWithItem(String sellerId,
+                                    CreateAuctionRequest req,
+                                    String itemType,
+                                    String name,
+                                    String description,
+                                    double startingPrice,
+                                    ItemCondition condition,
+                                    String imageUrl,
+                                    Map<String, Object> details) {
+        Item item = itemService.create(itemType, name, description, startingPrice,
+                condition, imageUrl, details, sellerId);
+        User seller = userRepository.findById(sellerId)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+          return auctionRepository.save(new Auction(req.title(), seller, item,
+                req.item().getStartingPrice(), req.startTime(), req.endTime()));
+      }
 
     @Transactional
     public Auction create(String sellerId, String itemId, String title,
