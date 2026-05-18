@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - api
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build, test, and check style
+        working-directory: auction-system
+        run: mvn -B -V clean verify
+
+      - name: Verify API fat jar
+        working-directory: auction-system
+        run: |
+          test -f api/target/api-1.0-SNAPSHOT.jar
+          jar tf api/target/api-1.0-SNAPSHOT.jar | grep -q 'BOOT-INF/classes/'
+          jar tf api/target/api-1.0-SNAPSHOT.jar | grep -q 'BOOT-INF/lib/'
