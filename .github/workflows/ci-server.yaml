@@ -31,6 +31,7 @@ jobs:
       - name: Verify API fat jar
         working-directory: auction-system
         run: |
-          test -f api/target/api-1.0-SNAPSHOT.jar
-          jar tf api/target/api-1.0-SNAPSHOT.jar | grep -q 'BOOT-INF/classes/'
-          jar tf api/target/api-1.0-SNAPSHOT.jar | grep -q 'BOOT-INF/lib/'
+          JAR=$(find api/target -name "api-*.jar" -not -name "*sources*" | head -1)
+          test -n "$JAR"
+          jar tf "$JAR" | grep -q 'BOOT-INF/classes/'
+          jar tf "$JAR" | grep -q 'BOOT-INF/lib/'
