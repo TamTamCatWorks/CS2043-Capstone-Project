@@ -3,28 +3,23 @@ package org.tamtamcatworks.auction.api.controller;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PatchMapping;
-
-import org.tamtamcatworks.auction.model.Auction;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.tamtamcatworks.auction.api.request.BidRequest;
+import org.tamtamcatworks.auction.api.response.BidResponse;
 import org.tamtamcatworks.auction.model.AuctionStatus;
 import org.tamtamcatworks.auction.service.auction.AuctionService;
 import org.tamtamcatworks.auction.service.auction.BidService;
-import org.tamtamcatworks.auction.api.dto.AuctionResponse;
-import org.tamtamcatworks.auction.api.dto.AuctionRequest;
-import org.tamtamcatworks.auction.api.dto.BidRequest;
-import org.tamtamcatworks.auction.api.dto.BidResponse;
-import org.tamtamcatworks.auction.service.auction.CreateAuctionRequest;
+import org.tamtamcatworks.auction.shared.request.AuctionRequest;
+import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auctions")
@@ -38,71 +33,54 @@ public class AuctionController {
         this.bidService = bidService;
     }
 
-    // seller flow — one form creates both item and auction
-    // @PostMapping
-    // public ResponseEntity<AuctionResponse> create(@RequestBody CreateAuctionRequest req,
-    //                                               HttpSession session) {
-    //     String sellerId = (String) session.getAttribute("userId");
-    //     return ResponseEntity.status(HttpStatus.CREATED).body(AuctionResponse.from(
-    //             auctionService.createWithItem(sellerId, req)
-    //     ));
-    // }
-
-    // advanced flow — auction for an already existing item
     @PostMapping("/existing-item")
     public ResponseEntity<AuctionResponse> createWithExistingItem(
-            @RequestBody AuctionRequest req, HttpSession session) {
+        @RequestBody AuctionRequest req,
+        HttpSession session
+    ) {
         String sellerId = (String) session.getAttribute("userId");
-        return ResponseEntity.status(HttpStatus.CREATED).body(AuctionResponse.from(
-                auctionService.create(sellerId, req.itemId(), req.title(),
-                        req.startingPrice(), req.startTime(), req.endTime())
-        ));
+        return ResponseEntity.status(HttpStatus.CREATED).body(auctionService.create(sellerId, req));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AuctionResponse> get(@PathVariable String id) {
-        return ResponseEntity.ok(AuctionResponse.from(auctionService.findById(id)));
+        return ResponseEntity.ok(auctionService.findResponseById(id));
     }
 
     @GetMapping
     public ResponseEntity<List<AuctionResponse>> getByStatus(@RequestParam AuctionStatus status) {
-        List<Auction> auctions = auctionService.findByStatus(status);
-        List<AuctionResponse> responses = auctions.stream()
-                .map(AuctionResponse::from)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(auctionService.findResponsesByStatus(status));
     }
 
     @PatchMapping("/{id}/open")
     public ResponseEntity<AuctionResponse> open(@PathVariable String id) {
-        return ResponseEntity.ok(AuctionResponse.from(auctionService.open(id)));
+        return ResponseEntity.ok(auctionService.openById(id));
     }
 
     @PatchMapping("/{id}/close")
     public ResponseEntity<AuctionResponse> close(@PathVariable String id) {
-        return ResponseEntity.ok(AuctionResponse.from(auctionService.close(id)));
+        return ResponseEntity.ok(auctionService.closeById(id));
     }
 
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<AuctionResponse> cancel(@PathVariable String id,
                                                   @RequestParam String reason) {
-        return ResponseEntity.ok(AuctionResponse.from(auctionService.cancel(id,reason)));
+        return ResponseEntity.ok(auctionService.cancelById(id, reason));
     }
 
-    // bidderId comes from session, not request body
     @PostMapping("/{id}/bids")
     public ResponseEntity<BidResponse> placeBid(@PathVariable String id,
                                                 @RequestBody BidRequest req,
                                                 HttpSession session) {
         String bidderId = (String) session.getAttribute("userId");
         return ResponseEntity.status(HttpStatus.CREATED).body(BidResponse.from(
-                bidService.placeBid(id, bidderId, req.amount(), req.bidType())
+            bidService.placeBid(id, bidderId, req.amount(), req.bidType())
         ));
     }
 
     @GetMapping("/{id}/bids")
     public ResponseEntity<List<BidResponse>> getBids(@PathVariable String id) {
         return ResponseEntity.ok(bidService.findByAuction(id)
-                .stream().map(BidResponse::from).toList());
+            .stream().map(BidResponse::from).toList());
     }
 }

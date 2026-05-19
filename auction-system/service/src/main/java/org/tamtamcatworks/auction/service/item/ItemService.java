@@ -2,6 +2,7 @@ package org.tamtamcatworks.auction.service.item;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.tamtamcatworks.auction.model.item.Item;
 import org.tamtamcatworks.auction.model.item.ItemCondition;
 import org.tamtamcatworks.auction.model.user.User;
+import org.tamtamcatworks.auction.shared.request.ItemRequest;
 
 import org.tamtamcatworks.auction.persist.repository.ItemRepository;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
@@ -56,7 +58,7 @@ public class ItemService {
             String name,
             String description,
             double startingPrice,
-            ItemCondition condition,
+            String condition,
             String imageUrl,
             Map<String, Object> details,
             String sellerId
@@ -89,7 +91,7 @@ public class ItemService {
             name,
             description,
             startingPrice,
-            condition,
+            parseCondition(condition),
             imageUrl,
             seller,
             details
@@ -116,5 +118,35 @@ public class ItemService {
             .orElseThrow(() ->
                     new NoSuchElementException("Item not found.")
             );
+    }
+
+    @Transactional
+    public Item create(ItemRequest req) {
+
+        if (req.sellerId() == null || req.sellerId().isBlank()) {
+            throw new IllegalArgumentException("Seller ID is required.");
+        }
+
+        return create(
+            req.itemType(),
+            req.name(),
+            req.description(),
+            req.startingPrice(),
+            req.condition(),
+            req.imageUrl(),
+            req.details(),
+            req.sellerId()
+        );
+    }
+
+    private ItemCondition parseCondition(String condition) {
+        if (condition == null || condition.isBlank()) {
+            throw new IllegalArgumentException("Condition is required.");
+        }
+        try {
+            return ItemCondition.valueOf(condition.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Unknown item condition: " + condition, exception);
+        }
     }
 }
