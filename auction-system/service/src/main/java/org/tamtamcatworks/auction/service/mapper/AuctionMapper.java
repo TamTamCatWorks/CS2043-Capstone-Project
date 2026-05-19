@@ -1,6 +1,7 @@
 package org.tamtamcatworks.auction.service.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.item.Item;
 import org.tamtamcatworks.auction.model.user.User;
@@ -21,16 +22,9 @@ public interface AuctionMapper {
         );
     }
 
-    default AuctionResponse toResponse(Auction auction) {
-        return new AuctionResponse(
-            auction.getTitle(),
-            auction.getSeller().getId(),
-            auction.getSeller().getFullName(),
-            auction.getItem().getId(),
-            auction.getItem().getName(),
-            auction.getStartingPrice(),
-            auction.getStartTime(),
-            auction.getEndTime()
-        );
-    }
+    @Mapping(target = "sellerId", source = "seller.id")
+    @Mapping(target = "sellerName", source = "seller.fullName")
+    @Mapping(target = "itemId", source = "item.id")
+    @Mapping(target = "itemName", source = "item.name")
+    AuctionResponse toResponse(Auction auction);
 }

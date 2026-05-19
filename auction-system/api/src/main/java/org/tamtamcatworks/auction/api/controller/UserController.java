@@ -64,7 +64,7 @@ public class UserController {
         request.getSession().setAttribute("userId", user.getId());
         securityContextRepository.saveContext(context, request, response);
 
-        return ResponseEntity.ok(userService.loginByRequest(req));
+        return ResponseEntity.ok(userService.toResponse(user));
     }
 
     @GetMapping("/{id}")

@@ -110,12 +110,8 @@ public class AuctionService {
 
     @Transactional
     public AuctionResponse createByRequest(CreateAuctionRequest request) {
-        Item item = itemService.create(request.item());
-        User seller = userRepository.findById(request.item().sellerId())
-            .orElseThrow(() -> new NoSuchElementException("User not found"));
-        Auction auction = auctionMapper.toEntity(request, seller, item);
-        Auction savedAuction = auctionRepository.save(auction);
-        return auctionMapper.toResponse(savedAuction);
+        Auction createdAuction = createWithItem(request.item().sellerId(), request);
+        return auctionMapper.toResponse(createdAuction);
     }
 
     public AuctionResponse toResponse(Auction auction) {

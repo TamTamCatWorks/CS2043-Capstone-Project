@@ -23,13 +23,5 @@ public interface UserMapper {
         return user;
     }
 
-    default UserResponse toResponse(User user) {
-        return new UserResponse(
-            user.getId(),
-            user.getUsername(),
-            user.getEmail(),
-            user.getFullName(),
-            user.getBalance()
-        );
-    }
+    UserResponse toResponse(User user);
 }

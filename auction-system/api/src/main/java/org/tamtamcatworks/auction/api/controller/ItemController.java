@@ -3,6 +3,7 @@ package org.tamtamcatworks.auction.api.controller;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,7 +53,7 @@ public class ItemController {
         return new ItemResponse(
             item.getId(),
             item.getName(),
-            item.getClass().getSimpleName(),
+            ClassUtils.getUserClass(item).getSimpleName(),
             item.getStartingPrice(),
             item.getCondition().name(),
             item.getSeller().getId(),

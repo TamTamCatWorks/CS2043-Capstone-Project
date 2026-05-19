@@ -9,7 +9,6 @@ import org.tamtamcatworks.auction.model.user.SellerProfile;
 import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
 import org.tamtamcatworks.auction.service.mapper.UserMapper;
-import org.tamtamcatworks.auction.shared.request.LoginRequest;
 import org.tamtamcatworks.auction.shared.request.RegisterRequest;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
@@ -32,12 +31,7 @@ public class UserService {
 
     @Transactional
     public User register(String username, String email, String password, String fullName) {
-        if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email already in use.");
-        }
-        if (userRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("Username already taken.");
-        }
+        validateRegistrationInputs(username, email);
 
         User user = new User(username, email, passwordEncoder.encode(password), fullName, 0.0);
         user.setBuyerProfile(new BuyerProfile());
@@ -69,12 +63,7 @@ public class UserService {
 
     @Transactional
     public UserResponse registerByRequest(RegisterRequest registerRequest) {
-        if (userRepository.existsByEmail(registerRequest.email())) {
-            throw new IllegalArgumentException("Email already in use.");
-        }
-        if (userRepository.existsByUsername(registerRequest.username())) {
-            throw new IllegalArgumentException("Username already taken.");
-        }
+        validateRegistrationInputs(registerRequest.username(), registerRequest.email());
 
         User user = userMapper.toEntity(registerRequest, passwordEncoder.encode(registerRequest.password()));
         User savedUser = userRepository.save(user);
@@ -82,12 +71,16 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserResponse loginByRequest(LoginRequest loginRequest) {
-        return userMapper.toResponse(login(loginRequest.email(), loginRequest.password()));
-    }
-
-    @Transactional(readOnly = true)
     public UserResponse toResponse(User user) {
         return userMapper.toResponse(user);
+    }
+
+    private void validateRegistrationInputs(String username, String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email already in use.");
+        }
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("Username already taken.");
+        }
     }
 }
