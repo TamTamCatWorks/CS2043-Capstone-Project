@@ -11,6 +11,7 @@ import org.tamtamcatworks.auction.persist.repository.AuctionRepository;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
 import org.tamtamcatworks.auction.service.item.ItemService;
 import org.tamtamcatworks.auction.service.mapper.AuctionMapper;
+import org.tamtamcatworks.auction.shared.request.AuctionRequest;
 import org.tamtamcatworks.auction.shared.request.CreateAuctionRequest;
 import org.tamtamcatworks.auction.shared.request.ItemRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
@@ -67,6 +68,19 @@ public class AuctionService {
     }
 
     @Transactional
+    public AuctionResponse create(String sellerId, AuctionRequest request) {
+        Auction createdAuction = create(
+            sellerId,
+            request.itemId(),
+            request.title(),
+            request.startingPrice(),
+            request.startTime(),
+            request.endTime()
+        );
+        return auctionMapper.toResponse(createdAuction);
+    }
+
+    @Transactional
     public Auction open(String auctionId) {
         Auction auction = auctionRepository.findById(auctionId)
             .orElseThrow(() -> new NoSuchElementException("Auction not found"));
@@ -114,11 +128,28 @@ public class AuctionService {
         return auctionMapper.toResponse(createdAuction);
     }
 
-    public AuctionResponse toResponse(Auction auction) {
-        return auctionMapper.toResponse(auction);
+    @Transactional(readOnly = true)
+    public AuctionResponse findResponseById(String auctionId) {
+        return auctionMapper.toResponse(findById(auctionId));
     }
 
-    public List<AuctionResponse> toResponses(List<Auction> auctions) {
-        return auctions.stream().map(auctionMapper::toResponse).toList();
+    @Transactional(readOnly = true)
+    public List<AuctionResponse> findResponsesByStatus(AuctionStatus status) {
+        return findByStatus(status).stream().map(auctionMapper::toResponse).toList();
+    }
+
+    @Transactional
+    public AuctionResponse openById(String auctionId) {
+        return auctionMapper.toResponse(open(auctionId));
+    }
+
+    @Transactional
+    public AuctionResponse closeById(String auctionId) {
+        return auctionMapper.toResponse(close(auctionId));
+    }
+
+    @Transactional
+    public AuctionResponse cancelById(String auctionId, String reason) {
+        return auctionMapper.toResponse(cancel(auctionId, reason));
     }
 }

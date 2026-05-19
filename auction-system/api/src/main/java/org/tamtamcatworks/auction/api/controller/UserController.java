@@ -64,11 +64,11 @@ public class UserController {
         request.getSession().setAttribute("userId", user.getId());
         securityContextRepository.saveContext(context, request, response);
 
-        return ResponseEntity.ok(userService.toResponse(user));
+        return ResponseEntity.ok(userService.findResponseById(user.getId()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUser(@PathVariable @NonNull String id) {
-        return ResponseEntity.ok(userService.toResponse(userService.findById(id)));
+        return ResponseEntity.ok(userService.findResponseById(id));
     }
 }

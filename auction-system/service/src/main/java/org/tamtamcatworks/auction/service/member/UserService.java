@@ -71,8 +71,13 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserResponse toResponse(User user) {
-        return userMapper.toResponse(user);
+    public UserResponse findResponseById(@NonNull String id) {
+        return userMapper.toResponse(findById(id));
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse findResponseByEmail(String email) {
+        return userMapper.toResponse(findByEmail(email));
     }
 
     private void validateRegistrationInputs(String username, String email) {

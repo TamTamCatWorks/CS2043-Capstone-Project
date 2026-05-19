@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.tamtamcatworks.auction.api.request.BidRequest;
 import org.tamtamcatworks.auction.api.response.BidResponse;
-import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.AuctionStatus;
 import org.tamtamcatworks.auction.service.auction.AuctionService;
 import org.tamtamcatworks.auction.service.auction.BidService;
@@ -40,42 +39,33 @@ public class AuctionController {
         HttpSession session
     ) {
         String sellerId = (String) session.getAttribute("userId");
-        Auction auction = auctionService.create(
-            sellerId,
-            req.itemId(),
-            req.title(),
-            req.startingPrice(),
-            req.startTime(),
-            req.endTime()
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(auctionService.toResponse(auction));
+        return ResponseEntity.status(HttpStatus.CREATED).body(auctionService.create(sellerId, req));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AuctionResponse> get(@PathVariable String id) {
-        return ResponseEntity.ok(auctionService.toResponse(auctionService.findById(id)));
+        return ResponseEntity.ok(auctionService.findResponseById(id));
     }
 
     @GetMapping
     public ResponseEntity<List<AuctionResponse>> getByStatus(@RequestParam AuctionStatus status) {
-        List<Auction> auctions = auctionService.findByStatus(status);
-        return ResponseEntity.ok(auctionService.toResponses(auctions));
+        return ResponseEntity.ok(auctionService.findResponsesByStatus(status));
     }
 
     @PatchMapping("/{id}/open")
     public ResponseEntity<AuctionResponse> open(@PathVariable String id) {
-        return ResponseEntity.ok(auctionService.toResponse(auctionService.open(id)));
+        return ResponseEntity.ok(auctionService.openById(id));
     }
 
     @PatchMapping("/{id}/close")
     public ResponseEntity<AuctionResponse> close(@PathVariable String id) {
-        return ResponseEntity.ok(auctionService.toResponse(auctionService.close(id)));
+        return ResponseEntity.ok(auctionService.closeById(id));
     }
 
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<AuctionResponse> cancel(@PathVariable String id,
                                                   @RequestParam String reason) {
-        return ResponseEntity.ok(auctionService.toResponse(auctionService.cancel(id, reason)));
+        return ResponseEntity.ok(auctionService.cancelById(id, reason));
     }
 
     @PostMapping("/{id}/bids")
