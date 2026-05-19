@@ -1,14 +1,17 @@
 package org.tamtamcatworks.auction.service.member;
 
-import org.tamtamcatworks.auction.persist.repository.UserRepository;
-import org.tamtamcatworks.auction.model.user.User;
+import org.springframework.lang.NonNull;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.tamtamcatworks.auction.model.user.BuyerProfile;
 import org.tamtamcatworks.auction.model.user.SellerProfile;
-
-import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.lang.NonNull;
+import org.tamtamcatworks.auction.model.user.User;
+import org.tamtamcatworks.auction.persist.repository.UserRepository;
+import org.tamtamcatworks.auction.service.mapper.UserMapper;
+import org.tamtamcatworks.auction.shared.request.LoginRequest;
+import org.tamtamcatworks.auction.shared.request.RegisterRequest;
+import org.tamtamcatworks.auction.shared.response.UserResponse;
 
 import java.util.NoSuchElementException;
 
@@ -17,18 +20,24 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
     }
 
     @Transactional
     public User register(String username, String email, String password, String fullName) {
-        if (userRepository.existsByEmail(email))
+        if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email already in use.");
-        if (userRepository.existsByUsername(username))
+        }
+        if (userRepository.existsByUsername(username)) {
             throw new IllegalArgumentException("Username already taken.");
+        }
 
         User user = new User(username, email, passwordEncoder.encode(password), fullName, 0.0);
         user.setBuyerProfile(new BuyerProfile());
@@ -40,8 +49,9 @@ public class UserService {
     public User login(String email, String password) {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new NoSuchElementException("Invalid email or password."));
-        if (!passwordEncoder.matches(password, user.getPasswordHash()))
+        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new IllegalArgumentException("Invalid email or password.");
+        }
         return user;
     }
 
@@ -55,5 +65,29 @@ public class UserService {
     public User findById(@NonNull String id) {
         return userRepository.findById(id)
             .orElseThrow(() -> new NoSuchElementException("User not found."));
+    }
+
+    @Transactional
+    public UserResponse registerByRequest(RegisterRequest registerRequest) {
+        if (userRepository.existsByEmail(registerRequest.email())) {
+            throw new IllegalArgumentException("Email already in use.");
+        }
+        if (userRepository.existsByUsername(registerRequest.username())) {
+            throw new IllegalArgumentException("Username already taken.");
+        }
+
+        User user = userMapper.toEntity(registerRequest, passwordEncoder.encode(registerRequest.password()));
+        User savedUser = userRepository.save(user);
+        return userMapper.toResponse(savedUser);
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse loginByRequest(LoginRequest loginRequest) {
+        return userMapper.toResponse(login(loginRequest.email(), loginRequest.password()));
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse toResponse(User user) {
+        return userMapper.toResponse(user);
     }
 }

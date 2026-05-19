@@ -2,29 +2,25 @@ package org.tamtamcatworks.auction.api.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.lang.NonNull;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.security.web.context.SecurityContextRepository;
-
-import org.tamtamcatworks.auction.service.member.UserService;
 import org.tamtamcatworks.auction.model.user.User;
-
-import org.tamtamcatworks.auction.api.dto.UserResponse;
-import org.tamtamcatworks.auction.api.dto.RegisterRequest;
-import org.tamtamcatworks.auction.api.dto.LoginRequest;
-
+import org.tamtamcatworks.auction.service.member.UserService;
+import org.tamtamcatworks.auction.shared.request.LoginRequest;
+import org.tamtamcatworks.auction.shared.request.RegisterRequest;
+import org.tamtamcatworks.auction.shared.response.UserResponse;
 
 @RestController
 @RequestMapping("/users")
@@ -46,9 +42,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@RequestBody RegisterRequest req) {
-        return ResponseEntity.ok(UserResponse.from(
-            userService.register(req.username(), req.email(), req.password(), req.fullName())
-        ));
+        return ResponseEntity.ok(userService.registerByRequest(req));
     }
 
     @PostMapping("/login")
@@ -70,11 +64,11 @@ public class UserController {
         request.getSession().setAttribute("userId", user.getId());
         securityContextRepository.saveContext(context, request, response);
 
-        return ResponseEntity.ok(UserResponse.from(user));
+        return ResponseEntity.ok(userService.loginByRequest(req));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUser(@PathVariable @NonNull String id) {
-        return ResponseEntity.ok(UserResponse.from(userService.findById(id)));
+        return ResponseEntity.ok(userService.toResponse(userService.findById(id)));
     }
 }
