@@ -2,6 +2,7 @@ package org.tamtamcatworks.auction.service.auction;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.lang.NonNull;
 
 import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.AuctionStatus;
@@ -67,8 +68,12 @@ public class AuctionService {
         return auctionRepository.save(new Auction(title, seller, item, startingPrice, startTime, endTime));
     }
 
+    /**
+     * Creates an auction for an existing item using the request DTO form.
+     * Use this overload from API/controller paths; keep the parameter-based overload for internal callers.
+     */
     @Transactional
-    public AuctionResponse create(String sellerId, AuctionRequest request) {
+    public AuctionResponse create(@NonNull String sellerId, @NonNull AuctionRequest request) {
         Auction createdAuction = create(
             sellerId,
             request.itemId(),
@@ -129,27 +134,27 @@ public class AuctionService {
     }
 
     @Transactional(readOnly = true)
-    public AuctionResponse findResponseById(String auctionId) {
+    public AuctionResponse findResponseById(@NonNull String auctionId) {
         return auctionMapper.toResponse(findById(auctionId));
     }
 
     @Transactional(readOnly = true)
-    public List<AuctionResponse> findResponsesByStatus(AuctionStatus status) {
+    public List<AuctionResponse> findResponsesByStatus(@NonNull AuctionStatus status) {
         return findByStatus(status).stream().map(auctionMapper::toResponse).toList();
     }
 
     @Transactional
-    public AuctionResponse openById(String auctionId) {
+    public AuctionResponse openById(@NonNull String auctionId) {
         return auctionMapper.toResponse(open(auctionId));
     }
 
     @Transactional
-    public AuctionResponse closeById(String auctionId) {
+    public AuctionResponse closeById(@NonNull String auctionId) {
         return auctionMapper.toResponse(close(auctionId));
     }
 
     @Transactional
-    public AuctionResponse cancelById(String auctionId, String reason) {
+    public AuctionResponse cancelById(@NonNull String auctionId, @NonNull String reason) {
         return auctionMapper.toResponse(cancel(auctionId, reason));
     }
 }
