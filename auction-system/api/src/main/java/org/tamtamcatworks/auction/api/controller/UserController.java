@@ -2,6 +2,8 @@ package org.tamtamcatworks.auction.api.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,7 +44,9 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@RequestBody RegisterRequest req) {
-        return ResponseEntity.ok(userService.registerByRequest(req));
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(userService.registerByRequest(req));
     }
 
     @PostMapping("/login")
@@ -51,7 +55,6 @@ public class UserController {
         HttpServletRequest request,
         HttpServletResponse response
     ) {
-        User user = userService.findByEmail(req.email());
         Authentication authenticationRequest =
             UsernamePasswordAuthenticationToken.unauthenticated(req.email(), req.password());
         Authentication authenticationResponse =
@@ -59,8 +62,12 @@ public class UserController {
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authenticationResponse);
+
+
         request.getSession(true);
         request.changeSessionId();
+
+        User user = userService.findByEmail(req.email());
         request.getSession().setAttribute("userId", user.getId());
         securityContextRepository.saveContext(context, request, response);
 
