@@ -18,6 +18,7 @@
     <java.version>21</java.version>
     <jacoco.version>0.8.12</jacoco.version>
     <checkstyle.version>3.6.0</checkstyle.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
   </properties>
 
   <scm>
@@ -92,7 +93,17 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.13.0</version>
+          <configuration>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
+            <annotationProcessorPaths>
+              <path>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+              </path>
+            </annotationProcessorPaths>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -136,9 +147,14 @@
       </plugins>
     </pluginManagement>
 
-    <!-- release plugin -->
     <plugins>
+    <!-- mapstruct -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+    <!-- release plugin -->
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-release-plugin</artifactId>
       <version>3.0.1</version>
