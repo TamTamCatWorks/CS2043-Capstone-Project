@@ -17,6 +17,7 @@ import org.tamtamcatworks.auction.model.AuctionStatus;
 import org.tamtamcatworks.auction.service.auction.AuctionService;
 import org.tamtamcatworks.auction.service.auction.BidService;
 import org.tamtamcatworks.auction.shared.request.AuctionRequest;
+import org.tamtamcatworks.auction.shared.request.CreateAuctionRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 
 import java.util.List;
@@ -31,6 +32,14 @@ public class AuctionController {
     public AuctionController(AuctionService auctionService, BidService bidService) {
         this.auctionService = auctionService;
         this.bidService = bidService;
+    }
+
+    @PostMapping
+    public ResponseEntity<AuctionResponse> create(@RequestBody CreateAuctionRequest req,
+                                                  HttpSession session) {
+        String sellerId = (String) session.getAttribute("userId");
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(auctionService.createByRequest(sellerId, req));
     }
 
     @PostMapping("/existing-item")

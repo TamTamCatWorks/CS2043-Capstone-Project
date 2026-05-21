@@ -128,8 +128,8 @@ public class AuctionService {
     }
 
     @Transactional
-    public AuctionResponse createByRequest(CreateAuctionRequest request) {
-        Auction createdAuction = createWithItem(request.item().sellerId(), request);
+    public AuctionResponse createByRequest(String sellerId, CreateAuctionRequest request) {
+        Auction createdAuction = createWithItem(sellerId, request);
         return auctionMapper.toResponse(createdAuction);
     }
 

@@ -48,6 +48,7 @@ public class WebSecurityConfig {
                 "/users/register",
                 "/users/login",
                 "/items",
+                "/auctions",
                 "/auctions/existing-item",
                 "/auctions/*/open",
                 "/auctions/*/close",
