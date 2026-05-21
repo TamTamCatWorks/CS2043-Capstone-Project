@@ -46,7 +46,7 @@ public class BidService {
         BidTransaction tx = new BidTransaction(auction, bidder, amount, bidType);
         auction.recordBid(tx);
         auctionRepository.save(auction);
-        return bidRepository.save(tx);
+        return tx;
     }
 
     @Transactional(readOnly = true)

@@ -134,9 +134,6 @@ public class LoadDatabase {
                 
                 Auction savedAuction = auctionRepository.save(auction);
                 log.info("Preloading auction {}", savedAuction);
-
-                BidTransaction savedBid = bidTransactionRepository.save(bidTransaction);
-                log.info("Preloading bid {}", savedBid.getId());
                 
                 return null;
             });
