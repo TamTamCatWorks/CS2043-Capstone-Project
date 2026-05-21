@@ -5,21 +5,561 @@
 
 .root {
     -fx-font-family: "Montserrat";
+    -fx-font-size: 11pt;
+
+    /* AtlantaFX theme overrides for a unified black, white, and tan experience */
+    -color-accent-fg: #8F7246;          /* warm bronze for active links, highlights */
+    -color-accent-emphasis: #1A1A1A;    /* sleek black for primary elements */
+    -color-fg-default: #1A1A1A;         /* charcoal/black body text */
+    -color-fg-muted: #7C7467;           /* muted warm text */
+    -color-canvas-default: #FAF8F5;     /* cream canvas background */
+    -color-bg-default: #FAF8F5;
+    -color-border-default: rgba(228, 196, 149, 0.4);
+    
+    /* Input and button focuses */
+    -color-focus-border: #E4C495;
+    -color-accent-muted: rgba(228, 196, 149, 0.2);
+}
+
+/* Backgrounds */
+.login-bg {
+    -fx-background-color: linear-gradient(to bottom right, #FAF8F5, #F5EFE6, #EFE9DE);
+}
+
+.dashboard-bg {
+    -fx-background-color: #FAF8F5;
+}
+
+/* Authentication Card styling */
+.auth-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 20px;
+    -fx-border-color: rgba(228, 196, 149, 0.4);
+    -fx-border-radius: 20px;
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(46, 38, 26, 0.06), 24, 0, 0, 12);
+}
+
+/* Brand styling */
+.brand-icon-container {
+    -fx-background-color: #FAF8F5;
+    -fx-background-radius: 100px;
+    -fx-border-color: #E4C495;
+    -fx-border-radius: 100px;
+    -fx-border-width: 2px;
+    -fx-padding: 6px;
+    -fx-max-width: 68px;
+    -fx-max-height: 68px;
+}
+
+.brand-icon {
+    -fx-icon-color: #1A1A1A;
+}
+
+.brand-title {
+    -fx-font-size: 24pt;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1A1A1A;
+}
+
+.brand-subtitle {
+    -fx-font-size: 11pt;
+    -fx-text-fill: #7C7467;
+}
+
+/* Inputs and Forms */
+.form-label {
+    -fx-font-size: 10pt;
+    -fx-font-weight: bold;
+    -fx-text-fill: #5C5549;
+}
+
+.input-group {
+    -fx-background-color: #FCFAF7;
+    -fx-border-color: #E6DFD3;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 0 12px;
+}
+
+.input-group:focused-within {
+    -fx-border-color: #E4C495;
+    -fx-background-color: #FFFFFF;
+}
+
+.input-icon {
+    -fx-icon-color: #A89F91;
+    -fx-padding: 0 8px 0 0;
+}
+
+.input-group:focused-within .input-icon {
+    -fx-icon-color: #8F7246;
+}
+
+.edge-to-edge-field {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 10px 0;
+    -fx-text-fill: #1A1A1A;
+}
+
+.edge-to-edge-field:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* Buttons */
+.btn-primary {
+    -fx-background-color: #1A1A1A;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 24px;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #E4C495;
+    -fx-text-fill: #1A1A1A;
+}
+
+.btn-primary:pressed {
+    -fx-background-color: #C8AB7E;
+    -fx-text-fill: #1A1A1A;
+}
+
+.progress-spinner {
+    -fx-progress-color: #E4C495;
+}
+
+/* Helper Text */
+.text-muted {
+    -fx-text-fill: #7C7467;
+    -fx-font-size: 10.5pt;
+}
+
+.auth-link {
+    -fx-text-fill: #8F7246;
+    -fx-font-weight: bold;
+    -fx-underline: false;
+}
+
+.auth-link:hover {
+    -fx-text-fill: #1A1A1A;
+    -fx-underline: true;
+}
+
+/* Messages */
+.error-label {
+    -fx-text-fill: #C2410C;
+    -fx-font-size: 10.5pt;
+    -fx-font-weight: bold;
+}
+
+.success-label {
+    -fx-text-fill: #15803D;
+    -fx-font-size: 10.5pt;
+    -fx-font-weight: bold;
+}
+
+/* Dashboard styling */
+.dashboard-header {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: rgba(228, 196, 149, 0.4);
+    -fx-border-width: 0 0 1px 0;
+}
+
+.header-brand-icon {
+    -fx-icon-color: #1A1A1A;
+}
+
+.header-brand-title {
+    -fx-font-size: 16pt;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1A1A1A;
+}
+
+.btn-danger-outline {
+    -fx-background-color: transparent;
+    -fx-border-color: #C2410C;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: #C2410C;
+    -fx-padding: 8px 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-danger-outline:hover {
+    -fx-background-color: #FFF7ED;
+}
+
+.btn-danger-outline:pressed {
+    -fx-background-color: #FFEDD5;
+}
+
+.btn-danger-outline .ikonli-font-icon {
+    -fx-icon-color: #C2410C;
+}
+
+.dashboard-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 24px;
+    -fx-border-color: rgba(228, 196, 149, 0.4);
+    -fx-border-radius: 24px;
+    -fx-effect: dropshadow(three-pass-box, rgba(46, 38, 26, 0.04), 20, 0, 0, 10);
+}
+
+.dashboard-welcome-title {
+    -fx-font-size: 22pt;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1A1A1A;
+}
+
+.balance-widget {
+    -fx-background-color: linear-gradient(to right, #FAF6EE, #F4EFE3);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(228, 196, 149, 0.4);
+    -fx-border-radius: 16px;
+}
+
+.balance-label {
+    -fx-font-size: 10pt;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7C7467;
+}
+
+.balance-value {
+    -fx-font-size: 26pt;
+    -fx-font-weight: bold;
+    -fx-text-fill: #15803D;
+}
+
+.details-box {
+    -fx-background-color: #FCFAF7;
+    -fx-background-radius: 12px;
+    -fx-border-color: #F4EFE6;
+    -fx-border-radius: 12px;
+}
+
+.detail-icon {
+    -fx-icon-color: #9C9282;
+}
+
+.detail-text {
+    -fx-font-size: 12pt;
+    -fx-text-fill: #2C2A26;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   NAVIGATION TABS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.nav-tab {
+    -fx-background-color: transparent;
+    -fx-text-fill: #7C7467;
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 11pt;
+    -fx-font-weight: 600;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+    -fx-border-width: 0 0 2 0;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.nav-tab:hover {
+    -fx-text-fill: #1A1A1A;
+    -fx-border-color: rgba(143, 114, 70, 0.4);
+}
+
+.nav-tab-active {
+    -fx-text-fill: #1A1A1A;
+    -fx-border-color: #8F7246;
+    -fx-font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   USER MENU DROPDOWN
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.user-menu-btn {
+    -fx-background-color: rgba(143, 114, 70, 0.08);
+    -fx-text-fill: #1A1A1A;
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 10pt;
+    -fx-font-weight: 600;
+    -fx-padding: 6 14;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: rgba(228, 196, 149, 0.4);
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.user-menu-btn:hover {
+    -fx-background-color: rgba(143, 114, 70, 0.15);
+}
+
+.user-menu-btn .arrow {
+    -fx-background-color: #8F7246;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUCTION CARDS (List View)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.auction-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(228, 196, 149, 0.3);
+    -fx-border-width: 1;
+    -fx-padding: 18 22;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 6, 0, 0, 2);
+}
+
+.auction-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(143, 114, 70, 0.12), 12, 0, 0, 3);
+    -fx-border-color: rgba(228, 196, 149, 0.6);
+}
+
+.auction-title {
+    -fx-font-family: 'Montserrat';
     -fx-font-size: 13pt;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1A1A1A;
 }
 
-.welcome {
-    -fx-spacing: 20px;
-    -fx-padding: 50px;
-    -fx-alignment: center;
+.auction-seller {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 9pt;
+    -fx-text-fill: #7C7467;
 }
 
-.welcome .ikonli-font-icon {
-    -fx-icon-size: 64px;
+.auction-price {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 14pt;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2D8F4E;
 }
 
-.welcome .label {
-    -fx-wrap-text: true;
-    -fx-pref-width: 450px;
-    -fx-text-alignment: center;
+.auction-time {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 9pt;
+    -fx-text-fill: #7C7467;
+    -fx-font-style: italic;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STATUS BADGES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.status-badge {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 8pt;
+    -fx-font-weight: 700;
+    -fx-padding: 3 10;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-text-fill: #FFFFFF;
+}
+
+.status-active {
+    -fx-background-color: #2D8F4E;
+}
+
+.status-pending {
+    -fx-background-color: #C4952A;
+}
+
+.status-closed {
+    -fx-background-color: #7C7467;
+}
+
+.status-cancelled {
+    -fx-background-color: #C0392B;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PRICE / BID DISPLAY
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.price-display {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 28pt;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2D8F4E;
+}
+
+.price-label {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 10pt;
+    -fx-text-fill: #7C7467;
+    -fx-font-weight: 600;
+}
+
+.bid-input-group {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: rgba(228, 196, 149, 0.5);
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 4 8;
+}
+
+.bid-input-group:focused-within {
+    -fx-border-color: #8F7246;
+    -fx-effect: dropshadow(gaussian, rgba(143, 114, 70, 0.15), 8, 0, 0, 0);
+}
+
+.bid-history-row {
+    -fx-padding: 8 12;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: rgba(228, 196, 149, 0.2);
+}
+
+.bid-history-row:hover {
+    -fx-background-color: rgba(143, 114, 70, 0.04);
+}
+
+.bid-amount {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 11pt;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1A1A1A;
+}
+
+.bid-bidder {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 10pt;
+    -fx-text-fill: #1A1A1A;
+}
+
+.bid-time {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 8pt;
+    -fx-text-fill: #7C7467;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   UTILITY STYLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.back-link {
+    -fx-text-fill: #8F7246;
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 10pt;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-border-color: transparent;
+}
+
+.back-link:hover {
+    -fx-text-fill: #6B5535;
+}
+
+.section-title {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 18pt;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1A1A1A;
+}
+
+.section-subtitle {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 10pt;
+    -fx-text-fill: #7C7467;
+}
+
+.form-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(228, 196, 149, 0.3);
+    -fx-border-width: 1;
+    -fx-padding: 30 36;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);
+}
+
+.detail-panel {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(228, 196, 149, 0.3);
+    -fx-border-width: 1;
+    -fx-padding: 24;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 6, 0, 0, 2);
+}
+
+.info-label {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 9pt;
+    -fx-font-weight: 600;
+    -fx-text-fill: #7C7467;
+    -fx-text-transform: uppercase;
+}
+
+.info-value {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 11pt;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1A1A1A;
+}
+
+.btn-secondary {
+    -fx-background-color: rgba(143, 114, 70, 0.1);
+    -fx-text-fill: #8F7246;
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 10pt;
+    -fx-font-weight: 700;
+    -fx-padding: 10 20;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: rgba(143, 114, 70, 0.3);
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: rgba(143, 114, 70, 0.2);
+}
+
+.btn-success {
+    -fx-background-color: #2D8F4E;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 10pt;
+    -fx-font-weight: 700;
+    -fx-padding: 10 20;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.btn-success:hover {
+    -fx-background-color: #247A3F;
+}
+
+.empty-state {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 12pt;
+    -fx-text-fill: #7C7467;
+    -fx-font-style: italic;
+    -fx-padding: 40;
+}
+
+.filter-combo {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: rgba(228, 196, 149, 0.5);
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 10pt;
+    -fx-padding: 4 10;
 }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<StackPane prefWidth="800.0" prefHeight="600.0" alignment="CENTER"
+           styleClass="login-bg"
+           xmlns="http://javafx.com/javafx/17"
+           xmlns:fx="http://javafx.com/fxml/1">
+
+    <VBox alignment="CENTER" spacing="24.0" styleClass="auth-card" maxWidth="420.0" maxHeight="560.0">
+        <padding>
+            <Insets top="30.0" right="40.0" bottom="30.0" left="40.0"/>
+        </padding>
+
+        <!-- Brand Header -->
+        <VBox alignment="CENTER" spacing="8.0">
+            <StackPane styleClass="brand-icon-container">
+                <ImageView fitWidth="56.0" fitHeight="56.0" preserveRatio="true">
+                    <Image url="@../../assets/icons/app-icon.png"/>
+                </ImageView>
+            </StackPane>
+            <Label text="GoodBids" styleClass="/brand-title"/>
+        </VBox>
+
+        <!-- Dynamic Content Slot -->
+        <StackPane fx:id="authContentArea" VBox.vgrow="ALWAYS"/>
+    </VBox>
+</StackPane>

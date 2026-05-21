@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<ScrollPane fitToWidth="true"
+            style="-fx-background-color: transparent; -fx-background: transparent;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.tamtamcatworks.auction.client.controller.CreateAuctionController">
+
+    <VBox alignment="TOP_CENTER" spacing="20.0">
+        <padding>
+            <Insets top="10.0" bottom="20.0"/>
+        </padding>
+
+        <!-- Header -->
+        <VBox spacing="4.0" alignment="CENTER" maxWidth="560.0">
+            <Label text="Create New Auction" styleClass="section-title"/>
+            <Label text="Fill in the details below to list a new auction" styleClass="section-subtitle"/>
+        </VBox>
+
+        <!-- Form Card -->
+        <VBox styleClass="form-card" spacing="20.0" maxWidth="560.0">
+
+            <!-- Auction Title -->
+            <VBox spacing="6.0">
+                <Label text="Auction Title" styleClass="form-label"/>
+                <HBox alignment="CENTER_LEFT" styleClass="input-group">
+                    <FontIcon iconLiteral="mdi2t-tag-outline" iconSize="18" styleClass="input-icon"/>
+                    <TextField fx:id="titleField" promptText="e.g. Vintage Watch Collection" HBox.hgrow="ALWAYS" styleClass="edge-to-edge-field"/>
+                </HBox>
+            </VBox>
+
+            <Separator/>
+
+            <Label text="Item Details" styleClass="info-value"/>
+
+            <!-- Item Name -->
+            <VBox spacing="6.0">
+                <Label text="Item Name" styleClass="form-label"/>
+                <HBox alignment="CENTER_LEFT" styleClass="input-group">
+                    <FontIcon iconLiteral="mdi2p-package-variant" iconSize="18" styleClass="input-icon"/>
+                    <TextField fx:id="itemNameField" promptText="e.g. Omega Seamaster 1965" HBox.hgrow="ALWAYS" styleClass="edge-to-edge-field"/>
+                </HBox>
+            </VBox>
+
+            <!-- Item Description -->
+            <VBox spacing="6.0">
+                <Label text="Description" styleClass="form-label"/>
+                <TextArea fx:id="itemDescField" promptText="Describe the item in detail..." prefRowCount="3"
+                          wrapText="true" styleClass="edge-to-edge-field"
+                          style="-fx-background-color: transparent;"/>
+            </VBox>
+
+            <!-- Item Type + Condition (side by side) -->
+            <HBox spacing="16.0">
+                <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                    <Label text="Item Type" styleClass="form-label"/>
+                    <ComboBox fx:id="itemTypeCombo" promptText="Select type" maxWidth="Infinity" styleClass="filter-combo"/>
+                </VBox>
+                <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                    <Label text="Condition" styleClass="form-label"/>
+                    <ComboBox fx:id="conditionCombo" promptText="Select condition" maxWidth="Infinity" styleClass="filter-combo"/>
+                </VBox>
+            </HBox>
+
+            <Separator/>
+
+            <!-- Starting Price -->
+            <VBox spacing="6.0">
+                <Label text="Starting Price" styleClass="form-label"/>
+                <HBox alignment="CENTER_LEFT" styleClass="input-group">
+                    <Label text="\$" styleClass="input-icon" style="-fx-font-weight: 700;"/>
+                    <TextField fx:id="startingPriceField" promptText="0.00" HBox.hgrow="ALWAYS" styleClass="edge-to-edge-field"/>
+                </HBox>
+            </VBox>
+
+            <!-- Start / End Time (side by side) -->
+            <HBox spacing="16.0">
+                <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                    <Label text="Start Date" styleClass="form-label"/>
+                    <DatePicker fx:id="startDatePicker" maxWidth="Infinity" styleClass="filter-combo"/>
+                </VBox>
+                <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                    <Label text="Start Time" styleClass="form-label"/>
+                    <TextField fx:id="startTimeField" promptText="HH:mm (24h)" styleClass="filter-combo"/>
+                </VBox>
+            </HBox>
+
+            <HBox spacing="16.0">
+                <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                    <Label text="End Date" styleClass="form-label"/>
+                    <DatePicker fx:id="endDatePicker" maxWidth="Infinity" styleClass="filter-combo"/>
+                </VBox>
+                <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                    <Label text="End Time" styleClass="form-label"/>
+                    <TextField fx:id="endTimeField" promptText="HH:mm (24h)" styleClass="filter-combo"/>
+                </VBox>
+            </HBox>
+
+            <!-- Message -->
+            <Label fx:id="messageLabel" wrapText="true" textAlignment="CENTER" maxWidth="Infinity"
+                   visible="false" managed="false"/>
+
+            <!-- Submit -->
+            <StackPane>
+                <Button fx:id="createButton" text="Create Auction" onAction="#handleCreateAuction"
+                        maxWidth="Infinity" styleClass="btn-primary, btn-lg"/>
+                <ProgressIndicator fx:id="progressIndicator" maxWidth="24" maxHeight="24"
+                                   styleClass="progress-spinner" visible="false"/>
+            </StackPane>
+        </VBox>
+    </VBox>
+</ScrollPane>

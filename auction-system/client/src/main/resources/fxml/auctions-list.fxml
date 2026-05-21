@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox spacing="20.0"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.tamtamcatworks.auction.client.controller.AuctionsListController">
+
+    <!-- Header Row: Title + Filter -->
+    <HBox alignment="CENTER_LEFT" spacing="16.0">
+        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+            <Label text="Browse Auctions" styleClass="section-title"/>
+            <Label text="Find and bid on items from sellers around the world" styleClass="section-subtitle"/>
+        </VBox>
+        <HBox alignment="CENTER_RIGHT" spacing="8.0">
+            <Label text="Filter:" styleClass="form-label"/>
+            <ComboBox fx:id="statusFilter" styleClass="filter-combo" prefWidth="130.0"/>
+        </HBox>
+    </HBox>
+
+    <!-- Loading Indicator -->
+    <StackPane fx:id="loadingPane" visible="false" managed="false" prefHeight="200.0">
+        <VBox alignment="CENTER" spacing="12.0">
+            <ProgressIndicator maxWidth="36" maxHeight="36" styleClass="progress-spinner"/>
+            <Label text="Loading auctions..." styleClass="text-muted"/>
+        </VBox>
+    </StackPane>
+
+    <!-- Empty State -->
+    <StackPane fx:id="emptyPane" visible="false" managed="false" prefHeight="200.0">
+        <VBox alignment="CENTER" spacing="8.0">
+            <FontIcon iconLiteral="mdi2m-magnify-close" iconSize="48" styleClass="detail-icon"/>
+            <Label text="No auctions found" styleClass="empty-state"/>
+        </VBox>
+    </StackPane>
+
+    <!-- Error State -->
+    <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false" styleClass="error-label"/>
+
+    <!-- Auction Cards List -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-background: transparent;">
+        <VBox fx:id="auctionsContainer" spacing="12.0">
+            <padding>
+                <Insets right="4.0" bottom="8.0"/>
+            </padding>
+        </VBox>
+    </ScrollPane>
+</VBox>

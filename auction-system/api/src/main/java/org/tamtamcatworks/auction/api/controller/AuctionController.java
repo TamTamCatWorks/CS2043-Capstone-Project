@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.tamtamcatworks.auction.api.request.BidRequest;
-import org.tamtamcatworks.auction.api.response.BidResponse;
 import org.tamtamcatworks.auction.model.AuctionStatus;
 import org.tamtamcatworks.auction.service.auction.AuctionService;
 import org.tamtamcatworks.auction.service.auction.BidService;
 import org.tamtamcatworks.auction.shared.request.AuctionRequest;
+import org.tamtamcatworks.auction.shared.request.BidRequest;
 import org.tamtamcatworks.auction.shared.request.CreateAuctionRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
+import org.tamtamcatworks.auction.shared.response.BidResponse;
 
 import java.util.List;
 
@@ -82,14 +82,12 @@ public class AuctionController {
                                                 @RequestBody BidRequest req,
                                                 HttpSession session) {
         String bidderId = (String) session.getAttribute("userId");
-        return ResponseEntity.status(HttpStatus.CREATED).body(BidResponse.from(
-            bidService.placeBid(id, bidderId, req.amount(), req.bidType())
-        ));
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(bidService.placeBid(id, bidderId, req));
     }
 
     @GetMapping("/{id}/bids")
     public ResponseEntity<List<BidResponse>> getBids(@PathVariable String id) {
-        return ResponseEntity.ok(bidService.findByAuction(id)
-            .stream().map(BidResponse::from).toList());
+        return ResponseEntity.ok(bidService.findByAuction(id));
     }
 }

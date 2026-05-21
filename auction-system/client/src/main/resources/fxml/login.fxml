@@ -1,10 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.geometry.Insets?>
 
-<VBox alignment="CENTER" spacing="20"
-      xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml">
-    <Label text="Auction System — Login Coming Soon"/>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.tamtamcatworks.auction.client.controller.LoginController">
+
+    <Label text="Sign in to your account to get started" styleClass="brand-subtitle"/>
+
+    <!-- Form fields -->
+    <VBox alignment="CENTER_LEFT" spacing="16.0" VBox.vgrow="ALWAYS">
+        <VBox spacing="6.0">
+            <Label text="Email Address" styleClass="form-label"/>
+            <HBox alignment="CENTER_LEFT" styleClass="input-group">
+                <FontIcon iconLiteral="mdi2e-email-outline" iconSize="18" styleClass="input-icon"/>
+                <TextField fx:id="emailField" promptText="Enter your email" HBox.hgrow="ALWAYS" styleClass="edge-to-edge-field"/>
+            </HBox>
+        </VBox>
+
+        <VBox spacing="6.0">
+            <Label text="Password" styleClass="form-label"/>
+            <HBox alignment="CENTER_LEFT" styleClass="input-group">
+                <FontIcon iconLiteral="mdi2l-lock-outline" iconSize="18" styleClass="input-icon"/>
+                <PasswordField fx:id="passwordField" promptText="Enter your password" HBox.hgrow="ALWAYS" styleClass="edge-to-edge-field"/>
+            </HBox>
+        </VBox>
+    </VBox>
+
+    <!-- Message/Error Display -->
+    <Label fx:id="messageLabel" wrapText="true" textAlignment="CENTER" maxWidth="340.0"/>
+
+    <!-- Action Buttons -->
+    <VBox spacing="16.0" alignment="CENTER" fillWidth="true">
+        <StackPane>
+            <Button fx:id="loginButton" text="Sign In" onAction="#handleLogin" maxWidth="Infinity" styleClass="btn-primary, btn-lg"/>
+            <ProgressIndicator fx:id="progressIndicator" maxWidth="24" maxHeight="24" styleClass="progress-spinner"/>
+        </StackPane>
+        
+        <HBox spacing="4.0" alignment="CENTER">
+            <Label text="New to GoodBids?" styleClass="text-muted"/>
+            <Hyperlink text="Create an account" onAction="#handleGoToRegister" styleClass="auth-link"/>
+        </HBox>
+    </VBox>
 </VBox>

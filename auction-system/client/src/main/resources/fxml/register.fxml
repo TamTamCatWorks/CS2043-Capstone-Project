@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox alignment="CENTER" spacing="16.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.tamtamcatworks.auction.client.controller.RegisterController">
+
+    <Label text="Edge-cutting auction network" styleClass="brand-subtitle"/>
+
+    <!-- Form fields -->
+    <VBox alignment="CENTER_LEFT" spacing="12.0" VBox.vgrow="ALWAYS">
+        <VBox spacing="4.0">
+            <Label text="Username" styleClass="form-label"/>
+            <HBox alignment="CENTER_LEFT" styleClass="input-group">
+                <FontIcon iconLiteral="mdi2a-account-outline" iconSize="18" styleClass="input-icon"/>
+                <TextField fx:id="usernameField" promptText="Choose a username" HBox.hgrow="ALWAYS" styleClass="edge-to-edge-field"/>
+            </HBox>
+        </VBox>
+
+        <VBox spacing="4.0">
+            <Label text="Full Name" styleClass="form-label"/>
+            <HBox alignment="CENTER_LEFT" styleClass="input-group">
+                <FontIcon iconLiteral="mdi2c-card-account-details-outline" iconSize="18" styleClass="input-icon"/>
+                <TextField fx:id="fullNameField" promptText="Enter your full name" HBox.hgrow="ALWAYS" styleClass="edge-to-edge-field"/>
+            </HBox>
+        </VBox>
+
+        <VBox spacing="4.0">
+            <Label text="Email Address" styleClass="form-label"/>
+            <HBox alignment="CENTER_LEFT" styleClass="input-group">
+                <FontIcon iconLiteral="mdi2e-email-outline" iconSize="18" styleClass="input-icon"/>
+                <TextField fx:id="emailField" promptText="Enter your email" HBox.hgrow="ALWAYS" styleClass="edge-to-edge-field"/>
+            </HBox>
+        </VBox>
+
+        <VBox spacing="4.0">
+            <Label text="Password" styleClass="form-label"/>
+            <HBox alignment="CENTER_LEFT" styleClass="input-group">
+                <FontIcon iconLiteral="mdi2l-lock-outline" iconSize="18" styleClass="input-icon"/>
+                <PasswordField fx:id="passwordField" promptText="Create a password" HBox.hgrow="ALWAYS" styleClass="edge-to-edge-field"/>
+            </HBox>
+        </VBox>
+    </VBox>
+
+    <!-- Message/Error Display -->
+    <Label fx:id="messageLabel" wrapText="true" textAlignment="CENTER" maxWidth="340.0"/>
+
+    <!-- Action Buttons -->
+    <VBox spacing="12.0" alignment="CENTER" fillWidth="true">
+        <StackPane>
+            <Button fx:id="registerButton" text="Register" onAction="#handleRegister" maxWidth="Infinity" styleClass="btn-primary, btn-lg"/>
+            <ProgressIndicator fx:id="progressIndicator" maxWidth="24" maxHeight="24" styleClass="progress-spinner"/>
+        </StackPane>
+        
+        <HBox spacing="4.0" alignment="CENTER">
+            <Label text="Already have an account?" styleClass="text-muted"/>
+            <Hyperlink text="Sign In" onAction="#handleGoToLogin" styleClass="auth-link"/>
+        </HBox>
+    </VBox>
+</VBox>

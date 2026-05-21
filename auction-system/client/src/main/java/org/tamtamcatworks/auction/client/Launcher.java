@@ -35,19 +35,17 @@ public class Launcher extends Application {
         // load app properties from pom.xml via filtering
         loadApplicationProperties();
 
-        // load initial view — login screen
-        FXMLLoader loader = new FXMLLoader(
-            getClass().getResource(FXML_DIR + "login.fxml")
-        );
-        Scene scene = new Scene(loader.load(), 800, 600);
-        scene.getStylesheets().add(ASSETS_DIR + "index.css");
+        // Set Navigation stage
+        Navigation.setPrimaryStage(stage);
 
-        stage.setScene(scene);
         stage.setTitle(System.getProperty("app.name", "Auction System"));
         stage.getIcons().add(new Image(APP_ICON_PATH));
         stage.setOnCloseRequest(t -> Platform.exit());
         stage.setMaxWidth(1280);
         stage.setMaxHeight(900);
+
+        // Load initial view — login screen using layout routing
+        Navigation.navigateTo(FXML_DIR + "login.fxml");
 
         Platform.runLater(() -> {
             stage.show();
