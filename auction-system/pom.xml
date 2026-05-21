@@ -20,14 +20,12 @@
     <checkstyle.version>3.6.0</checkstyle.version>
     <mapstruct.version>1.6.3</mapstruct.version>
   </properties>
-
   <scm>
     <connection>scm:git:https://github.com/TamTamCatWorks/CS2043-Capstone-Project.git</connection>
     <developerConnection>scm:git:git@github.com:TamTamCatWorks/CS2043-Capstone-Project.git</developerConnection>
     <url>https://github.com/TamTamCatWorks/CS2043-Capstone-Project</url>
     <tag>HEAD</tag>
   </scm>
-
   <dependencyManagement>
     <!-- auto tracking for child modules -->
     <dependencies>
@@ -54,6 +52,11 @@
       <dependency>
         <groupId>org.tamtamcatworks.auction</groupId>
         <artifactId>shared</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.tamtamcatworks.auction</groupId>
+        <artifactId>client</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
@@ -146,26 +149,24 @@
         </plugin>
       </plugins>
     </pluginManagement>
-
     <plugins>
-    <!-- mapstruct -->
+      <!-- mapstruct -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
       </plugin>
       <plugin>
-    <!-- release plugin -->
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-release-plugin</artifactId>
-      <version>3.0.1</version>
-      <configuration>
-        <tagNameFormat>v@{project.version}</tagNameFormat>
-        <scmCommentPrefix>[release]</scmCommentPrefix>
-        <prepareGoals>clean verify</prepareGoals>
-        <autoVersionSubmodules>true</autoVersionSubmodules> 
-      </configuration>
+        <!-- release plugin -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>3.0.1</version>
+        <configuration>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <scmCommentPrefix>[release]</scmCommentPrefix>
+          <prepareGoals>clean verify</prepareGoals>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+        </configuration>
       </plugin>
-
       <!-- maven checkstyle -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -188,7 +189,6 @@
           </execution>
         </executions>
       </plugin>
-
       <!-- jacoco -->
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -210,7 +210,6 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
   <modules>
@@ -219,5 +218,6 @@
     <module>persist</module>
     <module>service</module>
     <module>api</module>
+    <module>client</module>
   </modules>
 </project>
