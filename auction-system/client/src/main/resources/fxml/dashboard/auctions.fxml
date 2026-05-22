@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="6.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.tamtamcatworks.auction.client.controller.shell.AuctionsViewController">
+    <padding>
+        <Insets top="12.0" right="16.0" bottom="12.0" left="16.0"/>
+    </padding>
+    <Label fx:id="emptyLabel" text="No auctions yet." styleClass="empty-state" managed="false" visible="false"/>
+    <ListView fx:id="auctionsListView" VBox.vgrow="ALWAYS" styleClass="profile-list-view"/>
+</VBox>

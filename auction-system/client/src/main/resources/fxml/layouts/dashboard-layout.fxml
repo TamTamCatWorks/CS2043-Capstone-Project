@@ -47,7 +47,8 @@
                 <Pane HBox.hgrow="ALWAYS"/>
 
                 <!-- User Menu -->
-                <MenuButton fx:id="userMenuButton" text="Account" styleClass="user-menu-btn">
+                <MenuButton fx:id="userMenuButton" text="Account" styleClass="user-menu-btn"
+                            onShowing="#handleUserMenuOpened">
                     <graphic>
                         <FontIcon iconLiteral="mdi2a-account-circle" iconSize="18"/>
                     </graphic>
@@ -61,6 +62,8 @@
                             </graphic>
                         </MenuItem>
                         <SeparatorMenuItem/>
+                        <MenuItem fx:id="notificationsHeaderItem" text="Notifications" onAction="#handleOpenNotificationsFromMenu"/>
+                        <SeparatorMenuItem fx:id="notificationsSeparatorItem"/>
                         <MenuItem text="Sign Out" onAction="#handleLogout">
                             <graphic>
                                 <FontIcon iconLiteral="mdi2l-logout" iconSize="14"/>

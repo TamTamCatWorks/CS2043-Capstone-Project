@@ -4,26 +4,22 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import org.tamtamcatworks.auction.client.Navigation;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
 public class LayoutController {
 
-    @FXML
-    private MenuButton userMenuButton;
+    @FXML private MenuButton userMenuButton;
+    @FXML private MenuItem userNameItem;
+    @FXML private MenuItem userEmailItem;
+    @FXML private MenuItem notificationsHeaderItem;
+    @FXML private SeparatorMenuItem notificationsSeparatorItem;
+    @FXML private Button navAuctions;
+    @FXML private Button navCreateAuction;
 
-    @FXML
-    private MenuItem userNameItem;
-
-    @FXML
-    private MenuItem userEmailItem;
-
-    @FXML
-    private Button navAuctions;
-
-    @FXML
-    private Button navCreateAuction;
+    private NotificationMenuManager notificationMenuManager;
 
     @FXML
     public void initialize() {
@@ -33,9 +29,18 @@ public class LayoutController {
             userNameItem.setText(user.fullName());
             userEmailItem.setText(user.email());
         }
+
+        notificationMenuManager = new NotificationMenuManager(
+            userMenuButton, notificationsHeaderItem, notificationsSeparatorItem);
+
         // Set initial active tab based on current navigation context
         updateActiveTab("dashboard");
+
+        // Populate the combined account menu and start polling notifications.
+        notificationMenuManager.start();
     }
+
+    // ── Navigation Handlers ──────────────────────────────────────────────────
 
     @FXML
     private void handleNavDashboard() {
@@ -57,9 +62,24 @@ public class LayoutController {
 
     @FXML
     private void handleLogout() {
+        notificationMenuManager.stop();
         SessionManager.logout();
         Navigation.navigateTo("/fxml/login.fxml");
     }
+
+    @FXML
+    private void handleUserMenuOpened() {
+        notificationMenuManager.handleMenuOpened();
+    }
+
+    @FXML
+    private void handleOpenNotificationsFromMenu() {
+        // Request dashboard to open the Notifications view and navigate there
+        SessionManager.setDashboardViewPath("/fxml/dashboard/notifications.fxml");
+        Navigation.navigateTo("/fxml/dashboard.fxml");
+    }
+
+    // ── Tab Highlighting ─────────────────────────────────────────────────────
 
     private void updateActiveTab(String tab) {
         navAuctions.getStyleClass().remove("nav-tab-active");

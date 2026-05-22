@@ -16,6 +16,7 @@ import org.tamtamcatworks.auction.shared.request.RegisterRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 import org.tamtamcatworks.auction.shared.response.BidResponse;
 import org.tamtamcatworks.auction.shared.response.ItemResponse;
+import org.tamtamcatworks.auction.shared.response.NotificationResponse;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
 import java.net.CookieManager;
@@ -201,5 +202,28 @@ public class ApiClient {
             .retrieve()
             .body(new ParameterizedTypeReference<java.util.Map<String, String>>() {});
         return response != null ? response.get("url") : null;
+    }
+
+    // ── Notifications ─────────────────────────────────────────────────────────
+
+    /**
+     * Fetch the current user's notifications (most recent first).
+     * Returns empty list if the API endpoint is not yet available.
+     */
+    public List<NotificationResponse> getNotifications() {
+        return client.get()
+            .uri("/notifications")
+            .retrieve()
+            .body(new ParameterizedTypeReference<>() {});
+    }
+
+    /**
+     * Mark all of the current user's notifications as read.
+     */
+    public void markNotificationsRead() {
+        client.patch()
+            .uri("/notifications/read-all")
+            .retrieve()
+            .toBodilessEntity();
     }
 }

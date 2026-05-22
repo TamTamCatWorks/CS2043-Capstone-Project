@@ -1,5 +1,6 @@
 package org.tamtamcatworks.auction.service.auction;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,6 +10,7 @@ import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.persist.repository.AuctionRepository;
 import org.tamtamcatworks.auction.persist.repository.BidTransactionRepository;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
+import org.tamtamcatworks.auction.service.event.BidEvent;
 import org.tamtamcatworks.auction.service.mapper.BidMapper;
 import org.tamtamcatworks.auction.shared.request.BidRequest;
 import org.tamtamcatworks.auction.shared.response.BidResponse;
@@ -24,15 +26,18 @@ public class BidService {
     private final BidTransactionRepository bidRepository;
     private final UserRepository userRepository;
     private final BidMapper bidMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public BidService(AuctionRepository auctionRepository,
                       BidTransactionRepository bidRepository,
                       UserRepository userRepository,
-                      BidMapper bidMapper) {
+                      BidMapper bidMapper,
+                      ApplicationEventPublisher eventPublisher) {
         this.auctionRepository = auctionRepository;
         this.bidRepository = bidRepository;
         this.userRepository = userRepository;
         this.bidMapper = bidMapper;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -49,9 +54,23 @@ public class BidService {
         if (bidder.getBalance() < request.amount())
             throw new IllegalArgumentException("Insufficient balance.");
 
+        // Capture previous leader BEFORE the bid is recorded
+        String previousLeaderId = auction.getLeadingBidder() != null
+            ? auction.getLeadingBidder().getId() : null;
+
         BidTransaction tx = bidMapper.toEntity(request, auction, bidder);
         auction.recordBid(tx);
         auctionRepository.save(auction);
+
+        eventPublisher.publishEvent(new BidEvent(
+            auction.getId(),
+            auction.getTitle(),
+            auction.getSeller().getId(),
+            bidderId,
+            previousLeaderId,
+            request.amount()
+        ));
+
         return bidMapper.toResponse(tx);
     }
 

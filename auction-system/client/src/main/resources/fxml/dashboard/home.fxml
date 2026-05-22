@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="0.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.tamtamcatworks.auction.client.controller.shell.HomeViewController">
+    <padding>
+        <Insets top="12.0" right="16.0" bottom="12.0" left="16.0"/>
+    </padding>
+
+    <HBox spacing="6.0" styleClass="profile-subnav-strip profile-subnav-strip-overflow"
+          translateY="-18.0">
+        <Button fx:id="homeAuctionsButton" text="Auctions" onAction="#handleShowAuctions" styleClass="profile-tab-chip"/>
+        <Button fx:id="homeBidsButton" text="Bids" onAction="#handleShowBids" styleClass="profile-tab-chip"/>
+    </HBox>
+
+    <Region prefHeight="4.0"/>
+
+    <StackPane fx:id="nestedContentArea" VBox.vgrow="ALWAYS" styleClass="profile-nested-content"/>
+</VBox>

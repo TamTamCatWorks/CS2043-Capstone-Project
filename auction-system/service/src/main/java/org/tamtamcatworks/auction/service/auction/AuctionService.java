@@ -1,5 +1,6 @@
 package org.tamtamcatworks.auction.service.auction;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.lang.NonNull;
@@ -10,6 +11,7 @@ import org.tamtamcatworks.auction.model.item.Item;
 import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.persist.repository.AuctionRepository;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
+import org.tamtamcatworks.auction.service.event.AuctionEvent;
 import org.tamtamcatworks.auction.service.item.ItemService;
 import org.tamtamcatworks.auction.service.mapper.AuctionMapper;
 import org.tamtamcatworks.auction.shared.request.AuctionRequest;
@@ -28,15 +30,18 @@ public class AuctionService {
     private final ItemService itemService;
     private final UserRepository userRepository;
     private final AuctionMapper auctionMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AuctionService(AuctionRepository auctionRepository,
                           UserRepository userRepository,
                           ItemService itemService,
-                          AuctionMapper auctionMapper) {
+                          AuctionMapper auctionMapper,
+                          ApplicationEventPublisher eventPublisher) {
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.itemService = itemService;
         this.auctionMapper = auctionMapper;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -90,7 +95,11 @@ public class AuctionService {
         Auction auction = auctionRepository.findById(auctionId)
             .orElseThrow(() -> new NoSuchElementException("Auction not found"));
         auction.open();
-        return auctionRepository.save(auction);
+        Auction saved = auctionRepository.save(auction);
+        eventPublisher.publishEvent(new AuctionEvent(
+            saved.getId(), saved.getTitle(),
+            saved.getSeller().getId(), saved.getStatus(), null));
+        return saved;
     }
 
     @Transactional
@@ -98,7 +107,11 @@ public class AuctionService {
         Auction auction = auctionRepository.findById(auctionId)
             .orElseThrow(() -> new NoSuchElementException("Auction not found"));
         auction.close();
-        return auctionRepository.save(auction);
+        Auction saved = auctionRepository.save(auction);
+        eventPublisher.publishEvent(new AuctionEvent(
+            saved.getId(), saved.getTitle(),
+            saved.getSeller().getId(), saved.getStatus(), null));
+        return saved;
     }
 
     @Transactional
@@ -106,7 +119,11 @@ public class AuctionService {
         Auction auction = auctionRepository.findById(auctionId)
             .orElseThrow(() -> new NoSuchElementException("Auction not found"));
         auction.cancel(reason);
-        return auctionRepository.save(auction);
+        Auction saved = auctionRepository.save(auction);
+        eventPublisher.publishEvent(new AuctionEvent(
+            saved.getId(), saved.getTitle(),
+            saved.getSeller().getId(), saved.getStatus(), reason));
+        return saved;
     }
 
     @Transactional(readOnly = true)
