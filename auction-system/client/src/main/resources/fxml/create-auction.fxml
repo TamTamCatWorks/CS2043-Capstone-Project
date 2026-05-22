@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <ScrollPane fitToWidth="true"
@@ -53,6 +54,21 @@
                 <TextArea fx:id="itemDescField" promptText="Describe the item in detail..." prefRowCount="3"
                           wrapText="true" styleClass="edge-to-edge-field"
                           style="-fx-background-color: transparent;"/>
+            </VBox>
+
+            <!-- Item Image Upload -->
+            <VBox spacing="6.0">
+                <Label text="Item Image" styleClass="form-label"/>
+                <HBox spacing="16.0" alignment="CENTER_LEFT">
+                    <StackPane styleClass="image-preview-placeholder" prefWidth="120.0" prefHeight="90.0">
+                        <ImageView fx:id="imagePreview" fitWidth="120.0" fitHeight="90.0" preserveRatio="true"/>
+                        <Label fx:id="imagePlaceholderLabel" text="No Image" styleClass="text-muted" style="-fx-font-size: 9pt;"/>
+                    </StackPane>
+                    <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                        <Button text="Choose Image..." onAction="#handleChooseImage" styleClass="btn-secondary"/>
+                        <Label fx:id="imagePathLabel" text="No file selected" styleClass="text-muted" wrapText="true" style="-fx-font-size: 9pt;"/>
+                    </VBox>
+                </HBox>
             </VBox>
 
             <!-- Item Type + Condition (side by side) -->

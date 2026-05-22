@@ -19,6 +19,7 @@
     <jacoco.version>0.8.12</jacoco.version>
     <checkstyle.version>3.6.0</checkstyle.version>
     <mapstruct.version>1.6.3</mapstruct.version>
+    <minio.version>8.5.10</minio.version>
   </properties>
   <scm>
     <connection>scm:git:https://github.com/TamTamCatWorks/CS2043-Capstone-Project.git</connection>
@@ -58,6 +59,11 @@
         <groupId>org.tamtamcatworks.auction</groupId>
         <artifactId>client</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.minio</groupId>
+        <artifactId>minio</artifactId>
+        <version>${minio.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

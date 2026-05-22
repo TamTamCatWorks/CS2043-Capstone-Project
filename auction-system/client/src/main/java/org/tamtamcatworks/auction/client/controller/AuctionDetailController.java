@@ -9,6 +9,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -39,6 +41,10 @@ public class AuctionDetailController {
   @FXML private Label endTimeLabel;
   @FXML private Label startPriceLabel;
   @FXML private Label leadingBidderLabel;
+
+  // Image components
+  @FXML private ImageView itemImageView;
+  @FXML private Label imagePlaceholderLabel;
 
   // Owner controls
   @FXML private HBox ownerControls;
@@ -98,6 +104,28 @@ public class AuctionDetailController {
   private void populateAuctionInfo(AuctionResponse auction) {
     contentPane.setVisible(true);
     contentPane.setManaged(true);
+
+    // Load item image asynchronously
+    if (auction.imageUrl() != null && !auction.imageUrl().isEmpty()) {
+      try {
+        Image img = new Image(auction.imageUrl(), true); // backgroundLoading = true
+        itemImageView.setImage(img);
+        imagePlaceholderLabel.setVisible(false);
+        imagePlaceholderLabel.setManaged(false);
+        itemImageView.setVisible(true);
+        itemImageView.setManaged(true);
+      } catch (Exception e) {
+        itemImageView.setVisible(false);
+        itemImageView.setManaged(false);
+        imagePlaceholderLabel.setVisible(true);
+        imagePlaceholderLabel.setManaged(true);
+      }
+    } else {
+      itemImageView.setVisible(false);
+      itemImageView.setManaged(false);
+      imagePlaceholderLabel.setVisible(true);
+      imagePlaceholderLabel.setManaged(true);
+    }
 
     titleLabel.setText(auction.title());
     sellerLabel.setText(auction.sellerName() != null ? auction.sellerName() : "-");

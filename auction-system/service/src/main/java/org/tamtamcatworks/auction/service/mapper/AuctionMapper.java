@@ -26,6 +26,9 @@ public interface AuctionMapper {
     @Mapping(target = "sellerName", source = "seller.fullName")
     @Mapping(target = "itemId", source = "item.id")
     @Mapping(target = "itemName", source = "item.name")
+    @Mapping(target = "imageUrl", source = "item.imageUrl")
+    @Mapping(target = "itemDescription", source = "item.description")
+    @Mapping(target = "itemType", expression = "java(auction.getItem() != null ? auction.getItem().getClass().getSimpleName() : null)")
     @Mapping(target = "leadingBidderId", source = "leadingBidder.id")
     @Mapping(target = "leadingBidderName", source = "leadingBidder.fullName")
     AuctionResponse toResponse(Auction auction);

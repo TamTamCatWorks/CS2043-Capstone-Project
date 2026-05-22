@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <VBox spacing="16.0"
@@ -29,6 +30,12 @@
 
         <!-- Left Column: Auction Info (60%) -->
         <VBox spacing="16.0" HBox.hgrow="ALWAYS" minWidth="300.0">
+            <!-- Item Image -->
+            <StackPane styleClass="detail-panel" style="-fx-padding: 0; -fx-background-color: #F5EFE6; -fx-background-radius: 14; -fx-border-radius: 14;" maxHeight="300.0">
+                <ImageView fx:id="itemImageView" fitHeight="300.0" fitWidth="500.0" preserveRatio="true"/>
+                <Label fx:id="imagePlaceholderLabel" text="No Image Available" styleClass="text-muted"/>
+            </StackPane>
+
             <VBox styleClass="detail-panel" spacing="16.0">
                 <!-- Title + Status -->
                 <HBox alignment="CENTER_LEFT" spacing="12.0">

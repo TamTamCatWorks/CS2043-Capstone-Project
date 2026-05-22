@@ -10,6 +10,9 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -29,7 +32,7 @@ public class AuctionsListController {
   @FXML private StackPane loadingPane;
   @FXML private StackPane emptyPane;
   @FXML private Label errorLabel;
-  @FXML private VBox auctionsContainer;
+  @FXML private FlowPane auctionsContainer;
 
   @FXML
   public void initialize() {
@@ -86,67 +89,95 @@ public class AuctionsListController {
     new Thread(task).start();
   }
 
-  private HBox createAuctionCard(AuctionResponse auction) {
-    HBox card = new HBox(16);
-    card.setAlignment(Pos.CENTER_LEFT);
-    card.getStyleClass().add("auction-card");
+  private VBox createAuctionCard(AuctionResponse auction) {
+    VBox card = new VBox(0);
+    card.getStyleClass().add("asset-card");
+    card.setPrefWidth(220);
+    card.setMinWidth(220);
+    card.setMaxWidth(220);
 
-    // Left: Title + Seller
-    VBox info = new VBox(4);
-    info.setAlignment(Pos.CENTER_LEFT);
-    HBox.setHgrow(info, Priority.ALWAYS);
+    // Image Section
+    StackPane imgWrapper = new StackPane();
+    imgWrapper.getStyleClass().add("asset-card-image-wrapper");
+    imgWrapper.setPrefHeight(140);
+    imgWrapper.setMinHeight(140);
+    imgWrapper.setMaxHeight(140);
 
+    ImageView imgView = new ImageView();
+    imgView.setFitWidth(220);
+    imgView.setFitHeight(140);
+    imgView.setPreserveRatio(true);
+
+    Label placeholderLabel = new Label();
+    placeholderLabel.getStyleClass().add("text-muted");
+    placeholderLabel.setStyle("-fx-font-size: 9pt;");
+
+    if (auction.imageUrl() != null && !auction.imageUrl().isEmpty()) {
+      try {
+        Image img = new Image(auction.imageUrl(), true); // backgroundLoading = true
+        imgView.setImage(img);
+        placeholderLabel.setVisible(false);
+      } catch (Exception e) {
+        placeholderLabel.setText("No Image");
+        imgView.setVisible(false);
+      }
+    } else {
+      placeholderLabel.setText("No Image");
+      imgView.setVisible(false);
+    }
+
+    imgWrapper.getChildren().addAll(imgView, placeholderLabel);
+
+    // Details Section
+    VBox details = new VBox(6);
+    details.getStyleClass().add("asset-card-details");
+
+    // Category / Item Type Badge
+    String itemType = auction.itemType() != null ? auction.itemType() : "Unknown";
+    Label categoryBadge = new Label(itemType.toUpperCase());
+    categoryBadge.getStyleClass().addAll("category-badge", "category-" + itemType.toLowerCase());
+
+    // Title
     Label titleLabel = new Label(auction.title());
-    titleLabel.getStyleClass().add("auction-title");
+    titleLabel.getStyleClass().add("asset-card-title");
+    titleLabel.setWrapText(true);
+    titleLabel.setMaxHeight(40);
+    titleLabel.setMinHeight(40);
 
-    Label sellerLabel = new Label("by " + auction.sellerName());
-    sellerLabel.getStyleClass().add("auction-seller");
+    // Seller Info
+    Label sellerLabel = new Label("by " + (auction.sellerName() != null ? auction.sellerName() : "Unknown"));
+    sellerLabel.getStyleClass().add("asset-card-seller");
 
-    // Item name
-    Label itemLabel = new Label(auction.itemName() != null
-        ? auction.itemName() : "No item");
-    itemLabel.getStyleClass().add("text-muted");
+    // Price + Status Row
+    HBox priceStatusRow = new HBox(8);
+    priceStatusRow.setAlignment(Pos.CENTER_LEFT);
 
-    info.getChildren().addAll(titleLabel, sellerLabel, itemLabel);
+    Label priceLabel = new Label(String.format("$%.2f", auction.currentPrice()));
+    priceLabel.getStyleClass().add("asset-card-price");
 
-    // Center: Status badge
+    Pane spacer = new Pane();
+    HBox.setHgrow(spacer, Priority.ALWAYS);
+
     Label statusBadge = new Label(auction.status());
     statusBadge.getStyleClass().addAll("status-badge", getStatusClass(auction.status()));
+    
+    priceStatusRow.getChildren().addAll(priceLabel, spacer, statusBadge);
 
-    // Time info
-    VBox timeBox = new VBox(2);
-    timeBox.setAlignment(Pos.CENTER_RIGHT);
-    timeBox.setMinWidth(140);
-
+    // Date/Time Row
     String timeText = formatTimeInfo(auction);
     Label timeLabel = new Label(timeText);
     timeLabel.getStyleClass().add("auction-time");
-    timeBox.getChildren().add(timeLabel);
 
-    // Right: Price + View button
-    VBox priceBox = new VBox(6);
-    priceBox.setAlignment(Pos.CENTER_RIGHT);
-    priceBox.setMinWidth(120);
+    details.getChildren().addAll(categoryBadge, titleLabel, sellerLabel, priceStatusRow, timeLabel);
 
-    Label priceLabel = new Label(String.format("\\$%.2f", auction.currentPrice()));
-    priceLabel.getStyleClass().add("auction-price");
+    card.getChildren().addAll(imgWrapper, details);
 
-    Label priceMeta = new Label("Current price");
-    priceMeta.getStyleClass().add("auction-seller");
-
-    Button viewBtn = new Button("View Details");
-    viewBtn.getStyleClass().addAll("btn-secondary");
-    viewBtn.setOnAction(e -> {
+    // Click handler for details view navigation
+    card.setOnMouseClicked(e -> {
       Navigation.setContextData(auction.id());
       Navigation.navigateTo("/fxml/auction-detail.fxml");
     });
 
-    priceBox.getChildren().addAll(priceLabel, priceMeta, viewBtn);
-
-    Pane spacer = new Pane();
-    HBox.setHgrow(spacer, Priority.SOMETIMES);
-
-    card.getChildren().addAll(info, statusBadge, timeBox, spacer, priceBox);
     return card;
   }
 

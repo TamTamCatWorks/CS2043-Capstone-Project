@@ -1,5 +1,6 @@
 package org.tamtamcatworks.auction.client.controller;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -13,6 +14,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 import org.tamtamcatworks.auction.client.Navigation;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.shared.request.CreateAuctionRequest;
@@ -36,18 +40,44 @@ public class CreateAuctionController {
   @FXML private Button createButton;
   @FXML private ProgressIndicator progressIndicator;
 
+  // Image upload elements
+  @FXML private ImageView imagePreview;
+  @FXML private Label imagePlaceholderLabel;
+  @FXML private Label imagePathLabel;
+
+  private File selectedImageFile;
+
   @FXML
   public void initialize() {
-    itemTypeCombo.getItems().addAll(
-        "Electronics", "Collectibles", "Art", "Jewelry",
-        "Vehicles", "Real Estate", "Fashion", "Sports", "Other"
-    );
+    // Only add item types supported by backend's ItemType enum
+    itemTypeCombo.getItems().addAll("Art", "Electronics", "Vehicle");
     conditionCombo.getItems().addAll(
         "New", "Like New", "Excellent", "Good", "Fair", "Poor"
     );
     messageLabel.setVisible(false);
     messageLabel.setManaged(false);
     progressIndicator.setVisible(false);
+  }
+
+  @FXML
+  private void handleChooseImage() {
+    FileChooser fileChooser = new FileChooser();
+    fileChooser.setTitle("Select Item Image");
+    fileChooser.getExtensionFilters().addAll(
+        new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+    );
+    File file = fileChooser.showOpenDialog(titleField.getScene().getWindow());
+    if (file != null) {
+      selectedImageFile = file;
+      imagePathLabel.setText(file.getName());
+      try {
+        Image img = new Image(file.toURI().toURL().toExternalForm());
+        imagePreview.setImage(img);
+        imagePlaceholderLabel.setVisible(false);
+      } catch (Exception e) {
+        showError("Failed to load image preview.");
+      }
+    }
   }
 
   @FXML
@@ -72,6 +102,11 @@ public class CreateAuctionController {
 
     if (condition == null) {
       showError("Please select item condition.");
+      return;
+    }
+
+    if (selectedImageFile == null) {
+      showError("Please select an item image to upload.");
       return;
     }
 
@@ -108,18 +143,24 @@ public class CreateAuctionController {
     String sellerId = SessionManager.getCurrentUser() != null
         ? SessionManager.getCurrentUser().id() : "";
 
-    ItemRequest itemRequest = new ItemRequest(
-        itemType, itemName, itemDesc, startingPrice,
-        condition, sellerId, null, null
-    );
-
-    CreateAuctionRequest request = new CreateAuctionRequest(
-        title, itemRequest, startTime, endTime
-    );
-
+    // Upload image first, then submit auction creation
     Task<AuctionResponse> task = new Task<>() {
       @Override
       protected AuctionResponse call() throws Exception {
+        String uploadedUrl = SessionManager.getApiClient().uploadImage(selectedImageFile);
+        if (uploadedUrl == null) {
+          throw new RuntimeException("Image upload failed");
+        }
+
+        ItemRequest itemRequest = new ItemRequest(
+            itemType, itemName, itemDesc, startingPrice,
+            condition, sellerId, uploadedUrl, null
+        );
+
+        CreateAuctionRequest request = new CreateAuctionRequest(
+            title, itemRequest, startTime, endTime
+        );
+
         return SessionManager.getApiClient().createAuctionWithItem(request);
       }
     };

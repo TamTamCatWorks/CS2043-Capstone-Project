@@ -189,4 +189,17 @@ public class ApiClient {
             .retrieve()
             .body(new ParameterizedTypeReference<>() {});
     }
+
+    public String uploadImage(java.io.File file) {
+        org.springframework.util.MultiValueMap<String, Object> body = new org.springframework.util.LinkedMultiValueMap<>();
+        body.add("file", new org.springframework.core.io.FileSystemResource(file));
+
+        java.util.Map<String, String> response = client.post()
+            .uri("/images/upload")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(body)
+            .retrieve()
+            .body(new ParameterizedTypeReference<java.util.Map<String, String>>() {});
+        return response != null ? response.get("url") : null;
+    }
 }

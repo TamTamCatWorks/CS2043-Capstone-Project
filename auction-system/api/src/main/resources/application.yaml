@@ -7,3 +7,14 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+minio:
+  endpoint: http://localhost:9000
+  externalUrl: http://localhost:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
+  bucketName: auction-images
