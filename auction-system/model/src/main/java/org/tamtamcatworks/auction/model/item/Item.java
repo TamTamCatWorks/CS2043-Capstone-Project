@@ -53,6 +53,13 @@ public abstract class Item extends BaseEntity {
 
     protected Item() { };
 
+    @PrePersist
+    protected void prePersist() {
+        if (this.listedAt == null) {
+            this.listedAt = LocalDateTime.now();
+        }
+    }
+
     public abstract String getSpecificInfo();
 
     @Override

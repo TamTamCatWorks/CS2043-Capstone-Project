@@ -25,10 +25,6 @@ import jakarta.persistence.PrePersist;
  * - createdAt: timestamp ghi thời điểm tạo, không sửa được
  * - Tại sao bất biến? Đảm bảo tính nhất quán, dùng làm primary key trong DB
  *
- * <p>WHY TWO CONSTRUCTORS (Tại sao có 2 constructor):
- * 1. Entity() - tạo mới entity từ code (sinh UUID mới, timestamp hiện tại)
- * 2. Entity(id, createdAt) - load từ DB (dùng ID và timestamp đã có)
- *
  * @author R&D (Nguyen Hoang Vu)
  * @version 1.0
  */

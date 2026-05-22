@@ -36,7 +36,10 @@ public class Auction extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private AuctionStatus status;
 
-    @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL)
+    /**
+     * NOTE: do NOT use CascadeType.ALL here.
+     */
+    @OneToMany(mappedBy = "auction")
     private List<BidTransaction> bidHistory = new ArrayList<>();
 
     // optimistic locking
@@ -66,8 +69,8 @@ public class Auction extends BaseEntity {
      * - endTime phải sau startTime (phiên phải có thời lượng)
      *
      * @param title tiêu đề phiên đấu giá
-     * @param itemId ID của item đang đấu giá
-     * @param sellerId ID của người bán
+     * @param item ID của item đang đấu giá
+     * @param seller ID của người bán
      * @param startingPrice giá khởi điểm (phải > 0)
      * @param startTime thời điểm bắt đầu
      * @param endTime thời điểm kết thúc (phải sau startTime)
