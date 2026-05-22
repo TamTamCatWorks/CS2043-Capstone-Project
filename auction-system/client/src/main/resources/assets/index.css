@@ -889,7 +889,7 @@
 }
 
 .profile-left-menu {
-    -fx-padding: 8 0 12 18;
+    -fx-padding: 8 0 12 0;
 }
 
 .profile-left-menu-item {
@@ -932,24 +932,22 @@
 }
 
 .profile-subnav-strip {
-    -fx-background-color: #F7F3EC;
-    -fx-background-radius: 12px;
+    -fx-background-color: transparent;
     -fx-border-color: rgba(228, 196, 149, 0.35);
-    -fx-border-radius: 12px;
-    -fx-border-width: 1px;
-    -fx-padding: 4;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 0;
 }
 
 .profile-subnav-strip-overflow {
-    -fx-effect: dropshadow(three-pass-box, rgba(46, 38, 26, 0.08), 12, 0, 0, 4);
+    -fx-effect: dropshadow(three-pass-box, rgba(46, 38, 26, 0.06), 8, 0, 0, 2);
 }
 
 .profile-nested-content {
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 16px;
-    -fx-border-color: rgba(228, 196, 149, 0.18);
+    -fx-border-color: rgba(228, 196, 149, 0.28);
     -fx-border-radius: 16px;
-    -fx-border-width: 1px;
+    -fx-border-width: 0;
 }
 
 .profile-tab-chip {
@@ -959,8 +957,11 @@
     -fx-font-size: 10pt;
     -fx-font-weight: 700;
     -fx-padding: 8 14;
+    -fx-alignment: center;
     -fx-background-radius: 10px;
-    -fx-border-radius: 10px;
+    -fx-border-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 2px 0;
     -fx-cursor: hand;
 }
 
@@ -970,7 +971,9 @@
 }
 
 .profile-tab-chip-selected {
-    -fx-background-color: #D8D1C4;
-    -fx-text-fill: #4D473E;
+    -fx-background-color: transparent;
+    -fx-text-fill: #3F392F;
+    -fx-border-color: transparent transparent #8F7246 transparent;
+    -fx-border-width: 0 0 3px 0;
 }
 
