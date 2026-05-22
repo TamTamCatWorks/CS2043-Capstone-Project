@@ -18,7 +18,7 @@
 <BorderPane prefWidth="900.0" prefHeight="640.0" styleClass="dashboard-bg"
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.tamtamcatworks.auction.client.controller.LayoutController">
+            fx:controller="org.tamtamcatworks.auction.client.controller.shell.LayoutController">
 
     <!-- Top Navigation Bar -->
     <top>

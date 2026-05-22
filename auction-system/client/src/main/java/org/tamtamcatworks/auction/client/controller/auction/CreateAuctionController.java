@@ -1,10 +1,12 @@
-package org.tamtamcatworks.auction.client.controller;
+package org.tamtamcatworks.auction.client.controller.auction;
 
 import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
+import java.util.HashMap;
+import java.util.Map;
+import com.dlsc.gemsfx.TimePicker;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -16,9 +18,14 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.tamtamcatworks.auction.client.Navigation;
 import org.tamtamcatworks.auction.client.SessionManager;
+import org.tamtamcatworks.auction.client.controller.details.ItemDetailsForm;
+import org.tamtamcatworks.auction.client.controller.details.ItemDetailsFormFactory;
+import org.tamtamcatworks.auction.client.controller.details.ItemDetailsType;
 import org.tamtamcatworks.auction.shared.request.CreateAuctionRequest;
 import org.tamtamcatworks.auction.shared.request.ItemRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
@@ -31,11 +38,12 @@ public class CreateAuctionController {
   @FXML private TextArea itemDescField;
   @FXML private ComboBox<String> itemTypeCombo;
   @FXML private ComboBox<String> conditionCombo;
+  @FXML private VBox detailsSectionBox;
+  @FXML private GridPane detailsGrid;
   @FXML private TextField startingPriceField;
   @FXML private DatePicker startDatePicker;
-  @FXML private TextField startTimeField;
-  @FXML private DatePicker endDatePicker;
-  @FXML private TextField endTimeField;
+  @FXML private TimePicker startTimePicker;
+  @FXML private ComboBox<Integer> durationDaysCombo;
   @FXML private Label messageLabel;
   @FXML private Button createButton;
   @FXML private ProgressIndicator progressIndicator;
@@ -46,14 +54,22 @@ public class CreateAuctionController {
   @FXML private Label imagePathLabel;
 
   private File selectedImageFile;
+  private final Map<String, Object> detailsMap = new HashMap<>();
+  private String currentItemType = null;
+  private ItemDetailsForm currentDetailsForm;
 
   @FXML
   public void initialize() {
     // Only add item types supported by backend's ItemType enum
-    itemTypeCombo.getItems().addAll("Art", "Electronics", "Vehicle");
+    itemTypeCombo.getItems().addAll("Art", "Electronics", "Vehicle", "Other");
     conditionCombo.getItems().addAll(
         "New", "Like New", "Excellent", "Good", "Fair", "Poor"
     );
+    durationDaysCombo.getItems().addAll(1, 3, 5, 7, 10);
+    durationDaysCombo.setValue(7);
+    itemTypeCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+      handleItemTypeChange(newVal);
+    });
     messageLabel.setVisible(false);
     messageLabel.setManaged(false);
     progressIndicator.setVisible(false);
@@ -122,20 +138,21 @@ public class CreateAuctionController {
       return;
     }
 
-    // Parse dates
-    LocalDateTime startTime = parseDateTime(startDatePicker, startTimeField, "start");
+    LocalDateTime startTime = parseOptionalStartDateTime();
     if (startTime == null) {
       return; // error already shown
     }
-    LocalDateTime endTime = parseDateTime(endDatePicker, endTimeField, "end");
-    if (endTime == null) {
+
+    Integer durationDays = parseDurationDays();
+    if (durationDays == null) {
       return;
     }
 
-    if (endTime.isBefore(startTime)) {
-      showError("End time must be after start time.");
+    if (!prepareItemDetails(itemType)) {
       return;
     }
+
+    LocalDateTime endTime = startTime.plusDays(durationDays);
 
     setLoading(true);
     hideMessage();
@@ -154,7 +171,7 @@ public class CreateAuctionController {
 
         ItemRequest itemRequest = new ItemRequest(
             itemType, itemName, itemDesc, startingPrice,
-            condition, sellerId, uploadedUrl, null
+            condition, sellerId, uploadedUrl, detailsMap
         );
 
         CreateAuctionRequest request = new CreateAuctionRequest(
@@ -188,26 +205,51 @@ public class CreateAuctionController {
     new Thread(task).start();
   }
 
-  private LocalDateTime parseDateTime(DatePicker datePicker, TextField timeField, String label) {
-    LocalDate date = datePicker.getValue();
-    String timeText = timeField.getText().trim();
+  private LocalDateTime parseOptionalStartDateTime() {
+    LocalDate selectedDate = startDatePicker.getValue();
+    LocalTime selectedTime = startTimePicker.getTime();
 
-    if (date == null) {
-      showError("Please select a " + label + " date.");
+    if (selectedDate == null && selectedTime == null) {
+      return LocalDateTime.now();
+    }
+
+    if (selectedDate == null || selectedTime == null) {
+      showError("Please select both start date and time, or leave both blank to start now.");
       return null;
     }
 
-    if (timeText.isEmpty()) {
-      showError("Please enter a " + label + " time (HH:mm).");
+    return LocalDateTime.of(selectedDate, selectedTime);
+  }
+
+  private Integer parseDurationDays() {
+    Integer durationDays = durationDaysCombo.getValue();
+    if (durationDays == null) {
+      showError("Please select an auction duration.");
       return null;
+    }
+    return durationDays;
+  }
+
+  private boolean prepareItemDetails(String itemTypeLabel) {
+    ItemDetailsType type = ItemDetailsType.fromDisplayName(itemTypeLabel);
+    if (type == null || !type.requiresDetails()) {
+      detailsMap.clear();
+      return true;
+    }
+
+    if (currentDetailsForm == null) {
+      showError("Please provide item-specific details.");
+      return false;
     }
 
     try {
-      LocalTime time = LocalTime.parse(timeText);
-      return LocalDateTime.of(date, time);
-    } catch (DateTimeParseException e) {
-      showError("Invalid " + label + " time format. Use HH:mm (e.g. 14:30).");
-      return null;
+      Map<String, Object> updatedDetails = currentDetailsForm.toDetailsMap();
+      detailsMap.clear();
+      detailsMap.putAll(updatedDetails);
+      return true;
+    } catch (IllegalArgumentException e) {
+      showError(e.getMessage());
+      return false;
     }
   }
 
@@ -239,5 +281,48 @@ public class CreateAuctionController {
   private void setLoading(boolean loading) {
     createButton.setDisable(loading);
     progressIndicator.setVisible(loading);
+  }
+
+  private void handleItemTypeChange(String type) {
+    if (type == null) {
+      currentItemType = null;
+      detailsMap.clear();
+      currentDetailsForm = null;
+      hideInlineDetails();
+      return;
+    }
+
+    if (!type.equals(currentItemType)) {
+      detailsMap.clear();
+      currentItemType = type;
+      currentDetailsForm = null;
+      renderInlineDetails(type);
+    }
+  }
+
+  private void renderInlineDetails(String typeLabel) {
+    ItemDetailsType type = ItemDetailsType.fromDisplayName(typeLabel);
+    if (type == null || !type.requiresDetails()) {
+      hideInlineDetails();
+      return;
+    }
+
+    ItemDetailsForm detailsForm = ItemDetailsFormFactory.create(type);
+    if (detailsForm == null) {
+      hideInlineDetails();
+      return;
+    }
+
+    detailsGrid.getChildren().clear();
+    detailsForm.buildForm(detailsGrid, detailsMap);
+    currentDetailsForm = detailsForm;
+    detailsSectionBox.setVisible(true);
+    detailsSectionBox.setManaged(true);
+  }
+
+  private void hideInlineDetails() {
+    detailsGrid.getChildren().clear();
+    detailsSectionBox.setVisible(false);
+    detailsSectionBox.setManaged(false);
   }
 }

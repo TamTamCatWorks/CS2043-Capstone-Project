@@ -18,6 +18,7 @@ public record AuctionResponse(
     LocalDateTime endTime,
     String imageUrl,
     String itemDescription,
-    String itemType
+    String itemType,
+    String specificInfo
 ) {
 }

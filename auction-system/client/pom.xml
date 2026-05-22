@@ -21,6 +21,7 @@
       <app.version>${project.version}</app.version>
       <lib.atlantafx.version>2.0.1</lib.atlantafx.version>
       <lib.ikonli.version>12.3.1</lib.ikonli.version>
+      <lib.gemsfx.version>4.0.5</lib.gemsfx.version>
   </properties>
 
   <dependencies>
@@ -53,6 +54,13 @@
           <groupId>org.kordamp.ikonli</groupId>
           <artifactId>ikonli-materialdesign2-pack</artifactId>
           <version>${lib.ikonli.version}</version>
+      </dependency>
+
+      <!-- GemsFX controls -->
+      <dependency>
+          <groupId>com.dlsc.gemsfx</groupId>
+          <artifactId>gemsfx</artifactId>
+          <version>${lib.gemsfx.version}</version>
       </dependency>
 
       <!-- HTTP client -->

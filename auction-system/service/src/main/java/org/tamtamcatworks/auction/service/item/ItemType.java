@@ -6,7 +6,8 @@ public enum ItemType {
 
     ART,
     ELECTRONICS,
-    VEHICLE;
+    VEHICLE,
+    OTHER;
 
     public static ItemType fromKey(String value) {
 

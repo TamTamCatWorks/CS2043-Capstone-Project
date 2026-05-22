@@ -5,7 +5,7 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.tamtamcatworks.auction.client.controller.LoginController">
+    fx:controller="org.tamtamcatworks.auction.client.controller.auth.LoginController">
 
     <Label text="Sign in to your account to get started" styleClass="brand-subtitle"/>
 

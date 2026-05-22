@@ -1,4 +1,4 @@
-package org.tamtamcatworks.auction.client.controller;
+package org.tamtamcatworks.auction.client.controller.shell;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;

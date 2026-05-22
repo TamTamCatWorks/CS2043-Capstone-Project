@@ -8,7 +8,7 @@
 <VBox spacing="20.0"
       xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.tamtamcatworks.auction.client.controller.AuctionsListController">
+    fx:controller="org.tamtamcatworks.auction.client.controller.auction.AuctionsListController">
 
     <!-- Header Row: Title + Filter -->
     <HBox alignment="CENTER_LEFT" spacing="16.0">

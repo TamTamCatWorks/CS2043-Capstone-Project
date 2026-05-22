@@ -9,10 +9,10 @@
 <VBox spacing="16.0"
       xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.tamtamcatworks.auction.client.controller.AuctionDetailController">
+    fx:controller="org.tamtamcatworks.auction.client.controller.auction.AuctionDetailController">
 
     <!-- Back Link -->
-    <Hyperlink fx:id="backLink" text="\u2190 Back to Auctions" onAction="#handleBack" styleClass="back-link"/>
+    <Hyperlink fx:id="backLink" text="Back to Auctions" onAction="#handleBack" styleClass="back-link"/>
 
     <!-- Loading -->
     <StackPane fx:id="loadingPane" visible="false" managed="false" prefHeight="300.0">
@@ -78,6 +78,14 @@
                         <Label fx:id="leadingBidderLabel" text="-" styleClass="info-value"/>
                     </VBox>
                 </HBox>
+
+                <Separator fx:id="specificInfoSeparator" visible="false" managed="false"/>
+
+                <!-- Specific Category Details -->
+                <VBox fx:id="specificInfoBox" spacing="4.0" visible="false" managed="false">
+                    <Label text="SPECIFIC DETAILS" styleClass="info-label"/>
+                    <Label fx:id="specificInfoLabel" text="-" styleClass="info-value" wrapText="true"/>
+                </VBox>
             </VBox>
 
             <!-- Owner Controls -->

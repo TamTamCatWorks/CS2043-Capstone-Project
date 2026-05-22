@@ -654,3 +654,7 @@
 .category-unknown {
     -fx-background-color: #7C7467;
 }
+
+.category-other {
+    -fx-background-color: #A89F91;
+}

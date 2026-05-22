@@ -4,13 +4,14 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
+<?import com.dlsc.gemsfx.TimePicker?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <ScrollPane fitToWidth="true"
             style="-fx-background-color: transparent; -fx-background: transparent;"
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.tamtamcatworks.auction.client.controller.CreateAuctionController">
+            fx:controller="org.tamtamcatworks.auction.client.controller.auction.CreateAuctionController">
 
     <VBox alignment="TOP_CENTER" spacing="20.0">
         <padding>
@@ -83,6 +84,11 @@
                 </VBox>
             </HBox>
 
+            <VBox fx:id="detailsSectionBox" spacing="8.0" visible="false" managed="false">
+                <Label text="Item Specific Details" styleClass="form-label"/>
+                <GridPane fx:id="detailsGrid" hgap="12.0" vgap="12.0"/>
+            </VBox>
+
             <Separator/>
 
             <!-- Starting Price -->
@@ -94,28 +100,20 @@
                 </HBox>
             </VBox>
 
-            <!-- Start / End Time (side by side) -->
-            <HBox spacing="16.0">
-                <VBox spacing="6.0" HBox.hgrow="ALWAYS">
-                    <Label text="Start Date" styleClass="form-label"/>
-                    <DatePicker fx:id="startDatePicker" maxWidth="Infinity" styleClass="filter-combo"/>
-                </VBox>
-                <VBox spacing="6.0" HBox.hgrow="ALWAYS">
-                    <Label text="Start Time" styleClass="form-label"/>
-                    <TextField fx:id="startTimeField" promptText="HH:mm (24h)" styleClass="filter-combo"/>
-                </VBox>
-            </HBox>
+            <VBox spacing="6.0">
+                <Label text="Start Date &amp; Time (Optional)" styleClass="form-label"/>
+                <HBox spacing="10.0">
+                    <DatePicker fx:id="startDatePicker" promptText="Select date" HBox.hgrow="ALWAYS" styleClass="filter-combo"/>
+                    <TimePicker fx:id="startTimePicker" styleClass="filter-combo" prefWidth="170.0"/>
+                </HBox>
+                <Label text="If left blank, auction starts immediately." styleClass="text-muted"/>
+            </VBox>
 
-            <HBox spacing="16.0">
-                <VBox spacing="6.0" HBox.hgrow="ALWAYS">
-                    <Label text="End Date" styleClass="form-label"/>
-                    <DatePicker fx:id="endDatePicker" maxWidth="Infinity" styleClass="filter-combo"/>
-                </VBox>
-                <VBox spacing="6.0" HBox.hgrow="ALWAYS">
-                    <Label text="End Time" styleClass="form-label"/>
-                    <TextField fx:id="endTimeField" promptText="HH:mm (24h)" styleClass="filter-combo"/>
-                </VBox>
-            </HBox>
+            <VBox spacing="6.0">
+                <Label text="Auction Duration" styleClass="form-label"/>
+                <ComboBox fx:id="durationDaysCombo" maxWidth="Infinity" styleClass="filter-combo"/>
+                <Label text="End time is automatically set from the start time." styleClass="text-muted"/>
+            </VBox>
 
             <!-- Message -->
             <Label fx:id="messageLabel" wrapText="true" textAlignment="CENTER" maxWidth="Infinity"

@@ -1,4 +1,4 @@
-package org.tamtamcatworks.auction.client.controller;
+package org.tamtamcatworks.auction.client.controller.auction;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -8,6 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -45,6 +46,11 @@ public class AuctionDetailController {
   // Image components
   @FXML private ImageView itemImageView;
   @FXML private Label imagePlaceholderLabel;
+
+  // Specific category details
+  @FXML private Separator specificInfoSeparator;
+  @FXML private VBox specificInfoBox;
+  @FXML private Label specificInfoLabel;
 
   // Owner controls
   @FXML private HBox ownerControls;
@@ -141,6 +147,20 @@ public class AuctionDetailController {
     }
     if (auction.endTime() != null) {
       endTimeLabel.setText(auction.endTime().format(TIME_FMT));
+    }
+
+    // Specific category details
+    if (auction.specificInfo() != null && !auction.specificInfo().trim().isEmpty()) {
+      specificInfoLabel.setText(auction.specificInfo().trim());
+      specificInfoSeparator.setVisible(true);
+      specificInfoSeparator.setManaged(true);
+      specificInfoBox.setVisible(true);
+      specificInfoBox.setManaged(true);
+    } else {
+      specificInfoSeparator.setVisible(false);
+      specificInfoSeparator.setManaged(false);
+      specificInfoBox.setVisible(false);
+      specificInfoBox.setManaged(false);
     }
 
     // Status badge

@@ -1,4 +1,4 @@
-package org.tamtamcatworks.auction.client.controller;
+package org.tamtamcatworks.auction.client.controller.auth;
 
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
