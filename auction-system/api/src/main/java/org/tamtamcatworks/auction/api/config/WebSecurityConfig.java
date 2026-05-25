@@ -55,7 +55,10 @@ public class WebSecurityConfig {
                 "/auctions/*/cancel",
                 "/auctions/*/bids",
                 "/images/upload",
-                "/users/top-up"
+                "/users/top-up",
+                "/notifications",
+                "/notifications/*/read",
+                "/notifications/read-all"
             ))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .securityContext(context -> context.securityContextRepository(securityContextRepository()))
@@ -65,6 +68,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/users/register", "/users/login").permitAll()
                 .requestMatchers(HttpMethod.GET, "/items/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/auctions", "/auctions/*", "/auctions/*/bids").permitAll()
+                .requestMatchers("/notifications/**").authenticated()
                 .anyRequest().authenticated()
             );
         return http.build();
