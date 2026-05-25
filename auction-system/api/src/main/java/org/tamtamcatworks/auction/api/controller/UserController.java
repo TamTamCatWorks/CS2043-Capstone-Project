@@ -22,7 +22,9 @@ import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.service.member.UserService;
 import org.tamtamcatworks.auction.shared.request.LoginRequest;
 import org.tamtamcatworks.auction.shared.request.RegisterRequest;
+import org.tamtamcatworks.auction.shared.request.TopUpRequest;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/users")
@@ -77,5 +79,17 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUser(@PathVariable @NonNull String id) {
         return ResponseEntity.ok(userService.findResponseById(id));
+    }
+
+    @PostMapping("/top-up")
+    public ResponseEntity<UserResponse> topUp(
+        @RequestBody TopUpRequest req,
+        HttpSession session
+    ) {
+        String userId = (String) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(userService.topUp(userId, req.amount()));
     }
 }

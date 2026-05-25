@@ -94,6 +94,18 @@ public class User extends BaseEntity {
     }
 
     /**
+     * Nạp tiền vào tài khoản.
+     *
+     * @param amount số tiền muốn nạp
+     */
+    public void addBalance(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Top-up amount must be strictly positive");
+        }
+        this.balance += amount;
+    }
+
+    /**
      * Hoàn tiền vào tài khoản.
      *
      * <p>USE CASE:

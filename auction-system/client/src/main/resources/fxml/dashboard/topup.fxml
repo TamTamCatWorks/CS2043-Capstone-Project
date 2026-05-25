@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.tamtamcatworks.auction.client.controller.shell.TopUpViewController"
+      style="-fx-background-color: transparent;">
+    
+    <padding>
+        <Insets top="20.0" right="30.0" bottom="20.0" left="30.0"/>
+    </padding>
+
+    <Label text="Top Up Balance" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+    <Label text="Enter the amount you would like to add to your account."
+           style="-fx-text-fill: #7f8c8d; -fx-font-size: 14px;" wrapText="true"/>
+
+    <VBox spacing="8.0" maxWidth="300.0">
+        <Label text="Amount" style="-fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+        <TextField fx:id="amountField" promptText="0.00" styleClass="text-field" prefHeight="40.0"/>
+    </VBox>
+
+    <Button fx:id="submitButton" text="Add Funds" onAction="#handleSubmit"
+            styleClass="btn-primary" prefHeight="40.0" prefWidth="150.0">
+    </Button>
+
+    <Label fx:id="feedbackLabel" text="" visible="false"
+           style="-fx-font-size: 13px;" wrapText="true"/>
+</VBox>

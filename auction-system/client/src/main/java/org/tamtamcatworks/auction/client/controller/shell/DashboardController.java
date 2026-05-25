@@ -36,6 +36,7 @@ public class DashboardController {
 
     @FXML private Button menuHomeButton;
     @FXML private Button menuNotificationsButton;
+    @FXML private Button menuTopUpButton;
 
     // Dynamic right content area
     @FXML private StackPane rightContentArea;
@@ -62,6 +63,7 @@ public class DashboardController {
         // wire left menu buttons (FXML already references handlers but keep safe)
         menuHomeButton.setOnAction(e -> handleMenuHome());
         menuNotificationsButton.setOnAction(e -> handleMenuNotifications());
+        menuTopUpButton.setOnAction(e -> handleMenuTopUp());
         setOuterSelected(menuHomeButton);
 
         // load initial view (honor any pending request from SessionManager)
@@ -69,6 +71,8 @@ public class DashboardController {
         if (pending != null && !pending.isBlank()) {
             if (pending.endsWith("notifications.fxml")) {
                 setOuterSelected(menuNotificationsButton);
+            } else if (pending.endsWith("topup.fxml")) {
+                setOuterSelected(menuTopUpButton);
             } else {
                 setOuterSelected(menuHomeButton);
             }
@@ -105,9 +109,16 @@ public class DashboardController {
         loadView("/fxml/dashboard/notifications.fxml");
     }
 
+    @FXML
+    private void handleMenuTopUp() {
+        setOuterSelected(menuTopUpButton);
+        loadView("/fxml/dashboard/topup.fxml");
+    }
+
     private void setOuterSelected(Button selectedButton) {
         applySelected(menuHomeButton, menuHomeButton == selectedButton);
         applySelected(menuNotificationsButton, menuNotificationsButton == selectedButton);
+        applySelected(menuTopUpButton, menuTopUpButton == selectedButton);
     }
 
     private void applySelected(Button button, boolean selected) {

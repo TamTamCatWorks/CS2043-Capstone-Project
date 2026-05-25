@@ -85,6 +85,14 @@ public class UserService {
         return userMapper.toResponse(user);
     }
 
+    @Transactional
+    public UserResponse topUp(@NonNull String id, double amount) {
+        User user = findById(id);
+        user.addBalance(amount);
+        userRepository.save(user);
+        return userMapper.toResponse(user);
+    }
+
     private void validateRegistrationInputs(String username, String email) {
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email already in use.");

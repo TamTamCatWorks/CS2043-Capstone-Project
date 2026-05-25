@@ -93,6 +93,8 @@
                     maxWidth="1.7976931348623157E308" prefWidth="240.0" styleClass="profile-left-menu-item"/>
             <Button fx:id="menuNotificationsButton" text="Notifications" onAction="#handleMenuNotifications"
                     maxWidth="1.7976931348623157E308" prefWidth="240.0" styleClass="profile-left-menu-item"/>
+            <Button fx:id="menuTopUpButton" text="Top Up" onAction="#handleMenuTopUp"
+                    maxWidth="1.7976931348623157E308" prefWidth="240.0" styleClass="profile-left-menu-item"/>
         </VBox>
 
         <Region VBox.vgrow="ALWAYS" prefHeight="1.0"/>

@@ -13,6 +13,7 @@ import org.tamtamcatworks.auction.shared.request.CreateAuctionRequest;
 import org.tamtamcatworks.auction.shared.request.ItemRequest;
 import org.tamtamcatworks.auction.shared.request.LoginRequest;
 import org.tamtamcatworks.auction.shared.request.RegisterRequest;
+import org.tamtamcatworks.auction.shared.request.TopUpRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 import org.tamtamcatworks.auction.shared.response.BidResponse;
 import org.tamtamcatworks.auction.shared.response.ItemResponse;
@@ -65,6 +66,15 @@ public class ApiClient {
     public UserResponse register(RegisterRequest request) {
         return client.post()
             .uri("/users/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .retrieve()
+            .body(UserResponse.class);
+    }
+
+    public UserResponse topUp(TopUpRequest request) {
+        return client.post()
+            .uri("/users/top-up")
             .contentType(MediaType.APPLICATION_JSON)
             .body(request)
             .retrieve()

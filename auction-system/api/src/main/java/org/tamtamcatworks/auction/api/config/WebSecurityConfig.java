@@ -54,7 +54,8 @@ public class WebSecurityConfig {
                 "/auctions/*/close",
                 "/auctions/*/cancel",
                 "/auctions/*/bids",
-                "/images/upload"
+                "/images/upload",
+                "/users/top-up"
             ))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .securityContext(context -> context.securityContextRepository(securityContextRepository()))

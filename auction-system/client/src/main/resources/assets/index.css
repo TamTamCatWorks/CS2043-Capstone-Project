@@ -1106,12 +1106,9 @@
     -fx-background-color: transparent;
     -fx-text-fill: #6E6558;
     -fx-font-family: 'Montserrat';
-    -fx-font-size: 0pt;
+    -fx-font-size: 10pt;
     -fx-font-weight: 700;
-    -fx-padding: 7 10;
-    -fx-pref-width: 38;
-    -fx-pref-height: 34;
-    -fx-alignment: center;
+    -fx-padding: 7 12;
     -fx-background-radius: 10px;
     -fx-border-radius: 0;
     -fx-border-color: transparent;
