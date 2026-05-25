@@ -2,6 +2,7 @@ package org.tamtamcatworks.auction.client.controller.auction;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -32,8 +33,24 @@ public class AuctionsListController {
   @FXML private Label errorLabel;
   @FXML private FlowPane auctionsContainer;
 
+  private final List<AuctionResponse> loadedAuctions = new ArrayList<>();
+  private String searchQuery = "";
+  private String searchCategory = "All categories";
+
   @FXML
   public void initialize() {
+    String pendingQuery = SessionManager.getPendingSearchQuery();
+    String pendingCategory = SessionManager.getPendingSearchCategory();
+    if (pendingQuery != null) {
+      searchQuery = pendingQuery.trim();
+    }
+    if (pendingCategory != null && !pendingCategory.isBlank()) {
+      searchCategory = pendingCategory.trim();
+    }
+    if (pendingQuery != null || pendingCategory != null) {
+      SessionManager.clearPendingSearch();
+    }
+
     statusFilter.getItems().addAll("ALL", "ACTIVE", "PENDING", "CLOSED");
     statusFilter.setValue("ALL");
     statusFilter.setOnAction(e -> loadAuctions());
@@ -63,12 +80,18 @@ public class AuctionsListController {
 
     task.setOnSucceeded(e -> {
       setLoading(false);
+      loadedAuctions.clear();
       List<AuctionResponse> auctions = task.getValue();
-      if (auctions == null || auctions.isEmpty()) {
+      if (auctions != null) {
+        loadedAuctions.addAll(auctions);
+      }
+
+      List<AuctionResponse> filteredAuctions = applySearchFilter(loadedAuctions);
+      if (filteredAuctions.isEmpty()) {
         emptyPane.setVisible(true);
         emptyPane.setManaged(true);
       } else {
-        for (AuctionResponse auction : auctions) {
+        for (AuctionResponse auction : filteredAuctions) {
           auctionsContainer.getChildren().add(createAuctionCard(auction));
         }
       }
@@ -207,5 +230,39 @@ public class AuctionsListController {
   private void setLoading(boolean loading) {
     loadingPane.setVisible(loading);
     loadingPane.setManaged(loading);
+  }
+
+  private List<AuctionResponse> applySearchFilter(List<AuctionResponse> auctions) {
+    if ((searchQuery == null || searchQuery.isBlank())
+        && (searchCategory == null || searchCategory.isBlank()
+            || "All categories".equalsIgnoreCase(searchCategory))) {
+      return auctions;
+    }
+
+    String normalized = searchQuery == null ? "" : searchQuery.toLowerCase();
+    String categoryNormalized = searchCategory == null ? "" : searchCategory.toLowerCase();
+    return auctions.stream()
+        .filter(auction -> matchesQuery(auction, normalized, categoryNormalized))
+        .toList();
+  }
+
+  private boolean matchesQuery(AuctionResponse auction, String normalizedQuery, String categoryNormalized) {
+    boolean queryMatches = normalizedQuery.isBlank()
+        || containsIgnoreCase(auction.title(), normalizedQuery)
+        || containsIgnoreCase(auction.itemName(), normalizedQuery)
+        || containsIgnoreCase(auction.itemDescription(), normalizedQuery)
+        || containsIgnoreCase(auction.itemType(), normalizedQuery)
+        || containsIgnoreCase(auction.sellerName(), normalizedQuery)
+        || containsIgnoreCase(auction.specificInfo(), normalizedQuery);
+
+    boolean categoryMatches = categoryNormalized.isBlank()
+        || "all categories".equals(categoryNormalized)
+        || containsIgnoreCase(auction.itemType(), categoryNormalized);
+
+    return queryMatches && categoryMatches;
+  }
+
+  private boolean containsIgnoreCase(String value, String normalizedQuery) {
+    return value != null && value.toLowerCase().contains(normalizedQuery);
   }
 }

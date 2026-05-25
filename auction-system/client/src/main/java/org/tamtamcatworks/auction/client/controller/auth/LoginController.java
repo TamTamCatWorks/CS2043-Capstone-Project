@@ -57,7 +57,7 @@ public class LoginController {
             UserResponse user = loginTask.getValue();
             if (user != null) {
                 SessionManager.setCurrentUser(user);
-                Navigation.navigateTo("/fxml/dashboard.fxml");
+                Navigation.navigateTo("/fxml/auctions-list.fxml");
             } else {
                 showError("Invalid response from server.");
             }
