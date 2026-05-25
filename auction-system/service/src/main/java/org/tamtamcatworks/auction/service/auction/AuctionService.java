@@ -23,6 +23,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class AuctionService {
@@ -195,5 +198,29 @@ public class AuctionService {
 
         String itemType = auction.getItem() != null ? auction.getItem().getClass().getSimpleName() : "";
         return itemType.equalsIgnoreCase(category);
+    }
+
+    @Transactional(readOnly = true)
+    public org.tamtamcatworks.auction.shared.response.PageResponse<AuctionResponse> searchResponsesPage(String keyword,
+                                                    AuctionStatus status,
+                                                    String category,
+                                                    Pageable pageable) {
+        String normalizedKeyword = keyword != null ? keyword.trim() : "";
+        String normalizedCategory = category != null ? category.trim() : "";
+
+        Class<? extends Item> itemTypeClass = null;
+        if (normalizedCategory != null && !normalizedCategory.isBlank() && !"all categories".equalsIgnoreCase(normalizedCategory)) {
+            try {
+                String className = "org.tamtamcatworks.auction.model.item." + normalizedCategory;
+                @SuppressWarnings("unchecked")
+                Class<? extends Item> cls = (Class<? extends Item>) Class.forName(className);
+                itemTypeClass = cls;
+            } catch (ClassNotFoundException e) {
+                // if class isn't found, leave itemTypeClass null (no type filter)
+            }
+        }
+
+        Page<Auction> page = auctionRepository.searchPaged(normalizedKeyword, status, itemTypeClass, pageable);
+        return auctionMapper.toPageResponse(page);
     }
 }

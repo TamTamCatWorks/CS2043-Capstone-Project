@@ -3,6 +3,8 @@ package org.tamtamcatworks.auction.api.controller;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Pageable;
+import org.tamtamcatworks.auction.shared.response.PageResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,9 +64,18 @@ public class AuctionController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<AuctionResponse>> search(@RequestParam(required = false) String q,
+    public ResponseEntity<PageResponse<AuctionResponse>> search(@RequestParam(required = false) String q,
                                                         @RequestParam(required = false) AuctionStatus status,
-                                                        @RequestParam(required = false) String category) {
+                                                        @RequestParam(required = false) String category,
+                                                        Pageable pageable) {
+        PageResponse<AuctionResponse> page = auctionService.searchResponsesPage(q, status, category, pageable);
+        return ResponseEntity.ok(page);
+    }
+
+    @GetMapping("/search/list")
+    public ResponseEntity<List<AuctionResponse>> searchAsList(@RequestParam(required = false) String q,
+                                                              @RequestParam(required = false) AuctionStatus status,
+                                                              @RequestParam(required = false) String category) {
         return ResponseEntity.ok(auctionService.searchResponses(q, status, category));
     }
 

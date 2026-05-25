@@ -50,4 +50,22 @@
             </padding>
         </FlowPane>
     </ScrollPane>
+    
+    <!-- Pagination Controls -->
+    <HBox alignment="CENTER" spacing="12.0" prefHeight="56.0">
+        <Button fx:id="prevPageButton" text="Previous" mnemonicParsing="false" styleClass="btn-secondary"/>
+        <Label fx:id="pageInfoLabel" text="Page 1 of 1" />
+        <Button fx:id="nextPageButton" text="Next" mnemonicParsing="false" styleClass="btn-secondary"/>
+        <Region HBox.hgrow="ALWAYS" />
+        <Label text="Per page:" styleClass="form-label"/>
+        <ComboBox fx:id="pageSizeCombo" prefWidth="100.0" styleClass="filter-combo">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="10" />
+                    <String fx:value="20" />
+                    <String fx:value="50" />
+                </FXCollections>
+            </items>
+        </ComboBox>
+    </HBox>
 </VBox>

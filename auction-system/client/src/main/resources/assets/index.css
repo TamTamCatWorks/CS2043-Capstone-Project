@@ -232,6 +232,7 @@
     -fx-font-family: 'Montserrat';
     -fx-font-size: 10pt;
     -fx-prompt-text-fill: #9C9282;
+    -fx-opacity: 0.98;
 }
 
 .header-search-field:focused {
@@ -758,6 +759,7 @@
     -fx-border-color: rgba(143, 114, 70, 0.5);
     -fx-scale-x: 1.02;
     -fx-scale-y: 1.02;
+    -fx-transition: all 180ms ease-in;
 }
 
 .asset-card-image-wrapper {
@@ -775,7 +777,7 @@
 
 .asset-card-title {
     -fx-font-family: 'Montserrat';
-    -fx-font-size: 10pt;
+    -fx-font-size: 11pt;
     -fx-font-weight: 700;
     -fx-text-fill: #1A1A1A;
 }

@@ -7,6 +7,9 @@ import org.tamtamcatworks.auction.model.item.Item;
 import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.shared.request.CreateAuctionRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
+import org.tamtamcatworks.auction.shared.response.PageResponse;
+import java.util.List;
+import org.springframework.data.domain.Page;
 
 @Mapper(componentModel = "spring")
 public interface AuctionMapper {
@@ -33,4 +36,16 @@ public interface AuctionMapper {
     @Mapping(target = "leadingBidderId", source = "leadingBidder.id")
     @Mapping(target = "leadingBidderName", source = "leadingBidder.fullName")
     AuctionResponse toResponse(Auction auction);
+
+    default PageResponse<AuctionResponse> toPageResponse(Page<Auction> page) {
+        List<AuctionResponse> content = page.getContent().stream().map(this::toResponse).toList();
+        return new PageResponse<>(
+            content,
+            page.getNumber(),
+            page.getSize(),
+            page.getTotalElements(),
+            page.getTotalPages(),
+            page.isLast()
+        );
+    }
 }

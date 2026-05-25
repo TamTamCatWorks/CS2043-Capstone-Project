@@ -2,12 +2,14 @@ package org.tamtamcatworks.auction.client.controller.auction;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import org.tamtamcatworks.auction.shared.response.PageResponse;
 
 import java.time.LocalDateTime;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -32,14 +34,48 @@ public class SearchResultsController {
   @FXML private Label errorLabel;
   @FXML private FlowPane auctionsContainer;
   @FXML private Label subtitleLabel;
+  @FXML private Button prevPageButton;
+  @FXML private Button nextPageButton;
+  @FXML private Label pageInfoLabel;
+  @FXML private ComboBox<String> pageSizeCombo;
 
   private List<AuctionResponse> results;
+  private int currentPage = 0;
+  private int pageSize = 20;
+  private int totalPages = 1;
+  private long totalElements = 0;
 
   @FXML
   public void initialize() {
     statusFilter.getItems().addAll("ALL", "ACTIVE", "PENDING", "CLOSED");
     statusFilter.setValue("ALL");
     statusFilter.setOnAction(e -> runSearch());
+
+    pageSizeCombo.getItems().addAll("10", "20", "50");
+    pageSizeCombo.setValue("20");
+    pageSizeCombo.setOnAction(e -> {
+      try {
+        pageSize = Integer.parseInt(pageSizeCombo.getValue());
+      } catch (Exception ex) {
+        pageSize = 20;
+      }
+      currentPage = 0;
+      runSearch();
+    });
+
+    prevPageButton.setOnAction(e -> {
+      if (currentPage > 0) {
+        currentPage -= 1;
+        runSearch();
+      }
+    });
+
+    nextPageButton.setOnAction(e -> {
+      if (currentPage + 1 < totalPages) {
+        currentPage += 1;
+        runSearch();
+      }
+    });
 
     runSearch();
   }
@@ -57,16 +93,26 @@ public class SearchResultsController {
     final String cat = pendingCategory;
     final String status = statusFilter.getValue();
 
-    Task<List<AuctionResponse>> task = new Task<>() {
+    final int pageToLoad = currentPage;
+    final int sizeToLoad = pageSize;
+
+    Task<org.tamtamcatworks.auction.shared.response.PageResponse<AuctionResponse>> task = new Task<>() {
       @Override
-      protected List<AuctionResponse> call() throws Exception {
-        return SessionManager.getApiClient().searchAuctions(q, status, cat);
+      protected org.tamtamcatworks.auction.shared.response.PageResponse<AuctionResponse> call() throws Exception {
+        return SessionManager.getApiClient().searchAuctionsPaged(q, status, cat, pageToLoad, sizeToLoad);
       }
     };
 
     task.setOnSucceeded(e -> {
       setLoading(false);
-      results = task.getValue();
+      org.tamtamcatworks.auction.shared.response.PageResponse<AuctionResponse> page = task.getValue();
+      results = page != null ? page.content() : null;
+      totalPages = page != null ? page.totalPages() : 1;
+      totalElements = page != null ? page.totalElements() : 0;
+      // update page info
+      pageInfoLabel.setText(String.format("Page %d of %d — %d items", currentPage + 1, totalPages, totalElements));
+      prevPageButton.setDisable(currentPage <= 0);
+      nextPageButton.setDisable(currentPage + 1 >= totalPages);
       auctionsContainer.getChildren().clear();
       if (results == null || results.isEmpty()) {
         emptyPane.setVisible(true);

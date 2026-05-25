@@ -23,6 +23,7 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.http.HttpClient;
 import java.util.List;
+import org.tamtamcatworks.auction.shared.response.PageResponse;
 
 public class ApiClient {
 
@@ -144,7 +145,7 @@ public class ApiClient {
     public List<AuctionResponse> searchAuctions(String keyword, String status, String category) {
         return client.get()
             .uri(uriBuilder -> {
-                var builder = uriBuilder.path("/auctions/search");
+                var builder = uriBuilder.path("/auctions/search/list");
                 if (keyword != null && !keyword.isBlank()) {
                     builder = builder.queryParam("q", keyword.trim());
                 }
@@ -158,6 +159,27 @@ public class ApiClient {
             })
             .retrieve()
             .body(new ParameterizedTypeReference<>() {});
+    }
+
+    public PageResponse<AuctionResponse> searchAuctionsPaged(String keyword, String status, String category, int page, int size) {
+        return client.get()
+            .uri(uriBuilder -> {
+                var builder = uriBuilder.path("/auctions/search");
+                if (keyword != null && !keyword.isBlank()) {
+                    builder = builder.queryParam("q", keyword.trim());
+                }
+                if (status != null && !status.isBlank() && !"ALL".equalsIgnoreCase(status)) {
+                    builder = builder.queryParam("status", status.trim());
+                }
+                if (category != null && !category.isBlank() && !"All categories".equalsIgnoreCase(category)) {
+                    builder = builder.queryParam("category", category.trim());
+                }
+                builder = builder.queryParam("page", Integer.toString(page));
+                builder = builder.queryParam("size", Integer.toString(size));
+                return builder.build();
+            })
+            .retrieve()
+            .body(new org.springframework.core.ParameterizedTypeReference<PageResponse<AuctionResponse>>() {});
     }
 
     public AuctionResponse openAuction(String id) {
