@@ -92,6 +92,7 @@ public class Navigation {
       return "/fxml/layouts/auth-layout.fxml";
     } else if (fxmlPath.contains("dashboard.fxml")
         || fxmlPath.contains("auctions-list.fxml")
+        || fxmlPath.contains("search-results.fxml")
         || fxmlPath.contains("auction-detail.fxml")
         || fxmlPath.contains("create-auction.fxml")) {
       return "/fxml/layouts/dashboard-layout.fxml";

@@ -144,6 +144,19 @@ public class AuctionService {
             .orElseThrow(() -> new NoSuchElementException("Auction not found."));
     }
 
+    @Transactional(readOnly = true)
+    public List<AuctionResponse> searchResponses(String keyword,
+                                                 AuctionStatus status,
+                                                 String category) {
+        String normalizedKeyword = keyword != null ? keyword.trim() : "";
+        String normalizedCategory = category != null ? category.trim() : "";
+
+        return auctionRepository.search(normalizedKeyword, status).stream()
+            .filter(auction -> matchesCategory(auction, normalizedCategory))
+            .map(auctionMapper::toResponse)
+            .toList();
+    }
+
     @Transactional
     public AuctionResponse createByRequest(String sellerId, CreateAuctionRequest request) {
         Auction createdAuction = createWithItem(sellerId, request);
@@ -173,5 +186,14 @@ public class AuctionService {
     @Transactional
     public AuctionResponse cancelById(@NonNull String auctionId, @NonNull String reason) {
         return auctionMapper.toResponse(cancel(auctionId, reason));
+    }
+
+    private boolean matchesCategory(Auction auction, String category) {
+        if (category == null || category.isBlank() || "all categories".equalsIgnoreCase(category)) {
+            return true;
+        }
+
+        String itemType = auction.getItem() != null ? auction.getItem().getClass().getSimpleName() : "";
+        return itemType.equalsIgnoreCase(category);
     }
 }

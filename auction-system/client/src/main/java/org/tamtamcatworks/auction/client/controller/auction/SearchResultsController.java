@@ -1,9 +1,9 @@
 package org.tamtamcatworks.auction.client.controller.auction;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
+
+import java.time.LocalDateTime;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -17,87 +17,63 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+
 import org.tamtamcatworks.auction.client.Navigation;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 
-/** Controller for the auction browse/list view. */
-public class AuctionsListController {
+public class SearchResultsController {
 
-  private static final DateTimeFormatter TIME_FMT =
-      DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
+  private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
 
   @FXML private ComboBox<String> statusFilter;
   @FXML private StackPane loadingPane;
   @FXML private StackPane emptyPane;
   @FXML private Label errorLabel;
   @FXML private FlowPane auctionsContainer;
+  @FXML private Label subtitleLabel;
 
-  private final List<AuctionResponse> loadedAuctions = new ArrayList<>();
-  private String searchQuery = "";
-  private String searchCategory = "All categories";
+  private List<AuctionResponse> results;
 
   @FXML
   public void initialize() {
-    String pendingQuery = SessionManager.getPendingSearchQuery();
-    String pendingCategory = SessionManager.getPendingSearchCategory();
-    if (pendingQuery != null) {
-      searchQuery = pendingQuery.trim();
-    }
-    if (pendingCategory != null && !pendingCategory.isBlank()) {
-      searchCategory = pendingCategory.trim();
-    }
-    if (pendingQuery != null || pendingCategory != null) {
-      SessionManager.clearPendingSearch();
-    }
-
     statusFilter.getItems().addAll("ALL", "ACTIVE", "PENDING", "CLOSED");
     statusFilter.setValue("ALL");
-    statusFilter.setOnAction(e -> loadAuctions());
-    loadAuctions();
+    statusFilter.setOnAction(e -> runSearch());
+
+    runSearch();
   }
 
-  private void loadAuctions() {
+  private void runSearch() {
     setLoading(true);
-    errorLabel.setVisible(false);
-    errorLabel.setManaged(false);
-    emptyPane.setVisible(false);
-    emptyPane.setManaged(false);
-    auctionsContainer.getChildren().clear();
+    String pendingQuery = SessionManager.getPendingSearchQuery();
+    String pendingCategory = SessionManager.getPendingSearchCategory();
+    if (pendingQuery == null) pendingQuery = "";
+    if (pendingCategory == null) pendingCategory = "";
 
-    String selected = statusFilter.getValue();
-    boolean hasSearch = (searchQuery != null && !searchQuery.isBlank())
-        || (searchCategory != null && !searchCategory.isBlank()
-            && !"All categories".equalsIgnoreCase(searchCategory));
+    subtitleLabel.setText("Results for \"" + pendingQuery + "\"");
+
+    final String q = pendingQuery;
+    final String cat = pendingCategory;
+    final String status = statusFilter.getValue();
 
     Task<List<AuctionResponse>> task = new Task<>() {
       @Override
       protected List<AuctionResponse> call() throws Exception {
-        if (hasSearch) {
-          return SessionManager.getApiClient().searchAuctions(searchQuery, selected, searchCategory);
-        }
-        if ("ALL".equals(selected)) {
-          return SessionManager.getApiClient().getAllAuctions();
-        } else {
-          return SessionManager.getApiClient().getAuctionsByStatus(selected);
-        }
+        return SessionManager.getApiClient().searchAuctions(q, status, cat);
       }
     };
 
     task.setOnSucceeded(e -> {
       setLoading(false);
-      loadedAuctions.clear();
-      List<AuctionResponse> auctions = task.getValue();
-      if (auctions != null) {
-        loadedAuctions.addAll(auctions);
-      }
-
-      if (loadedAuctions.isEmpty()) {
+      results = task.getValue();
+      auctionsContainer.getChildren().clear();
+      if (results == null || results.isEmpty()) {
         emptyPane.setVisible(true);
         emptyPane.setManaged(true);
       } else {
-        for (AuctionResponse auction : loadedAuctions) {
-          auctionsContainer.getChildren().add(createAuctionCard(auction));
+        for (AuctionResponse a : results) {
+          auctionsContainer.getChildren().add(createAuctionCard(a));
         }
       }
     });
@@ -105,14 +81,17 @@ public class AuctionsListController {
     task.setOnFailed(e -> {
       setLoading(false);
       Throwable ex = task.getException();
-      String msg = ex != null && ex.getMessage() != null
-          ? ex.getMessage() : "Unknown error";
-      errorLabel.setText("Failed to load auctions: " + msg);
+      errorLabel.setText("Search failed: " + (ex != null ? ex.getMessage() : "Unknown"));
       errorLabel.setVisible(true);
       errorLabel.setManaged(true);
     });
 
     new Thread(task).start();
+  }
+
+  private void setLoading(boolean l) {
+    loadingPane.setVisible(l);
+    loadingPane.setManaged(l);
   }
 
   private VBox createAuctionCard(AuctionResponse auction) {
@@ -140,7 +119,7 @@ public class AuctionsListController {
 
     if (auction.imageUrl() != null && !auction.imageUrl().isEmpty()) {
       try {
-        Image img = new Image(auction.imageUrl(), true); // backgroundLoading = true
+        Image img = new Image(auction.imageUrl(), true);
         imgView.setImage(img);
         placeholderLabel.setVisible(false);
       } catch (Exception e) {
@@ -158,23 +137,19 @@ public class AuctionsListController {
     VBox details = new VBox(6);
     details.getStyleClass().add("asset-card-details");
 
-    // Category / Item Type Badge
     String itemType = auction.itemType() != null ? auction.itemType() : "Unknown";
     Label categoryBadge = new Label(itemType.toUpperCase());
     categoryBadge.getStyleClass().addAll("category-badge", "category-" + itemType.toLowerCase());
 
-    // Title
     Label titleLabel = new Label(auction.title());
     titleLabel.getStyleClass().add("asset-card-title");
     titleLabel.setWrapText(true);
     titleLabel.setMaxHeight(40);
     titleLabel.setMinHeight(40);
 
-    // Seller Info
     Label sellerLabel = new Label("by " + (auction.sellerName() != null ? auction.sellerName() : "Unknown"));
     sellerLabel.getStyleClass().add("asset-card-seller");
 
-    // Price + Status Row
     HBox priceStatusRow = new HBox(8);
     priceStatusRow.setAlignment(Pos.CENTER_LEFT);
 
@@ -186,10 +161,9 @@ public class AuctionsListController {
 
     Label statusBadge = new Label(auction.status());
     statusBadge.getStyleClass().addAll("status-badge", getStatusClass(auction.status()));
-    
+
     priceStatusRow.getChildren().addAll(priceLabel, spacer, statusBadge);
 
-    // Date/Time Row
     String timeText = formatTimeInfo(auction);
     Label timeLabel = new Label(timeText);
     timeLabel.getStyleClass().add("auction-time");
@@ -198,7 +172,6 @@ public class AuctionsListController {
 
     card.getChildren().addAll(imgWrapper, details);
 
-    // Click handler for details view navigation
     card.setOnMouseClicked(e -> {
       Navigation.setContextData(auction.id());
       Navigation.navigateTo("/fxml/auction-detail.fxml");
@@ -231,10 +204,4 @@ public class AuctionsListController {
     }
     return "";
   }
-
-  private void setLoading(boolean loading) {
-    loadingPane.setVisible(loading);
-    loadingPane.setManaged(loading);
-  }
-
 }

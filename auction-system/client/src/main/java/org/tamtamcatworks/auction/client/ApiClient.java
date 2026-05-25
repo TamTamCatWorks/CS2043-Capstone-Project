@@ -141,6 +141,25 @@ public class ApiClient {
             .body(new ParameterizedTypeReference<>() {});
     }
 
+    public List<AuctionResponse> searchAuctions(String keyword, String status, String category) {
+        return client.get()
+            .uri(uriBuilder -> {
+                var builder = uriBuilder.path("/auctions/search");
+                if (keyword != null && !keyword.isBlank()) {
+                    builder = builder.queryParam("q", keyword.trim());
+                }
+                if (status != null && !status.isBlank() && !"ALL".equalsIgnoreCase(status)) {
+                    builder = builder.queryParam("status", status.trim());
+                }
+                if (category != null && !category.isBlank() && !"All categories".equalsIgnoreCase(category)) {
+                    builder = builder.queryParam("category", category.trim());
+                }
+                return builder.build();
+            })
+            .retrieve()
+            .body(new ParameterizedTypeReference<>() {});
+    }
+
     public AuctionResponse openAuction(String id) {
         return client.patch()
             .uri("/auctions/{id}/open", id)

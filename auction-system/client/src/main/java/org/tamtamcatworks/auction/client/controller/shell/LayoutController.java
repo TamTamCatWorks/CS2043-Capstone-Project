@@ -97,7 +97,7 @@ public class LayoutController {
         String category = headerCategoryFilter != null ? headerCategoryFilter.getValue() : "All categories";
         SessionManager.addRecentSearch(query.isEmpty() ? category : query);
         SessionManager.setPendingSearch(query, category);
-        Navigation.navigateTo("/fxml/auctions-list.fxml");
+        Navigation.navigateTo("/fxml/search-results.fxml");
     }
 
     private void updateHeaderSearchActive() {

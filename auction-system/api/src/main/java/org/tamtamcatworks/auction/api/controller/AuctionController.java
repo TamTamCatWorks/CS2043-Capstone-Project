@@ -61,6 +61,13 @@ public class AuctionController {
         return ResponseEntity.ok(auctionService.findResponsesByStatus(status));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<AuctionResponse>> search(@RequestParam(required = false) String q,
+                                                        @RequestParam(required = false) AuctionStatus status,
+                                                        @RequestParam(required = false) String category) {
+        return ResponseEntity.ok(auctionService.searchResponses(q, status, category));
+    }
+
     @PatchMapping("/{id}/open")
     public ResponseEntity<AuctionResponse> open(@PathVariable String id) {
         return ResponseEntity.ok(auctionService.openById(id));

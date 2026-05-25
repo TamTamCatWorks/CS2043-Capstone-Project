@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox spacing="20.0"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="org.tamtamcatworks.auction.client.controller.auction.SearchResultsController">
+
+    <!-- Header Row: Title + Filter -->
+    <HBox alignment="CENTER_LEFT" spacing="16.0">
+        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+            <Label text="Search Results" styleClass="section-title"/>
+            <Label fx:id="subtitleLabel" text="" styleClass="section-subtitle"/>
+        </VBox>
+        <HBox alignment="CENTER_RIGHT" spacing="8.0">
+            <Label text="Filter:" styleClass="form-label"/>
+            <ComboBox fx:id="statusFilter" styleClass="filter-combo" prefWidth="130.0"/>
+        </HBox>
+    </HBox>
+
+    <!-- Loading Indicator -->
+    <StackPane fx:id="loadingPane" visible="false" managed="false" prefHeight="200.0">
+        <VBox alignment="CENTER" spacing="12.0">
+            <ProgressIndicator maxWidth="36" maxHeight="36" styleClass="progress-spinner"/>
+            <Label text="Searching auctions..." styleClass="text-muted"/>
+        </VBox>
+    </StackPane>
+
+    <!-- Empty State -->
+    <StackPane fx:id="emptyPane" visible="false" managed="false" prefHeight="200.0">
+        <VBox alignment="CENTER" spacing="8.0">
+            <FontIcon iconLiteral="mdi2m-magnify-close" iconSize="48" styleClass="detail-icon"/>
+            <Label text="No results found" styleClass="empty-state"/>
+        </VBox>
+    </StackPane>
+
+    <!-- Error State -->
+    <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false" styleClass="error-label"/>
+
+    <!-- Auction Cards List -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-background: transparent;">
+        <FlowPane fx:id="auctionsContainer" hgap="20.0" vgap="20.0" alignment="TOP_LEFT">
+            <padding>
+                <Insets top="4.0" right="4.0" bottom="20.0" left="4.0"/>
+            </padding>
+        </FlowPane>
+    </ScrollPane>
+</VBox>
