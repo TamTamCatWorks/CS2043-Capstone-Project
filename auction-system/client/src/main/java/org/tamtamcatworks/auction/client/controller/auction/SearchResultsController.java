@@ -29,6 +29,7 @@ public class SearchResultsController {
   private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
 
   @FXML private ComboBox<String> statusFilter;
+  @FXML private ComboBox<String> categoryFilter;
   @FXML private StackPane loadingPane;
   @FXML private StackPane emptyPane;
   @FXML private Label errorLabel;
@@ -49,7 +50,20 @@ public class SearchResultsController {
   public void initialize() {
     statusFilter.getItems().addAll("ALL", "ACTIVE", "PENDING", "CLOSED");
     statusFilter.setValue("ALL");
-    statusFilter.setOnAction(e -> runSearch());
+    statusFilter.setOnAction(e -> {
+      currentPage = 0;
+      runSearch();
+    });
+
+    categoryFilter.getItems().addAll("All categories", "Art", "Electronics", "Vehicle", "Other");
+    String pendingCategory = SessionManager.getPendingSearchCategory();
+    categoryFilter.setValue(pendingCategory != null && !pendingCategory.isBlank()
+        ? pendingCategory
+        : "All categories");
+    categoryFilter.setOnAction(e -> {
+      currentPage = 0;
+      runSearch();
+    });
 
     pageSizeCombo.getItems().addAll("10", "20", "50");
     pageSizeCombo.setValue("20");
@@ -82,8 +96,12 @@ public class SearchResultsController {
 
   private void runSearch() {
     setLoading(true);
+    errorLabel.setVisible(false);
+    errorLabel.setManaged(false);
+    emptyPane.setVisible(false);
+    emptyPane.setManaged(false);
     String pendingQuery = SessionManager.getPendingSearchQuery();
-    String pendingCategory = SessionManager.getPendingSearchCategory();
+    String pendingCategory = categoryFilter != null ? categoryFilter.getValue() : SessionManager.getPendingSearchCategory();
     if (pendingQuery == null) pendingQuery = "";
     if (pendingCategory == null) pendingCategory = "";
 
@@ -109,7 +127,6 @@ public class SearchResultsController {
       results = page != null ? page.content() : null;
       totalPages = page != null ? page.totalPages() : 1;
       totalElements = page != null ? page.totalElements() : 0;
-      // update page info
       pageInfoLabel.setText(String.format("Page %d of %d — %d items", currentPage + 1, totalPages, totalElements));
       prevPageButton.setDisable(currentPage <= 0);
       nextPageButton.setDisable(currentPage + 1 >= totalPages);
@@ -118,6 +135,8 @@ public class SearchResultsController {
         emptyPane.setVisible(true);
         emptyPane.setManaged(true);
       } else {
+        emptyPane.setVisible(false);
+        emptyPane.setManaged(false);
         for (AuctionResponse a : results) {
           auctionsContainer.getChildren().add(createAuctionCard(a));
         }

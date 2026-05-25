@@ -1106,9 +1106,11 @@
     -fx-background-color: transparent;
     -fx-text-fill: #6E6558;
     -fx-font-family: 'Montserrat';
-    -fx-font-size: 10pt;
+    -fx-font-size: 0pt;
     -fx-font-weight: 700;
-    -fx-padding: 8 14;
+    -fx-padding: 7 10;
+    -fx-pref-width: 38;
+    -fx-pref-height: 34;
     -fx-alignment: center;
     -fx-background-radius: 10px;
     -fx-border-radius: 0;
@@ -1127,5 +1129,14 @@
     -fx-text-fill: #3F392F;
     -fx-border-color: transparent transparent #8F7246 transparent;
     -fx-border-width: 0 0 3px 0;
+}
+
+.profile-tab-chip .ikonli-font-icon {
+    -fx-icon-color: #6E6558;
+}
+
+.profile-tab-chip:hover .ikonli-font-icon,
+.profile-tab-chip-selected .ikonli-font-icon {
+    -fx-icon-color: #1A1A1A;
 }
 

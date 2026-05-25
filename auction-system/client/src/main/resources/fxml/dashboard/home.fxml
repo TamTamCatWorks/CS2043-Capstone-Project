@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <VBox spacing="0.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.tamtamcatworks.auction.client.controller.shell.HomeViewController">
@@ -11,10 +12,18 @@
         <Insets top="12.0" right="16.0" bottom="12.0" left="16.0"/>
     </padding>
 
-    <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="profile-subnav-strip profile-subnav-strip-overflow"
+    <HBox spacing="10.0" alignment="CENTER" styleClass="profile-subnav-strip profile-subnav-strip-overflow"
           translateY="-18.0">
-      <Button fx:id="homeAuctionsButton" text="Auctions" onAction="#handleShowAuctions" styleClass="profile-tab-chip"/>
-      <Button fx:id="homeBidsButton" text="Bids" onAction="#handleShowBids" styleClass="profile-tab-chip"/>
+      <Button fx:id="homeAuctionsButton" text="" onAction="#handleShowAuctions" styleClass="profile-tab-chip" accessibleText="Auctions">
+        <graphic>
+          <FontIcon iconLiteral="mdi2h-hammer" iconSize="16"/>
+        </graphic>
+      </Button>
+      <Button fx:id="homeBidsButton" text="" onAction="#handleShowBids" styleClass="profile-tab-chip" accessibleText="Bids">
+        <graphic>
+          <FontIcon iconLiteral="mdi2f-finance" iconSize="16"/>
+        </graphic>
+      </Button>
     </HBox>
 
     <StackPane fx:id="nestedContentArea" VBox.vgrow="ALWAYS" styleClass="profile-nested-content"/>

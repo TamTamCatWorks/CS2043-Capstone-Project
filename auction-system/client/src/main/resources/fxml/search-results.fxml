@@ -19,6 +19,8 @@
         <HBox alignment="CENTER_RIGHT" spacing="8.0">
             <Label text="Filter:" styleClass="form-label"/>
             <ComboBox fx:id="statusFilter" styleClass="filter-combo" prefWidth="130.0"/>
+            <Label text="Category:" styleClass="form-label"/>
+            <ComboBox fx:id="categoryFilter" styleClass="filter-combo" prefWidth="150.0"/>
         </HBox>
     </HBox>
 
