@@ -149,6 +149,13 @@ public class User extends BaseEntity {
         return email;
     }
 
+    public AdminProfile getAdminProfile() {
+        return adminProfile;
+    }
+
+    public void setAdminProfile(AdminProfile adminProfile) {
+        this.adminProfile = adminProfile;
+    }
 
     public void setBuyerProfile(BuyerProfile buyerProfile)   { this.buyerProfile = buyerProfile; }
     public void setSellerProfile(SellerProfile sellerProfile) { this.sellerProfile = sellerProfile; }

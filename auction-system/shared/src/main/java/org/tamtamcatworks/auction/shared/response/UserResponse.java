@@ -5,6 +5,8 @@ public record UserResponse(
     String username,
     String email,
     String fullName,
-    double balance
+    double balance,
+    boolean isAdmin,
+    java.util.List<String> permissions
 ) {
 }

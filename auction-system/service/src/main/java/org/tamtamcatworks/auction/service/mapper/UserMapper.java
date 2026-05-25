@@ -23,5 +23,20 @@ public interface UserMapper {
         return user;
     }
 
-    UserResponse toResponse(User user);
+    default UserResponse toResponse(User user) {
+        if (user == null) {
+            return null;
+        }
+        boolean isAdmin = user.getAdminProfile() != null;
+        java.util.List<String> permissions = isAdmin ? user.getAdminProfile().getPermissions() : java.util.List.of();
+        return new UserResponse(
+            user.getId(),
+            user.getUsername(),
+            user.getEmail(),
+            user.getFullName(),
+            user.getBalance(),
+            isAdmin,
+            permissions
+        );
+    }
 }

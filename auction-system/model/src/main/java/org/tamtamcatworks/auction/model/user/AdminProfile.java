@@ -84,8 +84,7 @@ public class AdminProfile extends BaseEntity {
 
     @Override
     public String toString() {
-        return ""
-                + "', permissions=" + permissions + "}";
+        return "AdminProfile{id='" + getId() + "', permissions=" + permissions + "}";
     }
 
     public List<String> getPermissions() {
