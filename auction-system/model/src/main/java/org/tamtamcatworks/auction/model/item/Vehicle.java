@@ -1,76 +1,155 @@
 package org.tamtamcatworks.auction.model.item;
 
-/**
- * Phương tiện: ô tô, xe máy, thuyền, máy bay cá nhân...
- */
+import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.Table;
+
+import org.tamtamcatworks.auction.model.user.User;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+
+@Entity
+@Table(name = "vehicle_items")
+@DiscriminatorValue("VEHICLE")
+@PrimaryKeyJoinColumn(name = "item_id")
 public class Vehicle extends Item {
 
-    /*
-     * Each vehicle will have:
-     * make (String)
-     * model (String)
-     * year (int)
-     * mileageKm (int)
-     * color (String)
-     * fuelType (String)
-     */
-
+    @Column(nullable = false)
     private String make;
+
+    @Column(nullable = false)
     private String model;
+
+    @Column(nullable = false)
     private int year;
+
+    @Column(nullable = false)
     private int mileageKm;
+
+    @Column(nullable = false)
     private String color;
+
+    @Column(nullable = false)
     private String fuelType;
 
-    /**
-     * Tạo phương tiện mới.
-     *
-     * name: tên hiển thị (vd: "Toyota Camry 2022")
-     * description: mô tả
-     * startingPrice: giá khởi điểm
-     * condition: tình trạng
-     * sellerId: id người bán
-     * make: hãng xe
-     * model: dòng xe
-     * year: năm sản xuất
-     * mileageKm: số km đã đi
-     * color: màu xe
-     * fuelType: loại nhiên liệu
-     */
     public Vehicle(
-            String name,
-            String description,
-            double startingPrice,
-            ItemCondition condition,
-            String sellerId,
-            String make,
-            String model,
-            int year,
-            int mileageKm,
-            String color,
-            String fuelType) {
-        super(name, description, startingPrice, ItemType.VEHICLE, condition, sellerId);
-        if (mileageKm < 0) {
-            throw new IllegalArgumentException("Số km đã đi không được âm.");
-        }
-        this.make = make;
-        this.model = model;
-        this.year = year;
-        this.mileageKm = mileageKm;
-        this.color = color;
-        this.fuelType = fuelType;
-    }
+        String name,
+        String description,
+        double startingPrice,
+        ItemCondition condition,
+        String imageUrl,
+        User seller,
+        String make,
+        String model,
+        int year,
+        int mileageKm,
+        String color,
+        String fuelType
+) {
 
-    /**
-     * Trả về thông tin chuyên biệt của Vehicle.
-     * - Format:
-     *   "make model year | km | color | fuelType"
-     */
+    super(
+        name,
+        description,
+        startingPrice,
+        condition,
+        imageUrl,
+        seller
+    );
+
+    setMake(make);
+    setModel(model);
+    setYear(year);
+    setMileageKm(mileageKm);
+    setColor(color);
+    setFuelType(fuelType);
+}
+
+    protected Vehicle() {}
+
     @Override
     public String getSpecificInfo() {
         return make + " " + model + " " + year
                 + " | " + mileageKm + " km"
                 + " | Màu: " + color
                 + " | Nhiên liệu: " + fuelType;
+    }
+
+    public String getMake() {
+    return make;
+}
+
+public void setMake(String make) {
+
+    if (make == null || make.isBlank()) {
+        throw new IllegalArgumentException("Make is required.");
+    }
+
+        this.make = make.trim();
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+
+        if (model == null || model.isBlank()) {
+            throw new IllegalArgumentException("Model is required.");
+    }
+
+        this.model = model.trim();
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+
+        if (year <= 0) {
+            throw new IllegalArgumentException("Invalid year.");
+        }
+
+        this.year = year;
+    }
+
+    public int getMileageKm() {
+        return mileageKm;
+    }
+
+    public void setMileageKm(int mileageKm) {
+
+        if (mileageKm < 0) {
+            throw new IllegalArgumentException("Mileage cannot be negative.");
+        }
+
+        this.mileageKm = mileageKm;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+
+        if (color == null || color.isBlank()) {
+            throw new IllegalArgumentException("Color is required.");
+        }
+
+        this.color = color.trim();
+    }
+
+    public String getFuelType() {
+        return fuelType;
+    }
+
+    public void setFuelType(String fuelType) {
+
+        if (fuelType == null || fuelType.isBlank()) {
+            throw new IllegalArgumentException("Fuel type is required.");
+        }
+
+        this.fuelType = fuelType.trim();
     }
 }

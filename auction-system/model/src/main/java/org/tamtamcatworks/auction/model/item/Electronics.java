@@ -1,56 +1,99 @@
 package org.tamtamcatworks.auction.model.item;
 
-/**
- * Concrete class for electronic items
- */
+import org.tamtamcatworks.auction.model.user.User;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "electronics_items")
+@DiscriminatorValue("ELECTRONICS")
+@PrimaryKeyJoinColumn(name = "item_id")
 public class Electronics extends Item {
 
-    /*
-     * Each electronic item will have
-     * brand (String)
-     * model (String)
-     * warrantyMonths (int)
-     */
-
+    @Column(nullable = false)
     private String brand;
+
+    @Column(nullable = false)
     private String model;
+
+    @Column(nullable = false)
     private int warrantyMonths;
 
-    /**
-     * Tạo sản phẩm điện tử mới.
-     *
-     * name: tên sản phẩm
-     * description: mô tả
-     * startingPrice: giá khởi điểm
-     * condition: tình trạng
-     * sellerId: id người bán
-     * brand: hãng sản xuất
-     * model: tên model
-     * warrantyMonths: số tháng bảo hành
-     */
     public Electronics(
-            String name,
-            String description,
-            double startingPrice,
-            ItemCondition condition,
-            String sellerId,
-            String brand,
-            String model,
-            int warrantyMonths) {
-        super(name, description, startingPrice, ItemType.ELECTRONICS, condition, sellerId);
-        this.brand = brand;
-        this.model = model;
-        this.warrantyMonths = warrantyMonths;
-    }
+        String name,
+        String description,
+        double startingPrice,
+        ItemCondition condition,
+        String imageUrl,
+        User seller,
+        String brand,
+        String model,
+        int warrantyMonths
+) {
 
-    /**
-     * Trả về thông tin chuyên biệt của Electronics.
-     * - Format: "brand | model | warranty"
-     */
+    super(
+        name,
+        description,
+        startingPrice,
+        condition,
+        imageUrl,
+        seller
+    );
+
+    setBrand(brand);
+    setModel(model);
+    setWarrantyMonths(warrantyMonths);
+}
+
+    protected Electronics() {}
+
     @Override
     public String getSpecificInfo() {
         return "Hãng: " + brand
                 + " | Model: " + model
                 + " | Bảo hành: " + warrantyMonths + " tháng";
+    }
+
+    public String getBrand() {
+    return brand;
+}
+
+    public void setBrand(String brand) {
+
+    if (brand == null || brand.isBlank()) {
+        throw new IllegalArgumentException("Brand is required.");
+    }
+
+        this.brand = brand.trim();
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+
+        if (model == null || model.isBlank()) {
+            throw new IllegalArgumentException("Model is required.");
+        }
+
+        this.model = model.trim();
+    }
+
+    public int getWarrantyMonths() {
+        return warrantyMonths;
+    }
+
+    public void setWarrantyMonths(int warrantyMonths) {
+
+        if (warrantyMonths < 0) {
+            throw new IllegalArgumentException("Warranty months cannot be negative.");
+    }
+
+        this.warrantyMonths = warrantyMonths;
     }
 }

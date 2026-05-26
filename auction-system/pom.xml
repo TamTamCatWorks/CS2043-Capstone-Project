@@ -1,24 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <!-- spring frame work import -->
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.2.5</version>
+  </parent>
   <groupId>org.tamtamcatworks.auction</groupId>
   <artifactId>auction-system</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>auction-system</name>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.release>21</maven.compiler.release>
+    <java.version>21</java.version>
+    <jacoco.version>0.8.12</jacoco.version>
+    <checkstyle.version>3.6.0</checkstyle.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
   </properties>
+
+  <scm>
+    <connection>scm:git:https://github.com/TamTamCatWorks/CS2043-Capstone-Project.git</connection>
+    <developerConnection>scm:git:git@github.com:TamTamCatWorks/CS2043-Capstone-Project.git</developerConnection>
+    <url>https://github.com/TamTamCatWorks/CS2043-Capstone-Project</url>
+    <tag>HEAD</tag>
+  </scm>
+
   <dependencyManagement>
+    <!-- auto tracking for child modules -->
     <dependencies>
       <dependency>
-        <groupId>org.junit</groupId>
-        <artifactId>junit-bom</artifactId>
-        <version>5.11.0</version>
-        <type>pom</type>
-        <scope>import</scope>
+        <groupId>org.tamtamcatworks.auction</groupId>
+        <artifactId>persist</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.tamtamcatworks.auction</groupId>
+        <artifactId>model</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.tamtamcatworks.auction</groupId>
+        <artifactId>service</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.tamtamcatworks.auction</groupId>
+        <artifactId>api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.tamtamcatworks.auction</groupId>
+        <artifactId>shared</artifactId>
+        <version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -32,6 +68,12 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- spring's test -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -51,7 +93,17 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.13.0</version>
+          <configuration>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
+            <annotationProcessorPaths>
+              <path>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+              </path>
+            </annotationProcessorPaths>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -94,9 +146,78 @@
         </plugin>
       </plugins>
     </pluginManagement>
+
+    <plugins>
+    <!-- mapstruct -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+    <!-- release plugin -->
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-release-plugin</artifactId>
+      <version>3.0.1</version>
+      <configuration>
+        <tagNameFormat>v@{project.version}</tagNameFormat>
+        <scmCommentPrefix>[release]</scmCommentPrefix>
+        <prepareGoals>clean verify</prepareGoals>
+        <autoVersionSubmodules>true</autoVersionSubmodules> 
+      </configuration>
+      </plugin>
+
+      <!-- maven checkstyle -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${checkstyle.version}</version>
+        <configuration>
+          <configLocation>google_checks.xml</configLocation>
+          <encoding>${project.build.sourceEncoding}</encoding>
+          <consoleOutput>true</consoleOutput>
+          <failsOnError>false</failsOnError>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>checkstyle-validate</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- jacoco -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
+        <executions>
+          <execution>
+            <id>jacoco-prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>jacoco-report</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
   </build>
   <modules>
-    <module>auction</module>
+    <module>shared</module>
     <module>model</module>
+    <module>persist</module>
+    <module>service</module>
+    <module>api</module>
   </modules>
 </project>
