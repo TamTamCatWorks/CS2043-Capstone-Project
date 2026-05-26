@@ -66,7 +66,7 @@ public class LayoutController {
 
         updateHeaderSearchActive();
 
-        // Populate the combined account menu and start polling notifications.
+        // Populate the combined account menu and start live notification sync.
         notificationMenuManager.start();
     }
 

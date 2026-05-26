@@ -18,6 +18,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.tamtamcatworks.auction.client.Navigation;
 import org.tamtamcatworks.auction.client.SessionManager;
+import org.tamtamcatworks.auction.client.ws.AuctionWebSocketClient;
+import org.springframework.messaging.simp.stomp.StompSession;
 import org.tamtamcatworks.auction.shared.request.BidRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 import org.tamtamcatworks.auction.shared.response.BidResponse;
@@ -70,6 +72,10 @@ public class AuctionDetailController {
   private String auctionId;
   private AuctionResponse currentAuction;
 
+  private AuctionWebSocketClient webSocketClient;
+  private StompSession.Subscription priceSubscription;
+  private StompSession.Subscription statusSubscription;
+
   @FXML
   public void initialize() {
     auctionId = Navigation.getContextData();
@@ -78,6 +84,72 @@ public class AuctionDetailController {
       return;
     }
     loadAuctionDetail();
+    setupWebSocket();
+  }
+
+  private void setupWebSocket() {
+    webSocketClient = new AuctionWebSocketClient();
+    webSocketClient.connect().thenAccept(session -> {
+      priceSubscription = webSocketClient.subscribeToPrice(auctionId, priceUpdate -> {
+        javafx.application.Platform.runLater(() -> {
+          currentPriceLabel.setText(String.format("$%.2f", priceUpdate.newPrice()));
+          if (currentAuction != null) {
+            currentAuction = new AuctionResponse(
+                currentAuction.id(),
+                currentAuction.title(),
+                currentAuction.sellerId(),
+                currentAuction.sellerName(),
+                currentAuction.itemId(),
+                currentAuction.itemName(),
+                currentAuction.leadingBidderId(),
+                currentAuction.leadingBidderName(),
+                currentAuction.startingPrice(),
+                priceUpdate.newPrice(),
+                currentAuction.status(),
+                currentAuction.startTime(),
+                currentAuction.endTime(),
+                currentAuction.imageUrl(),
+                currentAuction.itemDescription(),
+                currentAuction.itemType(),
+                currentAuction.specificInfo()
+            );
+          }
+          loadAuctionDetail();
+        });
+      });
+
+      statusSubscription = webSocketClient.subscribeToStatus(auctionId, statusUpdate -> {
+        javafx.application.Platform.runLater(() -> {
+          loadAuctionDetail();
+        });
+      });
+    }).exceptionally(ex -> {
+      System.err.println("WebSocket connection failed: " + ex.getMessage());
+      return null;
+    });
+
+    if (contentPane != null) {
+      contentPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+        if (newScene == null) {
+          cleanupWebSocket();
+        }
+      });
+    }
+  }
+
+  private void cleanupWebSocket() {
+    if (priceSubscription != null) {
+      priceSubscription.unsubscribe();
+      priceSubscription = null;
+    }
+    if (statusSubscription != null) {
+      statusSubscription.unsubscribe();
+      statusSubscription = null;
+    }
+    if (webSocketClient != null) {
+      webSocketClient.disconnect();
+      webSocketClient = null;
+    }
   }
 
   private void loadAuctionDetail() {

@@ -11,7 +11,9 @@ import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.tamtamcatworks.auction.client.SessionManager;
+import org.tamtamcatworks.auction.client.ws.AuctionWebSocketClient;
 import org.tamtamcatworks.auction.shared.response.NotificationResponse;
+import org.springframework.messaging.simp.stomp.StompSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +25,11 @@ final class NotificationMenuManager {
     private final SeparatorMenuItem notificationsSeparatorItem;
     private final Label unreadBadgeLabel = new Label();
     private final List<MenuItem> renderedNotificationItems = new ArrayList<>();
+    private final List<NotificationResponse> currentNotifications = new ArrayList<>();
 
     private ScheduledService<List<NotificationResponse>> notificationPoller;
+    private AuctionWebSocketClient notificationWebSocketClient;
+    private StompSession.Subscription notificationSubscription;
 
     NotificationMenuManager(MenuButton userMenuButton,
                             MenuItem notificationsHeaderItem,
@@ -38,11 +43,20 @@ final class NotificationMenuManager {
     void start() {
         refreshNotificationMenu(List.of());
         startNotificationPolling();
+        startNotificationWebSocket();
     }
 
     void stop() {
         if (notificationPoller != null) {
             notificationPoller.cancel();
+        }
+        if (notificationSubscription != null) {
+            notificationSubscription.unsubscribe();
+            notificationSubscription = null;
+        }
+        if (notificationWebSocketClient != null) {
+            notificationWebSocketClient.disconnect();
+            notificationWebSocketClient = null;
         }
     }
 
@@ -53,8 +67,32 @@ final class NotificationMenuManager {
             } catch (Exception ignored) {
                 // API may not be ready yet.
             }
-            Platform.runLater(() -> updateUnreadBadge(0));
+            Platform.runLater(() -> {
+                currentNotifications.replaceAll(notification -> new NotificationResponse(
+                    notification.id(),
+                    notification.type(),
+                    notification.message(),
+                    true,
+                    notification.createdAt()
+                ));
+                refreshNotificationMenu(List.copyOf(currentNotifications));
+            });
         }, "mark-notifs-read").start();
+    }
+
+    private void startNotificationWebSocket() {
+        notificationWebSocketClient = new AuctionWebSocketClient();
+        notificationWebSocketClient.connect().thenAccept(session -> {
+            notificationSubscription = notificationWebSocketClient.subscribeToNotifications(notification ->
+                Platform.runLater(() -> onNotificationReceived(notification))
+            );
+        });
+    }
+
+    private void onNotificationReceived(NotificationResponse notification) {
+        currentNotifications.removeIf(existing -> existing.id().equals(notification.id()));
+        currentNotifications.add(0, notification);
+        refreshNotificationMenu(List.copyOf(currentNotifications));
     }
 
     private void startNotificationPolling() {
@@ -74,12 +112,20 @@ final class NotificationMenuManager {
             }
         };
         notificationPoller.setPeriod(Duration.seconds(30));
-        notificationPoller.setOnSucceeded(e -> Platform.runLater(() ->
-            refreshNotificationMenu(notificationPoller.getValue())));
+        notificationPoller.setOnSucceeded(e -> Platform.runLater(() -> {
+            currentNotifications.clear();
+            currentNotifications.addAll(notificationPoller.getValue());
+            refreshNotificationMenu(List.copyOf(currentNotifications));
+        }));
         notificationPoller.start();
     }
 
     private void refreshNotificationMenu(List<NotificationResponse> notifications) {
+        currentNotifications.clear();
+        if (notifications != null) {
+            currentNotifications.addAll(notifications);
+        }
+
         userMenuButton.getItems().removeAll(renderedNotificationItems);
         renderedNotificationItems.clear();
 
