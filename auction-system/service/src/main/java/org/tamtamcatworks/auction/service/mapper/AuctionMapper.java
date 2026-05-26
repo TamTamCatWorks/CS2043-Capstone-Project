@@ -2,19 +2,29 @@ package org.tamtamcatworks.auction.service.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
 import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.item.Item;
 import org.tamtamcatworks.auction.model.user.User;
+
 import org.tamtamcatworks.auction.shared.request.CreateAuctionRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 import org.tamtamcatworks.auction.shared.response.PageResponse;
 import java.util.List;
 import org.springframework.data.domain.Page;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+    componentModel = "spring",
+    uses = ItemMapper.class
+)
 public interface AuctionMapper {
 
-    default Auction toEntity(CreateAuctionRequest request, User seller, Item item) {
+    default Auction toEntity(
+        CreateAuctionRequest request,
+        User seller,
+        Item item
+    ) {
+
         return new Auction(
             request.title(),
             seller,

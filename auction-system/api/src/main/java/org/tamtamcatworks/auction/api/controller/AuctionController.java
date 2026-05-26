@@ -22,6 +22,7 @@ import org.tamtamcatworks.auction.shared.request.CreateAuctionRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 import org.tamtamcatworks.auction.shared.response.BidResponse;
 
+import java.util.Objects;
 import java.util.List;
 
 @RestController
@@ -39,7 +40,7 @@ public class AuctionController {
     @PostMapping
     public ResponseEntity<AuctionResponse> create(@RequestBody CreateAuctionRequest req,
                                                   HttpSession session) {
-        String sellerId = (String) session.getAttribute("userId");
+        String sellerId = requireUserId(session);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(auctionService.createByRequest(sellerId, req));
     }
@@ -49,7 +50,7 @@ public class AuctionController {
         @RequestBody AuctionRequest req,
         HttpSession session
     ) {
-        String sellerId = (String) session.getAttribute("userId");
+        String sellerId = requireUserId(session);
         return ResponseEntity.status(HttpStatus.CREATED).body(auctionService.create(sellerId, req));
     }
 
@@ -107,5 +108,13 @@ public class AuctionController {
     @GetMapping("/{id}/bids")
     public ResponseEntity<List<BidResponse>> getBids(@PathVariable String id) {
         return ResponseEntity.ok(bidService.findByAuction(id));
+    }
+
+    private String requireUserId(HttpSession session) {
+
+        return Objects.requireNonNull(
+            (String) session.getAttribute("userId"),
+            "User is not authenticated."
+        );
     }
 }

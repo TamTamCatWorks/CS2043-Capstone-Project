@@ -199,8 +199,6 @@ public class User extends BaseEntity {
     public void setBuyerProfile(BuyerProfile buyerProfile)   { this.buyerProfile = buyerProfile; }
     public void setSellerProfile(SellerProfile sellerProfile) { this.sellerProfile = sellerProfile; }
 
-
-
     /**
      * Hiển thị thông tin tóm tắt của user.
      *
@@ -214,9 +212,6 @@ public class User extends BaseEntity {
      * @return chuỗi mô tả user
      */
 
-
-
-    
     @Override
     public String toString() {
         return "User: " + username + " | ID: " + getId() + " | Balance: " + balance;

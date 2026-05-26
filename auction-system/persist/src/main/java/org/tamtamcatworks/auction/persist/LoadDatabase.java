@@ -10,8 +10,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.BidTransaction;
@@ -39,12 +41,12 @@ public class LoadDatabase {
 
     @Bean
     @Order(0)
-    CommandLineRunner initUser(UserRepository userRepository) {
+    CommandLineRunner initUser(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            User bidder = new User("testbidder", "test1@example.com", "hashed123", "Test Bidder", 5000.0);
+            User bidder = new User("testbidder", "test1@example.com", passwordEncoder.encode("hashed123"), "Test Bidder", 3000.0);
             bidder.setBuyerProfile(new BuyerProfile());
 
-            User seller = new User("testseller", "test2@example.com", "hashed123", "Test Seller", 1000.0);
+            User seller = new User("testseller", "test2@example.com", passwordEncoder.encode("hashed123"), "Test Seller", 1000.0);
             seller.setBuyerProfile(new BuyerProfile());
             seller.setSellerProfile(new SellerProfile());
 
@@ -79,8 +81,6 @@ public class LoadDatabase {
                 "testMedium",
                 "100cm x 80cm",
                 false);
-            art.setDimensions("100cm x 80cm");
-            art.setImageUrl("https://example.com/test-art.jpg");
 
             Item savedArt = itemRepository.save(art);
             ITEM_ID = savedArt.getId();
@@ -132,11 +132,11 @@ public class LoadDatabase {
                 bidder.holdFunds(2000);
                 BidTransaction bidTransaction = new BidTransaction(auction, bidder, 2000, BidTransaction.BidType.MANUAL);
                 auction.recordBid(bidTransaction);
-                
+
                 Auction savedAuction = auctionRepository.save(auction);
                 userRepository.save(bidder);
                 log.info("Preloading auction {}", savedAuction);
-                
+
                 return null;
             });
         };

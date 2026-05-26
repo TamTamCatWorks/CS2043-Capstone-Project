@@ -97,7 +97,9 @@ public class BidTransaction extends BaseEntity {
 
     @Override
     public String toString() {
+        String bidderName = (bidder == null || bidder.getFullName() == null) ? "N/A" : bidder.getFullName();
+        String typeStr = (bidType == null) ? "N/A" : bidType.name();
         return String.format("BidTransaction{bidder='%s', amount=%,.0f VNĐ, type=%s}",
-                bidder.getFullName(), amount, bidType);
+                bidderName, amount, typeStr);
     }
 }
