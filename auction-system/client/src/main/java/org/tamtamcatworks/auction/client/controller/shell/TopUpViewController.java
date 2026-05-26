@@ -11,8 +11,6 @@ import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.shared.request.TopUpRequest;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
-import java.net.URL;
-
 public class TopUpViewController {
 
     @FXML private TextField amountField;
@@ -61,13 +59,25 @@ public class TopUpViewController {
                     UserResponse updatedUser = getValue();
                     SessionManager.setCurrentUser(updatedUser);
                     amountField.clear();
-                    showSuccess("Top-up successful! New balance: $" + String.format("%,.2f", updatedUser.balance()));
+                    showSuccess("Top-up successful! Available balance: $" + String.format("%,.2f", updatedUser.balance()));
                     submitButton.setDisable(false);
 
                     // Re-trigger layout rebuild via dashboard
-                    Label balanceLabel = (Label) amountField.getScene().lookup("#balanceLabel");
-                    if (balanceLabel != null) {
-                        balanceLabel.setText(String.format("$%,.2f", updatedUser.balance()));
+                    Label totalBalanceLabel = (Label) amountField.getScene().lookup("#totalBalanceLabel");
+                    Label holdBalanceLabel = (Label) amountField.getScene().lookup("#holdBalanceLabel");
+                    Label availableBalanceLabel = (Label) amountField.getScene().lookup("#availableBalanceLabel");
+                    double available = updatedUser.balance();
+                    double hold = updatedUser.holdBalance();
+                    double total = available + hold;
+
+                    if (totalBalanceLabel != null) {
+                        totalBalanceLabel.setText(String.format("$%,.2f", total));
+                    }
+                    if (holdBalanceLabel != null) {
+                        holdBalanceLabel.setText(String.format("$%,.2f", hold));
+                    }
+                    if (availableBalanceLabel != null) {
+                        availableBalanceLabel.setText(String.format("$%,.2f", available));
                     }
                 });
             }

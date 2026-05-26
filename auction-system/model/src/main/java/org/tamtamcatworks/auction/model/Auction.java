@@ -211,7 +211,7 @@ public class Auction extends BaseEntity {
      * 4. Event chứa lý do hủy
      *
      * <p>HỒU QUẢ:
-     * - Tất cả holdAmount sẽ được hoàn lại cho bidder
+    * - Tất cả holdBalance sẽ được hoàn lại cho bidder
      * - Không có người thắng, item không được bán
      *
      * @param reason lý do hủy phiên

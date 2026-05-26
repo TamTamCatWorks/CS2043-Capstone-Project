@@ -81,6 +81,13 @@ public class ApiClient {
             .body(UserResponse.class);
     }
 
+    public UserResponse getUser(String id) {
+        return client.get()
+            .uri("/users/{id}", id)
+            .retrieve()
+            .body(UserResponse.class);
+    }
+
     // ── Auctions ──────────────────────────────────────────────────────────────
 
     public List<AuctionResponse> getAllAuctions() {

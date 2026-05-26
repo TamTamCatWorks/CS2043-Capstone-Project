@@ -41,7 +41,7 @@ public class LoadDatabase {
     @Order(0)
     CommandLineRunner initUser(UserRepository userRepository) {
         return args -> {
-            User bidder = new User("testbidder", "test1@example.com", "hashed123", "Test Bidder", 1000.0);
+            User bidder = new User("testbidder", "test1@example.com", "hashed123", "Test Bidder", 5000.0);
             bidder.setBuyerProfile(new BuyerProfile());
 
             User seller = new User("testseller", "test2@example.com", "hashed123", "Test Seller", 1000.0);
@@ -129,10 +129,12 @@ public class LoadDatabase {
                 ).orElseThrow();
                 auction.open();
 
+                bidder.holdFunds(2000);
                 BidTransaction bidTransaction = new BidTransaction(auction, bidder, 2000, BidTransaction.BidType.MANUAL);
                 auction.recordBid(bidTransaction);
                 
                 Auction savedAuction = auctionRepository.save(auction);
+                userRepository.save(bidder);
                 log.info("Preloading auction {}", savedAuction);
                 
                 return null;

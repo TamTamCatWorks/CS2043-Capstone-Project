@@ -347,6 +347,39 @@
     -fx-border-radius: 16px;
 }
 
+/* Prominent Available balance card */
+.available-card {
+    -fx-background-color: linear-gradient(to right, #FFFFFF, #FBFBFA);
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(228,196,149,0.35);
+    -fx-border-radius: 14px;
+    -fx-padding: 14px;
+    -fx-effect: dropshadow(three-pass-box, rgba(46,38,26,0.06), 18, 0, 0, 10);
+}
+.available-caption {
+    -fx-font-size: 10pt;
+    -fx-text-fill: #7C7467;
+    -fx-font-weight: 600;
+}
+.available-value {
+    -fx-font-size: 28pt;
+    -fx-font-weight: 800;
+    -fx-text-fill: #1A1A1A;
+}
+.available-total {
+    -fx-font-size: 10.5pt;
+    -fx-text-fill: #7C7467;
+    -fx-font-weight: 600;
+}
+.available-small {
+    -fx-font-size: 10pt;
+    -fx-text-fill: #9C9282;
+}
+
+.progress {
+    -fx-accent: #8F7246; /* progress color */
+}
+
 .balance-label {
     -fx-font-size: 10pt;
     -fx-font-weight: bold;

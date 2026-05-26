@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.StackPane;
 import org.tamtamcatworks.auction.client.ApiClient;
 import org.tamtamcatworks.auction.client.Navigation;
@@ -28,7 +29,11 @@ public class DashboardController {
     @FXML private Label fullNameLabel;
     @FXML private Label usernameLabel;
     @FXML private Label emailLabel;
-    @FXML private Label balanceLabel;
+    @FXML private Label totalBalanceLabel;
+    @FXML private Label holdBalanceLabel;
+    @FXML private Label availableBalanceLabel;
+    @FXML private ProgressBar balanceProgressBar;
+    @FXML private Label activePercentLabel;
     @FXML private Label auctionCountLabel;
     @FXML private Label bidCountLabel;
     @FXML private Label wonCountLabel;
@@ -57,7 +62,7 @@ public class DashboardController {
         fullNameLabel.setText(user.fullName());
         usernameLabel.setText("@" + user.username());
         emailLabel.setText(user.email());
-        balanceLabel.setText(String.format("$%,.2f", user.balance()));
+        updateBalanceLabels(user);
         memberSinceLabel.setText("Member since 2026");
 
         // wire left menu buttons (FXML already references handlers but keep safe)
@@ -161,5 +166,24 @@ public class DashboardController {
         String[] parts = fullName.trim().split("\\s+");
         if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase();
         return (parts[0].charAt(0) + "" + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+
+    private void updateBalanceLabels(UserResponse user) {
+        if (user == null) {
+            return;
+        }
+        double available = user.balance();
+        double hold = user.holdBalance();
+        double total = available + hold;
+        // update textual values
+        totalBalanceLabel.setText(String.format("Total: $%,.2f", total));
+        holdBalanceLabel.setText(String.format("On Hold: $%,.2f (%.0f%%)", hold, total == 0 ? 0.0 : (hold / total) * 100.0));
+        availableBalanceLabel.setText(String.format("$%,.2f", available));
+
+        // update progress bar and percent label (available / total)
+        double progress = (total == 0) ? 0.0 : (available / total);
+        balanceProgressBar.setProgress(progress);
+        double activePct = (total == 0) ? 0.0 : (progress * 100.0);
+        activePercentLabel.setText(String.format("Active Funds (%.0f%%)", activePct));
     }
 }

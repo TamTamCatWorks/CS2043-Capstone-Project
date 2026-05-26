@@ -46,18 +46,28 @@
 
         <Region prefHeight="16.0"/>
 
-        <!-- Balance Pill -->
-        <HBox alignment="CENTER" styleClass="profile-balance-pill" spacing="8.0"
-              maxWidth="220.0">
+        <!-- Wallet Summary — Prominent Available Card -->
+        <VBox alignment="CENTER_LEFT" spacing="8.0" maxWidth="260.0">
             <padding>
-                <Insets top="12.0" right="20.0" bottom="12.0" left="20.0"/>
+                <Insets top="12.0" right="12.0" bottom="12.0" left="12.0"/>
             </padding>
-            <FontIcon iconLiteral="mdi2w-wallet-outline" iconSize="20" styleClass="profile-balance-icon"/>
-            <VBox spacing="2.0">
-                <Label text="Balance" styleClass="profile-balance-caption"/>
-                <Label fx:id="balanceLabel" text="\$0.00" styleClass="profile-balance-value"/>
+            <VBox styleClass="available-card" alignment="CENTER_LEFT" spacing="8.0" prefWidth="240.0">
+                <Label text="Available balance" styleClass="available-caption"/>
+                <HBox alignment="CENTER_LEFT">
+                    <Label fx:id="availableBalanceLabel" text="0.00" styleClass="available-value"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="totalBalanceLabel" text="Total: 0.00" styleClass="available-total"/>
+                </HBox>
+
+                <ProgressBar fx:id="balanceProgressBar" prefWidth="220.0" progress="0.0" />
+
+                <HBox alignment="CENTER_LEFT">
+                    <Label fx:id="activePercentLabel" text="Active Funds (0%)" styleClass="available-small"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="holdBalanceLabel" text="On Hold: 0.00 (0%)" styleClass="available-small"/>
+                </HBox>
             </VBox>
-        </HBox>
+        </VBox>
 
         <Region prefHeight="16.0"/>
 

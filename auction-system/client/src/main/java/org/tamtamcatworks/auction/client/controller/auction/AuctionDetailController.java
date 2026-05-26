@@ -21,6 +21,7 @@ import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.shared.request.BidRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 import org.tamtamcatworks.auction.shared.response.BidResponse;
+import org.tamtamcatworks.auction.shared.response.UserResponse;
 
 /** Controller for the auction detail view with bidding. */
 public class AuctionDetailController {
@@ -270,15 +271,23 @@ public class AuctionDetailController {
     placeBidBtn.setDisable(true);
     BidRequest request = new BidRequest(amount, "MANUAL");
 
-    Task<BidResponse> task = new Task<>() {
+    Task<UserResponse> task = new Task<>() {
       @Override
-      protected BidResponse call() throws Exception {
-        return SessionManager.getApiClient().placeBid(auctionId, request);
+      protected UserResponse call() throws Exception {
+        SessionManager.getApiClient().placeBid(auctionId, request);
+        if (SessionManager.getCurrentUser() == null) {
+          return null;
+        }
+        return SessionManager.getApiClient().getUser(SessionManager.getCurrentUser().id());
       }
     };
 
     task.setOnSucceeded(e -> {
       placeBidBtn.setDisable(false);
+      UserResponse refreshedUser = task.getValue();
+      if (refreshedUser != null) {
+        SessionManager.setCurrentUser(refreshedUser);
+      }
       bidAmountField.clear();
       showBidMessage("Bid placed successfully!", false);
       // Refresh the auction detail to show updated price and bid history
