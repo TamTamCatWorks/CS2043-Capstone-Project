@@ -51,23 +51,38 @@ public class BidService {
             throw new IllegalStateException("Auction is not accepting bids.");
         if (!auction.isValidBidAmount(request.amount()))
             throw new IllegalArgumentException("Bid amount too low.");
-        if (bidder.getBalance() < request.amount())
-            throw new IllegalArgumentException("Insufficient balance.");
 
-        // Capture previous leader BEFORE the bid is recorded
-        String previousLeaderId = auction.getLeadingBidder() != null
-            ? auction.getLeadingBidder().getId() : null;
+        User previousLeader = auction.getLeadingBidder();
+        double currentPrice = auction.getCurrentPrice();
+        boolean rebiddingAgainstSelf = previousLeader != null && previousLeader.getId().equals(bidder.getId());
+        double requiredAvailableBalance = rebiddingAgainstSelf
+            ? request.amount() - currentPrice
+            : request.amount();
+
+        if (bidder.getBalance() < requiredAvailableBalance)
+            throw new IllegalArgumentException("Insufficient available balance.");
+
+        if (rebiddingAgainstSelf) {
+            bidder.holdFunds(requiredAvailableBalance);
+        } else {
+            bidder.holdFunds(request.amount());
+            if (previousLeader != null) {
+                previousLeader.releaseHeldFunds(currentPrice);
+                userRepository.save(previousLeader);
+            }
+        }
 
         BidTransaction tx = bidMapper.toEntity(request, auction, bidder);
         auction.recordBid(tx);
         auctionRepository.save(auction);
+        userRepository.save(bidder);
 
         eventPublisher.publishEvent(new BidEvent(
             auction.getId(),
             auction.getTitle(),
             auction.getSeller().getId(),
             bidderId,
-            previousLeaderId,
+            previousLeader != null ? previousLeader.getId() : null,
             request.amount()
         ));
 

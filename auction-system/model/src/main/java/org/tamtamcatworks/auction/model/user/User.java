@@ -29,6 +29,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private double balance;
 
+    @Column(name = "hold_balance", nullable = false)
+    private double holdBalance;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "buyer_profile_id")
     private BuyerProfile buyerProfile;
@@ -69,6 +72,7 @@ public class User extends BaseEntity {
         this.passwordHash = passwordHash;
         this.fullName = fullName;
         this.balance = initialBalance;
+        this.holdBalance = 0.0;
     }
 
     protected User() {} // for JPA
@@ -77,19 +81,15 @@ public class User extends BaseEntity {
     // ── Balance Management ─────────────────────────────────────────────────────
 
     /**
-     * Trừ số dư tài khoản.
-     *
-     * <p>USE CASE:
-     * - Khi bid được chấp nhận: trừ balance, đóng băng vào holdAmount
-     * - Khi nạp tiền (ngược lại): dùng refundBalance hoặc set trực tiếp
-     *
-     * <p>NOTE:
-     * - Method này KHÔNG validate balance >= amount
-     * - Validation nên được gọi trước khi deduct
+     * Trừ số dư khả dụng.
      *
      * @param amount số tiền muốn trừ
      */
     public void deductBalance(double amount) {
+        validatePositiveAmount(amount);
+        if (balance < amount) {
+            throw new IllegalArgumentException("Insufficient available balance.");
+        }
         this.balance -= amount;
     }
 
@@ -99,30 +99,69 @@ public class User extends BaseEntity {
      * @param amount số tiền muốn nạp
      */
     public void addBalance(double amount) {
-        if (amount <= 0) {
-            throw new IllegalArgumentException("Top-up amount must be strictly positive");
-        }
+        validatePositiveAmount(amount);
         this.balance += amount;
     }
 
     /**
-     * Hoàn tiền vào tài khoản.
-     *
-     * <p>USE CASE:
-     * - Khi bị outbid: hoàn holdAmount cũ
-     * - Khi phiên bị hủy: hoàn toàn bộ holdAmount
-     * - Khi nạp tiền
+     * Hoàn tiền vào số dư khả dụng.
      *
      * @param amount số tiền muốn hoàn
      */
     public void refundBalance(double amount) {
+        validatePositiveAmount(amount);
         this.balance += amount;
+    }
+
+    /**
+     * Chuyển tiền từ số dư khả dụng sang số dư đang giữ cho bidding.
+     *
+     * @param amount số tiền muốn giữ
+     */
+    public void holdFunds(double amount) {
+        validatePositiveAmount(amount);
+        if (balance < amount) {
+            throw new IllegalArgumentException("Insufficient available balance.");
+        }
+        balance -= amount;
+        holdBalance += amount;
+    }
+
+    /**
+     * Hoàn tiền đang bị giữ trở lại số dư khả dụng.
+     *
+     * @param amount số tiền muốn giải phóng
+     */
+    public void releaseHeldFunds(double amount) {
+        validatePositiveAmount(amount);
+        if (holdBalance < amount) {
+            throw new IllegalArgumentException("Insufficient held balance.");
+        }
+        holdBalance -= amount;
+        balance += amount;
+    }
+
+    /**
+     * Tiêu hao tiền đang bị giữ khi bid thắng được chốt.
+     *
+     * @param amount số tiền muốn chốt
+     */
+    public void consumeHeldFunds(double amount) {
+        validatePositiveAmount(amount);
+        if (holdBalance < amount) {
+            throw new IllegalArgumentException("Insufficient held balance.");
+        }
+        holdBalance -= amount;
     }
 
     // ── Getters ──────────────────────────────────────────────────────────────────
 
     public double getBalance() {
         return balance;
+    }
+
+    public double getHoldBalance() {
+        return holdBalance;
     }
 
     public BuyerProfile getBuyerProfile() {
@@ -181,5 +220,11 @@ public class User extends BaseEntity {
     @Override
     public String toString() {
         return "User: " + username + " | ID: " + getId() + " | Balance: " + balance;
+    }
+
+    private void validatePositiveAmount(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be strictly positive");
+        }
     }
 }

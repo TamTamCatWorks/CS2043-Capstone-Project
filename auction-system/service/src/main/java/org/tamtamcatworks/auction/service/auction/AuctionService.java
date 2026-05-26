@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 @Service
@@ -109,7 +108,13 @@ public class AuctionService {
     public Auction close(String auctionId) {
         Auction auction = auctionRepository.findById(auctionId)
             .orElseThrow(() -> new NoSuchElementException("Auction not found"));
+        User leadingBidder = auction.getLeadingBidder();
+        double currentPrice = auction.getCurrentPrice();
         auction.close();
+        if (leadingBidder != null && currentPrice > 0) {
+            leadingBidder.consumeHeldFunds(currentPrice);
+            userRepository.save(leadingBidder);
+        }
         Auction saved = auctionRepository.save(auction);
         eventPublisher.publishEvent(new AuctionEvent(
             saved.getId(), saved.getTitle(),
@@ -121,7 +126,13 @@ public class AuctionService {
     public Auction cancel(String auctionId, String reason) {
         Auction auction = auctionRepository.findById(auctionId)
             .orElseThrow(() -> new NoSuchElementException("Auction not found"));
+        User leadingBidder = auction.getLeadingBidder();
+        double currentPrice = auction.getCurrentPrice();
         auction.cancel(reason);
+        if (leadingBidder != null && currentPrice > 0) {
+            leadingBidder.releaseHeldFunds(currentPrice);
+            userRepository.save(leadingBidder);
+        }
         Auction saved = auctionRepository.save(auction);
         eventPublisher.publishEvent(new AuctionEvent(
             saved.getId(), saved.getTitle(),
