@@ -20,6 +20,7 @@ import org.tamtamcatworks.auction.shared.request.AuctionRequest;
 import org.tamtamcatworks.auction.shared.request.CreateAuctionRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 
+import java.util.Objects;
 import java.util.List;
 
 @RestController
@@ -37,7 +38,7 @@ public class AuctionController {
     @PostMapping
     public ResponseEntity<AuctionResponse> create(@RequestBody CreateAuctionRequest req,
                                                   HttpSession session) {
-        String sellerId = (String) session.getAttribute("userId");
+        String sellerId = requireUserId(session);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(auctionService.createByRequest(sellerId, req));
     }
@@ -47,7 +48,7 @@ public class AuctionController {
         @RequestBody AuctionRequest req,
         HttpSession session
     ) {
-        String sellerId = (String) session.getAttribute("userId");
+        String sellerId = requireUserId(session);
         return ResponseEntity.status(HttpStatus.CREATED).body(auctionService.create(sellerId, req));
     }
 
@@ -81,7 +82,7 @@ public class AuctionController {
     public ResponseEntity<BidResponse> placeBid(@PathVariable String id,
                                                 @RequestBody BidRequest req,
                                                 HttpSession session) {
-        String bidderId = (String) session.getAttribute("userId");
+        String bidderId = requireUserId(session);
         return ResponseEntity.status(HttpStatus.CREATED).body(BidResponse.from(
             bidService.placeBid(id, bidderId, req.amount(), req.bidType())
         ));
@@ -91,5 +92,13 @@ public class AuctionController {
     public ResponseEntity<List<BidResponse>> getBids(@PathVariable String id) {
         return ResponseEntity.ok(bidService.findByAuction(id)
             .stream().map(BidResponse::from).toList());
+    }
+
+    private String requireUserId(HttpSession session) {
+
+        return Objects.requireNonNull(
+            (String) session.getAttribute("userId"),
+            "User is not authenticated."
+        );
     }
 }

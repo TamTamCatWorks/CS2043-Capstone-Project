@@ -19,23 +19,30 @@ import org.tamtamcatworks.auction.shared.request.ItemRequest;
 import org.tamtamcatworks.auction.persist.repository.ItemRepository;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
 
+import org.tamtamcatworks.auction.service.mapper.ItemMapper;
+import org.tamtamcatworks.auction.shared.response.ItemResponse;
+
 @Service
 public class ItemService {
 
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final List<ItemCreator> creators;
+    private final ItemMapper itemMapper;
+
     private Map<ItemType, ItemCreator> registry;
 
     public ItemService(
         ItemRepository itemRepository,
         UserRepository userRepository,
-        List<ItemCreator> creators
+        List<ItemCreator> creators,
+        ItemMapper itemMapper
     ) {
 
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.creators = creators;
+        this.itemMapper = itemMapper;
     }
 
     @PostConstruct
@@ -106,6 +113,20 @@ public class ItemService {
     }
 
     @Transactional(readOnly = true)
+    public ItemResponse findResponseById(String id) {
+
+        Item item = findById(id);
+
+        return itemMapper.toResponse(item);
+    }
+
+    public List<ItemResponse> findAllResponses() {
+
+        List<Item> items = itemRepository.findAll();
+
+        return itemMapper.toResponses(items);
+    }
+
     public Item findById(String id) {
 
         if (id == null || id.isBlank()) {
@@ -118,6 +139,11 @@ public class ItemService {
             .orElseThrow(() ->
                     new NoSuchElementException("Item not found.")
             );
+    }
+
+    public List<Item> findAll() {
+
+        return itemRepository.findAll();
     }
 
     @Transactional
@@ -148,5 +174,13 @@ public class ItemService {
         } catch (IllegalArgumentException exception) {
             throw new IllegalArgumentException("Unknown item condition: " + condition, exception);
         }
+    }
+
+    @Transactional
+    public ItemResponse createResponse(ItemRequest req) {
+
+        Item item = create(req);
+
+        return itemMapper.toResponse(item);
     }
 }
