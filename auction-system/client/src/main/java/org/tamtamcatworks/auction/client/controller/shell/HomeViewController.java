@@ -1,56 +1,41 @@
 package org.tamtamcatworks.auction.client.controller.shell;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
+import org.tamtamcatworks.auction.client.ViewLoader;
 
+/**
+ * Controller for the home sub-panel within the dashboard.
+ *
+ * <p>Hosts two tabs (Auctions / Bids) that swap a nested content area.
+ * Uses {@link TabChipBar} for selection state and {@link ViewLoader} for
+ * sub-view injection — no copy-pasted loadView() or applySelected() methods.
+ */
 public class HomeViewController {
-    @FXML private StackPane nestedContentArea;
-    @FXML private Button homeAuctionsButton;
-    @FXML private Button homeBidsButton;
 
-    @FXML
-    public void initialize() {
-        setSelectedTab(homeAuctionsButton);
-        loadNestedView("/fxml/dashboard/auctions.fxml");
-    }
+  @FXML private StackPane nestedContentArea;
+  @FXML private Button homeAuctionsButton;
+  @FXML private Button homeBidsButton;
 
-    @FXML
-    private void handleShowAuctions() {
-        setSelectedTab(homeAuctionsButton);
-        loadNestedView("/fxml/dashboard/auctions.fxml");
-    }
+  private TabChipBar tabs;
 
-    @FXML
-    private void handleShowBids() {
-        setSelectedTab(homeBidsButton);
-        loadNestedView("/fxml/dashboard/bids.fxml");
-    }
+  @FXML
+  public void initialize() {
+    tabs = new TabChipBar("profile-tab-chip-selected", homeAuctionsButton, homeBidsButton);
+    tabs.select(homeAuctionsButton);
+    ViewLoader.into(nestedContentArea).load("/fxml/dashboard/auctions.fxml");
+  }
 
-    private void setSelectedTab(Button selectedButton) {
-        applySelected(homeAuctionsButton, homeAuctionsButton == selectedButton);
-        applySelected(homeBidsButton, homeBidsButton == selectedButton);
-    }
+  @FXML
+  private void handleShowAuctions() {
+    tabs.select(homeAuctionsButton);
+    ViewLoader.into(nestedContentArea).load("/fxml/dashboard/auctions.fxml");
+  }
 
-    private void applySelected(Button button, boolean selected) {
-        if (button == null) {
-            return;
-        }
-        button.getStyleClass().remove("profile-tab-chip-selected");
-        if (selected) {
-            button.getStyleClass().add("profile-tab-chip-selected");
-        }
-    }
-
-    private void loadNestedView(String path) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(path));
-            Parent view = loader.load();
-            nestedContentArea.getChildren().setAll(view);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
+  @FXML
+  private void handleShowBids() {
+    tabs.select(homeBidsButton);
+    ViewLoader.into(nestedContentArea).load("/fxml/dashboard/bids.fxml");
+  }
 }

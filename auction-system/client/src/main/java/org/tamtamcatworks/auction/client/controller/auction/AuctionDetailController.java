@@ -2,7 +2,6 @@ package org.tamtamcatworks.auction.client.controller.auction;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -16,7 +15,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.tamtamcatworks.auction.client.AsyncTask;
 import org.tamtamcatworks.auction.client.Navigation;
+import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.client.ws.AuctionWebSocketClient;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -26,6 +27,7 @@ import org.tamtamcatworks.auction.shared.response.BidResponse;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
 /** Controller for the auction detail view with bidding. */
+@Route(fxml = "/fxml/auction-detail.fxml", layout = Route.DASHBOARD_LAYOUT)
 public class AuctionDetailController {
 
   private static final DateTimeFormatter TIME_FMT =
@@ -156,28 +158,19 @@ public class AuctionDetailController {
     setLoading(true);
     hideError();
 
-    Task<AuctionResponse> task = new Task<>() {
-      @Override
-      protected AuctionResponse call() throws Exception {
-        return SessionManager.getApiClient().getAuction(auctionId);
-      }
-    };
-
-    task.setOnSucceeded(e -> {
-      setLoading(false);
-      currentAuction = task.getValue();
-      populateAuctionInfo(currentAuction);
-      loadBidHistory();
-    });
-
-    task.setOnFailed(e -> {
-      setLoading(false);
-      Throwable ex = task.getException();
-      showError("Failed to load auction: "
-          + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
-    });
-
-    new Thread(task).start();
+    AsyncTask.<AuctionResponse>run(() -> SessionManager.getApiClient().getAuction(auctionId))
+        .onSuccess(auction -> {
+          setLoading(false);
+          currentAuction = auction;
+          populateAuctionInfo(currentAuction);
+          loadBidHistory();
+        })
+        .onFailure(ex -> {
+          setLoading(false);
+          showError("Failed to load auction: "
+              + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
+        })
+        .start();
   }
 
   private void populateAuctionInfo(AuctionResponse auction) {
@@ -266,36 +259,26 @@ public class AuctionDetailController {
   }
 
   private void loadBidHistory() {
-    Task<List<BidResponse>> task = new Task<>() {
-      @Override
-      protected List<BidResponse> call() throws Exception {
-        return SessionManager.getApiClient().getBids(auctionId);
-      }
-    };
-
-    task.setOnSucceeded(e -> {
-      List<BidResponse> bids = task.getValue();
-      bidHistoryContainer.getChildren().clear();
-      if (bids == null || bids.isEmpty()) {
-        noBidsLabel.setVisible(true);
-        noBidsLabel.setManaged(true);
-      } else {
-        noBidsLabel.setVisible(false);
-        noBidsLabel.setManaged(false);
-        for (BidResponse bid : bids) {
-          bidHistoryContainer.getChildren().add(createBidRow(bid));
-        }
-      }
-    });
-
-    task.setOnFailed(e -> {
-      // Silently handle bid history load failure
-      noBidsLabel.setText("Could not load bid history");
-      noBidsLabel.setVisible(true);
-      noBidsLabel.setManaged(true);
-    });
-
-    new Thread(task).start();
+    AsyncTask.<List<BidResponse>>run(() -> SessionManager.getApiClient().getBids(auctionId))
+        .onSuccess(bids -> {
+          bidHistoryContainer.getChildren().clear();
+          if (bids == null || bids.isEmpty()) {
+            noBidsLabel.setVisible(true);
+            noBidsLabel.setManaged(true);
+          } else {
+            noBidsLabel.setVisible(false);
+            noBidsLabel.setManaged(false);
+            for (BidResponse bid : bids) {
+              bidHistoryContainer.getChildren().add(createBidRow(bid));
+            }
+          }
+        })
+        .onFailure(ex -> {
+          noBidsLabel.setText("Could not load bid history");
+          noBidsLabel.setVisible(true);
+          noBidsLabel.setManaged(true);
+        })
+        .start();
   }
 
   private HBox createBidRow(BidResponse bid) {
@@ -343,37 +326,29 @@ public class AuctionDetailController {
     placeBidBtn.setDisable(true);
     BidRequest request = new BidRequest(amount, "MANUAL");
 
-    Task<UserResponse> task = new Task<>() {
-      @Override
-      protected UserResponse call() throws Exception {
-        SessionManager.getApiClient().placeBid(auctionId, request);
-        if (SessionManager.getCurrentUser() == null) {
-          return null;
-        }
-        return SessionManager.getApiClient().getUser(SessionManager.getCurrentUser().id());
-      }
-    };
-
-    task.setOnSucceeded(e -> {
-      placeBidBtn.setDisable(false);
-      UserResponse refreshedUser = task.getValue();
-      if (refreshedUser != null) {
-        SessionManager.setCurrentUser(refreshedUser);
-      }
-      bidAmountField.clear();
-      showBidMessage("Bid placed successfully!", false);
-      // Refresh the auction detail to show updated price and bid history
-      loadAuctionDetail();
-    });
-
-    task.setOnFailed(e -> {
-      placeBidBtn.setDisable(false);
-      Throwable ex = task.getException();
-      showBidMessage("Bid failed: "
-          + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"), true);
-    });
-
-    new Thread(task).start();
+    AsyncTask.<UserResponse>run(() -> {
+          SessionManager.getApiClient().placeBid(auctionId, request);
+          if (SessionManager.getCurrentUser() == null) {
+            return null;
+          }
+          return SessionManager.getApiClient().getUser(SessionManager.getCurrentUser().id());
+        })
+        .onSuccess(refreshedUser -> {
+          placeBidBtn.setDisable(false);
+          if (refreshedUser != null) {
+            SessionManager.setCurrentUser(refreshedUser);
+          }
+          bidAmountField.clear();
+          showBidMessage("Bid placed successfully!", false);
+          // Refresh the auction detail to show updated price and bid history
+          loadAuctionDetail();
+        })
+        .onFailure(ex -> {
+          placeBidBtn.setDisable(false);
+          showBidMessage("Bid failed: "
+              + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"), true);
+        })
+        .start();
   }
 
   @FXML
@@ -387,21 +362,13 @@ public class AuctionDetailController {
   }
 
   private void runAuctionAction(java.util.concurrent.Callable<AuctionResponse> action) {
-    Task<AuctionResponse> task = new Task<>() {
-      @Override
-      protected AuctionResponse call() throws Exception {
-        return action.call();
-      }
-    };
-
-    task.setOnSucceeded(e -> loadAuctionDetail());
-    task.setOnFailed(e -> {
-      Throwable ex = task.getException();
-      showError("Action failed: "
-          + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
-    });
-
-    new Thread(task).start();
+    AsyncTask.<AuctionResponse>run(action)
+        .onSuccess(res -> loadAuctionDetail())
+        .onFailure(ex -> {
+          showError("Action failed: "
+              + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
+        })
+        .start();
   }
 
   @FXML

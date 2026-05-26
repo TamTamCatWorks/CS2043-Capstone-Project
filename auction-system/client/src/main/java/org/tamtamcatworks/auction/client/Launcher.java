@@ -35,6 +35,17 @@ public class Launcher extends Application {
         // load app properties from pom.xml via filtering
         loadApplicationProperties();
 
+        // Register routes
+        Navigation.registerAll(
+            org.tamtamcatworks.auction.client.controller.auth.LoginController.class,
+            org.tamtamcatworks.auction.client.controller.auth.RegisterController.class,
+            org.tamtamcatworks.auction.client.controller.auction.AuctionsListController.class,
+            org.tamtamcatworks.auction.client.controller.auction.AuctionDetailController.class,
+            org.tamtamcatworks.auction.client.controller.auction.CreateAuctionController.class,
+            org.tamtamcatworks.auction.client.controller.auction.SearchResultsController.class,
+            org.tamtamcatworks.auction.client.controller.shell.DashboardController.class
+        );
+
         // Set Navigation stage
         Navigation.setPrimaryStage(stage);
 

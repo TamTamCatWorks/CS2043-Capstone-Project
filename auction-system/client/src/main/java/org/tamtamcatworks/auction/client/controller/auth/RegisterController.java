@@ -1,13 +1,17 @@
 package org.tamtamcatworks.auction.client.controller.auth;
 
-import javafx.concurrent.Task;
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.util.Duration;
+import org.tamtamcatworks.auction.client.AsyncTask;
 import org.tamtamcatworks.auction.client.Navigation;
+import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.shared.request.RegisterRequest;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
+@Route(fxml = "/fxml/register.fxml", layout = Route.AUTH_LAYOUT)
 public class RegisterController {
 
     @FXML
@@ -52,34 +56,24 @@ public class RegisterController {
         setLoading(true);
         messageLabel.setText("");
 
-        Task<UserResponse> registerTask = new Task<>() {
-            @Override
-            protected UserResponse call() throws Exception {
-                RegisterRequest request = new RegisterRequest(username, email, password, fullName);
-                return SessionManager.getApiClient().register(request);
-            }
-        };
-
-        registerTask.setOnSucceeded(e -> {
-            setLoading(false);
-            UserResponse user = registerTask.getValue();
-            if (user != null) {
-                showSuccess("Registration successful! Redirecting to login...");
-                javafx.animation.PauseTransition delay = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(1.5));
-                delay.setOnFinished(event -> Navigation.navigateTo("/fxml/login.fxml"));
-                delay.play();
-            } else {
-                showError("Invalid response from server.");
-            }
-        });
-
-        registerTask.setOnFailed(e -> {
-            setLoading(false);
-            Throwable ex = registerTask.getException();
-            showError("Registration failed: " + (ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
-        });
-
-        new Thread(registerTask).start();
+        AsyncTask.<UserResponse>run(() ->
+                SessionManager.getApiClient().register(new RegisterRequest(username, email, password, fullName)))
+            .onSuccess(user -> {
+                setLoading(false);
+                if (user != null) {
+                    showSuccess("Registration successful! Redirecting to login...");
+                    PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
+                    delay.setOnFinished(event -> Navigation.navigateTo("/fxml/login.fxml"));
+                    delay.play();
+                } else {
+                    showError("Invalid response from server.");
+                }
+            })
+            .onFailure(ex -> {
+                setLoading(false);
+                showError("Registration failed: " + (ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
+            })
+            .start();
     }
 
     @FXML

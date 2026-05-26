@@ -5,7 +5,6 @@ import java.util.List;
 import org.tamtamcatworks.auction.shared.response.PageResponse;
 
 import java.time.LocalDateTime;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
@@ -20,10 +19,13 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+import org.tamtamcatworks.auction.client.AsyncTask;
 import org.tamtamcatworks.auction.client.Navigation;
+import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 
+@Route(fxml = "/fxml/search-results.fxml", layout = Route.DASHBOARD_LAYOUT)
 public class SearchResultsController {
 
   private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
@@ -114,44 +116,35 @@ public class SearchResultsController {
     final int pageToLoad = currentPage;
     final int sizeToLoad = pageSize;
 
-    Task<org.tamtamcatworks.auction.shared.response.PageResponse<AuctionResponse>> task = new Task<>() {
-      @Override
-      protected org.tamtamcatworks.auction.shared.response.PageResponse<AuctionResponse> call() throws Exception {
-        return SessionManager.getApiClient().searchAuctionsPaged(q, status, cat, pageToLoad, sizeToLoad);
-      }
-    };
-
-    task.setOnSucceeded(e -> {
-      setLoading(false);
-      org.tamtamcatworks.auction.shared.response.PageResponse<AuctionResponse> page = task.getValue();
-      results = page != null ? page.content() : null;
-      totalPages = page != null ? page.totalPages() : 1;
-      totalElements = page != null ? page.totalElements() : 0;
-      pageInfoLabel.setText(String.format("Page %d of %d — %d items", currentPage + 1, totalPages, totalElements));
-      prevPageButton.setDisable(currentPage <= 0);
-      nextPageButton.setDisable(currentPage + 1 >= totalPages);
-      auctionsContainer.getChildren().clear();
-      if (results == null || results.isEmpty()) {
-        emptyPane.setVisible(true);
-        emptyPane.setManaged(true);
-      } else {
-        emptyPane.setVisible(false);
-        emptyPane.setManaged(false);
-        for (AuctionResponse a : results) {
-          auctionsContainer.getChildren().add(createAuctionCard(a));
-        }
-      }
-    });
-
-    task.setOnFailed(e -> {
-      setLoading(false);
-      Throwable ex = task.getException();
-      errorLabel.setText("Search failed: " + (ex != null ? ex.getMessage() : "Unknown"));
-      errorLabel.setVisible(true);
-      errorLabel.setManaged(true);
-    });
-
-    new Thread(task).start();
+    AsyncTask.<PageResponse<AuctionResponse>>run(() ->
+            SessionManager.getApiClient().searchAuctionsPaged(q, status, cat, pageToLoad, sizeToLoad))
+        .onSuccess(page -> {
+          setLoading(false);
+          results = page != null ? page.content() : null;
+          totalPages = page != null ? page.totalPages() : 1;
+          totalElements = page != null ? page.totalElements() : 0;
+          pageInfoLabel.setText(String.format("Page %d of %d — %d items", currentPage + 1, totalPages, totalElements));
+          prevPageButton.setDisable(currentPage <= 0);
+          nextPageButton.setDisable(currentPage + 1 >= totalPages);
+          auctionsContainer.getChildren().clear();
+          if (results == null || results.isEmpty()) {
+            emptyPane.setVisible(true);
+            emptyPane.setManaged(true);
+          } else {
+            emptyPane.setVisible(false);
+            emptyPane.setManaged(false);
+            for (AuctionResponse a : results) {
+              auctionsContainer.getChildren().add(createAuctionCard(a));
+            }
+          }
+        })
+        .onFailure(ex -> {
+          setLoading(false);
+          errorLabel.setText("Search failed: " + (ex != null ? ex.getMessage() : "Unknown"));
+          errorLabel.setVisible(true);
+          errorLabel.setManaged(true);
+        })
+        .start();
   }
 
   private void setLoading(boolean l) {

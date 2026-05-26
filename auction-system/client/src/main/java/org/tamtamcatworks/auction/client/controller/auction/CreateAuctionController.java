@@ -7,7 +7,6 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import com.dlsc.gemsfx.TimePicker;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -21,7 +20,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import org.tamtamcatworks.auction.client.AsyncTask;
 import org.tamtamcatworks.auction.client.Navigation;
+import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.client.controller.details.ItemDetailsForm;
 import org.tamtamcatworks.auction.client.controller.details.ItemDetailsFormFactory;
@@ -31,6 +32,7 @@ import org.tamtamcatworks.auction.shared.request.ItemRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 
 /** Controller for the create auction form. */
+@Route(fxml = "/fxml/create-auction.fxml", layout = Route.DASHBOARD_LAYOUT)
 public class CreateAuctionController {
 
   @FXML private TextField titleField;
@@ -160,49 +162,40 @@ public class CreateAuctionController {
     String sellerId = SessionManager.getCurrentUser() != null
         ? SessionManager.getCurrentUser().id() : "";
 
-    // Upload image first, then submit auction creation
-    Task<AuctionResponse> task = new Task<>() {
-      @Override
-      protected AuctionResponse call() throws Exception {
-        String uploadedUrl = SessionManager.getApiClient().uploadImage(selectedImageFile);
-        if (uploadedUrl == null) {
-          throw new RuntimeException("Image upload failed");
-        }
+    AsyncTask.<AuctionResponse>run(() -> {
+          String uploadedUrl = SessionManager.getApiClient().uploadImage(selectedImageFile);
+          if (uploadedUrl == null) {
+            throw new RuntimeException("Image upload failed");
+          }
 
-        ItemRequest itemRequest = new ItemRequest(
-            itemType, itemName, itemDesc, startingPrice,
-            condition, sellerId, uploadedUrl, detailsMap
-        );
+          ItemRequest itemRequest = new ItemRequest(
+              itemType, itemName, itemDesc, startingPrice,
+              condition, sellerId, uploadedUrl, detailsMap
+          );
 
-        CreateAuctionRequest request = new CreateAuctionRequest(
-            title, itemRequest, startTime, endTime
-        );
+          CreateAuctionRequest request = new CreateAuctionRequest(
+              title, itemRequest, startTime, endTime
+          );
 
-        return SessionManager.getApiClient().createAuctionWithItem(request);
-      }
-    };
-
-    task.setOnSucceeded(e -> {
-      setLoading(false);
-      AuctionResponse result = task.getValue();
-      if (result != null) {
-        showSuccess("Auction created successfully!");
-        // Navigate to the new auction detail after a brief delay
-        javafx.application.Platform.runLater(() -> {
-          Navigation.setContextData(result.id());
-          Navigation.navigateTo("/fxml/auction-detail.fxml");
-        });
-      }
-    });
-
-    task.setOnFailed(e -> {
-      setLoading(false);
-      Throwable ex = task.getException();
-      showError("Failed to create auction: "
-          + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
-    });
-
-    new Thread(task).start();
+          return SessionManager.getApiClient().createAuctionWithItem(request);
+        })
+        .onSuccess(result -> {
+          setLoading(false);
+          if (result != null) {
+            showSuccess("Auction created successfully!");
+            // Navigate to the new auction detail after a brief delay
+            javafx.application.Platform.runLater(() -> {
+              Navigation.setContextData(result.id());
+              Navigation.navigateTo("/fxml/auction-detail.fxml");
+            });
+          }
+        })
+        .onFailure(ex -> {
+          setLoading(false);
+          showError("Failed to create auction: "
+              + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
+        })
+        .start();
   }
 
   private LocalDateTime parseOptionalStartDateTime() {

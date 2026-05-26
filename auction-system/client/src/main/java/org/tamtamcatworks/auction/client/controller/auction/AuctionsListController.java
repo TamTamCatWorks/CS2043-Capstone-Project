@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
@@ -17,11 +16,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.tamtamcatworks.auction.client.AsyncTask;
 import org.tamtamcatworks.auction.client.Navigation;
+import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 
 /** Controller for the auction browse/list view. */
+@Route(fxml = "/fxml/auctions-list.fxml", layout = Route.DASHBOARD_LAYOUT)
 public class AuctionsListController {
 
   private static final DateTimeFormatter TIME_FMT =
@@ -70,49 +72,40 @@ public class AuctionsListController {
         || (searchCategory != null && !searchCategory.isBlank()
             && !"All categories".equalsIgnoreCase(searchCategory));
 
-    Task<List<AuctionResponse>> task = new Task<>() {
-      @Override
-      protected List<AuctionResponse> call() throws Exception {
-        if (hasSearch) {
-          return SessionManager.getApiClient().searchAuctions(searchQuery, selected, searchCategory);
-        }
-        if ("ALL".equals(selected)) {
-          return SessionManager.getApiClient().getAllAuctions();
-        } else {
-          return SessionManager.getApiClient().getAuctionsByStatus(selected);
-        }
-      }
-    };
+    AsyncTask.<List<AuctionResponse>>run(() -> {
+          if (hasSearch) {
+            return SessionManager.getApiClient().searchAuctions(searchQuery, selected, searchCategory);
+          }
+          if ("ALL".equals(selected)) {
+            return SessionManager.getApiClient().getAllAuctions();
+          } else {
+            return SessionManager.getApiClient().getAuctionsByStatus(selected);
+          }
+        })
+        .onSuccess(auctions -> {
+          setLoading(false);
+          loadedAuctions.clear();
+          if (auctions != null) {
+            loadedAuctions.addAll(auctions);
+          }
 
-    task.setOnSucceeded(e -> {
-      setLoading(false);
-      loadedAuctions.clear();
-      List<AuctionResponse> auctions = task.getValue();
-      if (auctions != null) {
-        loadedAuctions.addAll(auctions);
-      }
-
-      if (loadedAuctions.isEmpty()) {
-        emptyPane.setVisible(true);
-        emptyPane.setManaged(true);
-      } else {
-        for (AuctionResponse auction : loadedAuctions) {
-          auctionsContainer.getChildren().add(createAuctionCard(auction));
-        }
-      }
-    });
-
-    task.setOnFailed(e -> {
-      setLoading(false);
-      Throwable ex = task.getException();
-      String msg = ex != null && ex.getMessage() != null
-          ? ex.getMessage() : "Unknown error";
-      errorLabel.setText("Failed to load auctions: " + msg);
-      errorLabel.setVisible(true);
-      errorLabel.setManaged(true);
-    });
-
-    new Thread(task).start();
+          if (loadedAuctions.isEmpty()) {
+            emptyPane.setVisible(true);
+            emptyPane.setManaged(true);
+          } else {
+            for (AuctionResponse auction : loadedAuctions) {
+              auctionsContainer.getChildren().add(createAuctionCard(auction));
+            }
+          }
+        })
+        .onFailure(ex -> {
+          setLoading(false);
+          String msg = ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error";
+          errorLabel.setText("Failed to load auctions: " + msg);
+          errorLabel.setVisible(true);
+          errorLabel.setManaged(true);
+        })
+        .start();
   }
 
   private VBox createAuctionCard(AuctionResponse auction) {
