@@ -6,11 +6,12 @@ import org.tamtamcatworks.auction.client.AsyncTask;
 import org.tamtamcatworks.auction.client.Navigation;
 import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
+import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.shared.request.LoginRequest;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
 @Route(fxml = "/fxml/login.fxml", layout = Route.AUTH_LAYOUT)
-public class LoginController {
+public class LoginController extends BaseController {
 
     @FXML
     private TextField emailField;
@@ -39,26 +40,26 @@ public class LoginController {
         String password = passwordField.getText();
 
         if (email.isEmpty() || password.isEmpty()) {
-            showError("Please enter both email and password.");
+            showError(messageLabel, "Please enter both email and password.");
             return;
         }
 
         setLoading(true);
         messageLabel.setText("");
 
-        AsyncTask.<UserResponse>run(() -> SessionManager.getApiClient().login(new LoginRequest(email, password)))
+        AsyncTask.<UserResponse>run(() -> api.login(new LoginRequest(email, password)))
             .onSuccess(user -> {
                 setLoading(false);
                 if (user != null) {
                     SessionManager.setCurrentUser(user);
                     Navigation.navigateTo("/fxml/auctions-list.fxml");
                 } else {
-                    showError("Invalid response from server.");
+                    showError(messageLabel, "Invalid response from server.");
                 }
             })
             .onFailure(ex -> {
                 setLoading(false);
-                showError("Login failed: " + (ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
+                showError(messageLabel, "Login failed: " + (ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
             })
             .start();
     }
@@ -66,14 +67,6 @@ public class LoginController {
     @FXML
     private void handleGoToRegister() {
         Navigation.navigateTo("/fxml/register.fxml");
-    }
-
-    private void showError(String message) {
-        messageLabel.getStyleClass().removeAll("success-label");
-        if (!messageLabel.getStyleClass().contains("error-label")) {
-            messageLabel.getStyleClass().add("error-label");
-        }
-        messageLabel.setText(message);
     }
 
     private void setLoading(boolean loading) {

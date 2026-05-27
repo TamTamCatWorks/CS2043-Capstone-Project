@@ -24,6 +24,7 @@ import org.tamtamcatworks.auction.client.AsyncTask;
 import org.tamtamcatworks.auction.client.Navigation;
 import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
+import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.client.controller.details.ItemDetailsForm;
 import org.tamtamcatworks.auction.client.controller.details.ItemDetailsFormFactory;
 import org.tamtamcatworks.auction.client.controller.details.ItemDetailsType;
@@ -33,7 +34,7 @@ import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 
 /** Controller for the create auction form. */
 @Route(fxml = "/fxml/create-auction.fxml", layout = Route.DASHBOARD_LAYOUT)
-public class CreateAuctionController {
+public class CreateAuctionController extends BaseController {
 
   @FXML private TextField titleField;
   @FXML private TextField itemNameField;
@@ -93,7 +94,7 @@ public class CreateAuctionController {
         imagePreview.setImage(img);
         imagePlaceholderLabel.setVisible(false);
       } catch (Exception e) {
-        showError("Failed to load image preview.");
+        showError(messageLabel, "Failed to load image preview.");
       }
     }
   }
@@ -109,22 +110,22 @@ public class CreateAuctionController {
     String priceText = startingPriceField.getText().trim();
 
     if (title.isEmpty() || itemName.isEmpty() || priceText.isEmpty()) {
-      showError("Please fill in auction title, item name, and starting price.");
+      showError(messageLabel, "Please fill in auction title, item name, and starting price.");
       return;
     }
 
     if (itemType == null) {
-      showError("Please select an item type.");
+      showError(messageLabel, "Please select an item type.");
       return;
     }
 
     if (condition == null) {
-      showError("Please select item condition.");
+      showError(messageLabel, "Please select item condition.");
       return;
     }
 
     if (selectedImageFile == null) {
-      showError("Please select an item image to upload.");
+      showError(messageLabel, "Please select an item image to upload.");
       return;
     }
 
@@ -132,11 +133,11 @@ public class CreateAuctionController {
     try {
       startingPrice = Double.parseDouble(priceText);
       if (startingPrice <= 0) {
-        showError("Starting price must be greater than zero.");
+        showError(messageLabel, "Starting price must be greater than zero.");
         return;
       }
     } catch (NumberFormatException e) {
-      showError("Please enter a valid starting price.");
+      showError(messageLabel, "Please enter a valid starting price.");
       return;
     }
 
@@ -163,7 +164,7 @@ public class CreateAuctionController {
         ? SessionManager.getCurrentUser().id() : "";
 
     AsyncTask.<AuctionResponse>run(() -> {
-          String uploadedUrl = SessionManager.getApiClient().uploadImage(selectedImageFile);
+          String uploadedUrl = api.uploadImage(selectedImageFile);
           if (uploadedUrl == null) {
             throw new RuntimeException("Image upload failed");
           }
@@ -177,13 +178,12 @@ public class CreateAuctionController {
               title, itemRequest, startTime, endTime
           );
 
-          return SessionManager.getApiClient().createAuctionWithItem(request);
+          return api.createAuctionWithItem(request);
         })
         .onSuccess(result -> {
           setLoading(false);
           if (result != null) {
-            showSuccess("Auction created successfully!");
-            // Navigate to the new auction detail after a brief delay
+            showSuccess(messageLabel, "Auction created successfully!");
             javafx.application.Platform.runLater(() -> {
               Navigation.setContextData(result.id());
               Navigation.navigateTo("/fxml/auction-detail.fxml");
@@ -192,7 +192,7 @@ public class CreateAuctionController {
         })
         .onFailure(ex -> {
           setLoading(false);
-          showError("Failed to create auction: "
+          showError(messageLabel, "Failed to create auction: "
               + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
         })
         .start();
@@ -207,7 +207,7 @@ public class CreateAuctionController {
     }
 
     if (selectedDate == null || selectedTime == null) {
-      showError("Please select both start date and time, or leave both blank to start now.");
+      showError(messageLabel, "Please select both start date and time, or leave both blank to start now.");
       return null;
     }
 
@@ -217,7 +217,7 @@ public class CreateAuctionController {
   private Integer parseDurationDays() {
     Integer durationDays = durationDaysCombo.getValue();
     if (durationDays == null) {
-      showError("Please select an auction duration.");
+      showError(messageLabel, "Please select an auction duration.");
       return null;
     }
     return durationDays;
@@ -231,7 +231,7 @@ public class CreateAuctionController {
     }
 
     if (currentDetailsForm == null) {
-      showError("Please provide item-specific details.");
+      showError(messageLabel, "Please provide item-specific details.");
       return false;
     }
 
@@ -241,29 +241,9 @@ public class CreateAuctionController {
       detailsMap.putAll(updatedDetails);
       return true;
     } catch (IllegalArgumentException e) {
-      showError(e.getMessage());
+      showError(messageLabel, e.getMessage());
       return false;
     }
-  }
-
-  private void showError(String message) {
-    messageLabel.getStyleClass().removeAll("success-label");
-    if (!messageLabel.getStyleClass().contains("error-label")) {
-      messageLabel.getStyleClass().add("error-label");
-    }
-    messageLabel.setText(message);
-    messageLabel.setVisible(true);
-    messageLabel.setManaged(true);
-  }
-
-  private void showSuccess(String message) {
-    messageLabel.getStyleClass().removeAll("error-label");
-    if (!messageLabel.getStyleClass().contains("success-label")) {
-      messageLabel.getStyleClass().add("success-label");
-    }
-    messageLabel.setText(message);
-    messageLabel.setVisible(true);
-    messageLabel.setManaged(true);
   }
 
   private void hideMessage() {

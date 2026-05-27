@@ -7,12 +7,12 @@ import javafx.util.Duration;
 import org.tamtamcatworks.auction.client.AsyncTask;
 import org.tamtamcatworks.auction.client.Navigation;
 import org.tamtamcatworks.auction.client.Route;
-import org.tamtamcatworks.auction.client.SessionManager;
+import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.shared.request.RegisterRequest;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
 @Route(fxml = "/fxml/register.fxml", layout = Route.AUTH_LAYOUT)
-public class RegisterController {
+public class RegisterController extends BaseController {
 
     @FXML
     private TextField usernameField;
@@ -49,7 +49,7 @@ public class RegisterController {
         String password = passwordField.getText();
 
         if (username.isEmpty() || email.isEmpty() || fullName.isEmpty() || password.isEmpty()) {
-            showError("All fields are required.");
+            showError(messageLabel, "All fields are required.");
             return;
         }
 
@@ -57,21 +57,21 @@ public class RegisterController {
         messageLabel.setText("");
 
         AsyncTask.<UserResponse>run(() ->
-                SessionManager.getApiClient().register(new RegisterRequest(username, email, password, fullName)))
+                api.register(new RegisterRequest(username, email, password, fullName)))
             .onSuccess(user -> {
                 setLoading(false);
                 if (user != null) {
-                    showSuccess("Registration successful! Redirecting to login...");
+                    showSuccess(messageLabel, "Registration successful! Redirecting to login...");
                     PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
                     delay.setOnFinished(event -> Navigation.navigateTo("/fxml/login.fxml"));
                     delay.play();
                 } else {
-                    showError("Invalid response from server.");
+                    showError(messageLabel, "Invalid response from server.");
                 }
             })
             .onFailure(ex -> {
                 setLoading(false);
-                showError("Registration failed: " + (ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
+                showError(messageLabel, "Registration failed: " + (ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
             })
             .start();
     }
@@ -79,22 +79,6 @@ public class RegisterController {
     @FXML
     private void handleGoToLogin() {
         Navigation.navigateTo("/fxml/login.fxml");
-    }
-
-    private void showError(String message) {
-        messageLabel.getStyleClass().removeAll("success-label");
-        if (!messageLabel.getStyleClass().contains("error-label")) {
-            messageLabel.getStyleClass().add("error-label");
-        }
-        messageLabel.setText(message);
-    }
-
-    private void showSuccess(String message) {
-        messageLabel.getStyleClass().removeAll("error-label");
-        if (!messageLabel.getStyleClass().contains("success-label")) {
-            messageLabel.getStyleClass().add("success-label");
-        }
-        messageLabel.setText(message);
     }
 
     private void setLoading(boolean loading) {

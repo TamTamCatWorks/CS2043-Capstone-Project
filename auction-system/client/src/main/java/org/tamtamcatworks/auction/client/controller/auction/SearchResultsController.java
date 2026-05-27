@@ -10,12 +10,12 @@ import javafx.scene.layout.StackPane;
 import org.tamtamcatworks.auction.client.AsyncTask;
 import org.tamtamcatworks.auction.client.NavigationState;
 import org.tamtamcatworks.auction.client.Route;
-import org.tamtamcatworks.auction.client.SessionManager;
+import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 import org.tamtamcatworks.auction.shared.response.PageResponse;
 
 @Route(fxml = "/fxml/search-results.fxml", layout = Route.DASHBOARD_LAYOUT)
-public class SearchResultsController {
+public class SearchResultsController extends BaseController {
 
   @FXML private ComboBox<String> statusFilter;
   @FXML private ComboBox<String> categoryFilter;
@@ -104,7 +104,7 @@ public class SearchResultsController {
     final int sizeToLoad = pageSize;
 
     AsyncTask.<PageResponse<AuctionResponse>>run(() ->
-            SessionManager.getApiClient().searchAuctionsPaged(q, status, cat, pageToLoad, sizeToLoad))
+          api.searchAuctionsPaged(q, status, cat, pageToLoad, sizeToLoad))
         .onSuccess(page -> {
           setLoading(false);
           results = page != null ? page.content() : null;

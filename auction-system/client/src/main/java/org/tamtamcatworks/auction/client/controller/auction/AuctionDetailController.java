@@ -20,6 +20,7 @@ import org.tamtamcatworks.auction.client.Navigation;
 import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.client.ws.AuctionWebSocketClient;
+import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.tamtamcatworks.auction.shared.request.BidRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
@@ -28,7 +29,7 @@ import org.tamtamcatworks.auction.shared.response.UserResponse;
 
 /** Controller for the auction detail view with bidding. */
 @Route(fxml = "/fxml/auction-detail.fxml", layout = Route.DASHBOARD_LAYOUT)
-public class AuctionDetailController {
+public class AuctionDetailController extends BaseController {
 
   private static final DateTimeFormatter TIME_FMT =
       DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
@@ -82,7 +83,7 @@ public class AuctionDetailController {
   public void initialize() {
     auctionId = Navigation.getContextData();
     if (auctionId == null || auctionId.isEmpty()) {
-      showError("No auction ID provided.");
+      showError(errorLabel, "No auction ID provided.");
       return;
     }
     loadAuctionDetail();
@@ -158,7 +159,7 @@ public class AuctionDetailController {
     setLoading(true);
     hideError();
 
-    AsyncTask.<AuctionResponse>run(() -> SessionManager.getApiClient().getAuction(auctionId))
+    AsyncTask.<AuctionResponse>run(() -> api.getAuction(auctionId))
         .onSuccess(auction -> {
           setLoading(false);
           currentAuction = auction;
@@ -167,7 +168,7 @@ public class AuctionDetailController {
         })
         .onFailure(ex -> {
           setLoading(false);
-          showError("Failed to load auction: "
+          showError(errorLabel, "Failed to load auction: "
               + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
         })
         .start();
@@ -259,7 +260,7 @@ public class AuctionDetailController {
   }
 
   private void loadBidHistory() {
-    AsyncTask.<List<BidResponse>>run(() -> SessionManager.getApiClient().getBids(auctionId))
+    AsyncTask.<List<BidResponse>>run(() -> api.getBids(auctionId))
         .onSuccess(bids -> {
           bidHistoryContainer.getChildren().clear();
           if (bids == null || bids.isEmpty()) {
@@ -327,11 +328,11 @@ public class AuctionDetailController {
     BidRequest request = new BidRequest(amount, "MANUAL");
 
     AsyncTask.<UserResponse>run(() -> {
-          SessionManager.getApiClient().placeBid(auctionId, request);
+          api.placeBid(auctionId, request);
           if (SessionManager.getCurrentUser() == null) {
             return null;
           }
-          return SessionManager.getApiClient().getUser(SessionManager.getCurrentUser().id());
+          return api.getUser(SessionManager.getCurrentUser().id());
         })
         .onSuccess(refreshedUser -> {
           placeBidBtn.setDisable(false);
@@ -353,19 +354,19 @@ public class AuctionDetailController {
 
   @FXML
   private void handleOpenAuction() {
-    runAuctionAction(() -> SessionManager.getApiClient().openAuction(auctionId));
+    runAuctionAction(() -> api.openAuction(auctionId));
   }
 
   @FXML
   private void handleCloseAuction() {
-    runAuctionAction(() -> SessionManager.getApiClient().closeAuction(auctionId));
+    runAuctionAction(() -> api.closeAuction(auctionId));
   }
 
   private void runAuctionAction(java.util.concurrent.Callable<AuctionResponse> action) {
     AsyncTask.<AuctionResponse>run(action)
         .onSuccess(res -> loadAuctionDetail())
         .onFailure(ex -> {
-          showError("Action failed: "
+          showError(errorLabel, "Action failed: "
               + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
         })
         .start();
@@ -392,12 +393,6 @@ public class AuctionDetailController {
       case "CANCELLED" -> "status-cancelled";
       default -> "status-pending";
     };
-  }
-
-  private void showError(String msg) {
-    errorLabel.setText(msg);
-    errorLabel.setVisible(true);
-    errorLabel.setManaged(true);
   }
 
   private void hideError() {
