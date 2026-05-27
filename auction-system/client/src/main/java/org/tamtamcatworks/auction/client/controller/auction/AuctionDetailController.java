@@ -19,7 +19,6 @@ import org.tamtamcatworks.auction.client.AsyncTask;
 import org.tamtamcatworks.auction.client.Navigation;
 import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
-import org.tamtamcatworks.auction.client.ws.AuctionWebSocketClient;
 import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.tamtamcatworks.auction.shared.request.BidRequest;
@@ -75,7 +74,6 @@ public class AuctionDetailController extends BaseController {
   private String auctionId;
   private AuctionResponse currentAuction;
 
-  private AuctionWebSocketClient webSocketClient;
   private StompSession.Subscription priceSubscription;
   private StompSession.Subscription statusSubscription;
 
@@ -91,45 +89,39 @@ public class AuctionDetailController extends BaseController {
   }
 
   private void setupWebSocket() {
-    webSocketClient = new AuctionWebSocketClient();
-    webSocketClient.connect().thenAccept(session -> {
-      priceSubscription = webSocketClient.subscribeToPrice(auctionId, priceUpdate -> {
-        javafx.application.Platform.runLater(() -> {
-          currentPriceLabel.setText(String.format("$%.2f", priceUpdate.newPrice()));
-          if (currentAuction != null) {
-            currentAuction = new AuctionResponse(
-                currentAuction.id(),
-                currentAuction.title(),
-                currentAuction.sellerId(),
-                currentAuction.sellerName(),
-                currentAuction.itemId(),
-                currentAuction.itemName(),
-                currentAuction.leadingBidderId(),
-                currentAuction.leadingBidderName(),
-                currentAuction.startingPrice(),
-                priceUpdate.newPrice(),
-                currentAuction.status(),
-                currentAuction.startTime(),
-                currentAuction.endTime(),
-                currentAuction.imageUrl(),
-                currentAuction.itemDescription(),
-                currentAuction.itemType(),
-                currentAuction.specificInfo()
-            );
-          }
-          loadAuctionDetail();
-        });
+    SessionManager.subscribeToPrice(auctionId, priceUpdate -> {
+      javafx.application.Platform.runLater(() -> {
+        currentPriceLabel.setText(String.format("$%.2f", priceUpdate.newPrice()));
+        if (currentAuction != null) {
+          currentAuction = new AuctionResponse(
+              currentAuction.id(),
+              currentAuction.title(),
+              currentAuction.sellerId(),
+              currentAuction.sellerName(),
+              currentAuction.itemId(),
+              currentAuction.itemName(),
+              currentAuction.leadingBidderId(),
+              currentAuction.leadingBidderName(),
+              currentAuction.startingPrice(),
+              priceUpdate.newPrice(),
+              currentAuction.status(),
+              currentAuction.startTime(),
+              currentAuction.endTime(),
+              currentAuction.imageUrl(),
+              currentAuction.itemDescription(),
+              currentAuction.itemType(),
+              currentAuction.specificInfo()
+          );
+        }
+        loadAuctionDetail();
       });
+    }).thenAccept(sub -> priceSubscription = sub)
+      .exceptionally(ex -> { System.err.println("WebSocket subscribe failed: " + (ex != null ? ex.getMessage() : "?")); return null; });
 
-      statusSubscription = webSocketClient.subscribeToStatus(auctionId, statusUpdate -> {
-        javafx.application.Platform.runLater(() -> {
-          loadAuctionDetail();
-        });
-      });
-    }).exceptionally(ex -> {
-      System.err.println("WebSocket connection failed: " + ex.getMessage());
-      return null;
-    });
+    SessionManager.subscribeToStatus(auctionId, statusUpdate -> {
+      javafx.application.Platform.runLater(this::loadAuctionDetail);
+    }).thenAccept(sub -> statusSubscription = sub)
+      .exceptionally(ex -> { System.err.println("WebSocket subscribe failed: " + (ex != null ? ex.getMessage() : "?")); return null; });
 
     if (contentPane != null) {
       contentPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -142,16 +134,12 @@ public class AuctionDetailController extends BaseController {
 
   private void cleanupWebSocket() {
     if (priceSubscription != null) {
-      priceSubscription.unsubscribe();
+      SessionManager.unsubscribe(priceSubscription);
       priceSubscription = null;
     }
     if (statusSubscription != null) {
-      statusSubscription.unsubscribe();
+      SessionManager.unsubscribe(statusSubscription);
       statusSubscription = null;
-    }
-    if (webSocketClient != null) {
-      webSocketClient.disconnect();
-      webSocketClient = null;
     }
   }
 

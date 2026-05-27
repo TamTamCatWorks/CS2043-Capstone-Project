@@ -11,7 +11,6 @@ import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.tamtamcatworks.auction.client.SessionManager;
-import org.tamtamcatworks.auction.client.ws.AuctionWebSocketClient;
 import org.tamtamcatworks.auction.shared.response.NotificationResponse;
 import org.springframework.messaging.simp.stomp.StompSession;
 
@@ -28,7 +27,6 @@ final class NotificationMenuManager {
     private final List<NotificationResponse> currentNotifications = new ArrayList<>();
 
     private ScheduledService<List<NotificationResponse>> notificationPoller;
-    private AuctionWebSocketClient notificationWebSocketClient;
     private StompSession.Subscription notificationSubscription;
 
     NotificationMenuManager(MenuButton userMenuButton,
@@ -51,12 +49,8 @@ final class NotificationMenuManager {
             notificationPoller.cancel();
         }
         if (notificationSubscription != null) {
-            notificationSubscription.unsubscribe();
+            SessionManager.unsubscribe(notificationSubscription);
             notificationSubscription = null;
-        }
-        if (notificationWebSocketClient != null) {
-            notificationWebSocketClient.disconnect();
-            notificationWebSocketClient = null;
         }
     }
 
@@ -81,12 +75,10 @@ final class NotificationMenuManager {
     }
 
     private void startNotificationWebSocket() {
-        notificationWebSocketClient = new AuctionWebSocketClient();
-        notificationWebSocketClient.connect().thenAccept(session -> {
-            notificationSubscription = notificationWebSocketClient.subscribeToNotifications(notification ->
-                Platform.runLater(() -> onNotificationReceived(notification))
-            );
-        });
+        SessionManager.subscribeToNotifications(notification ->
+            Platform.runLater(() -> onNotificationReceived(notification))
+        ).thenAccept(sub -> notificationSubscription = sub)
+          .exceptionally(ex -> { System.err.println("Notification WebSocket failed: " + (ex != null ? ex.getMessage() : "?")); return null; });
     }
 
     private void onNotificationReceived(NotificationResponse notification) {
