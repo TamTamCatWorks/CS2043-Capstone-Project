@@ -1,14 +1,11 @@
 package org.tamtamcatworks.auction.client.controller.shell;
 
 import javafx.application.Platform;
-import javafx.concurrent.ScheduledService;
-import javafx.concurrent.Task;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.layout.HBox;
-import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.shared.response.NotificationResponse;
@@ -26,7 +23,6 @@ final class NotificationMenuManager {
     private final List<MenuItem> renderedNotificationItems = new ArrayList<>();
     private final List<NotificationResponse> currentNotifications = new ArrayList<>();
 
-    private ScheduledService<List<NotificationResponse>> notificationPoller;
     private StompSession.Subscription notificationSubscription;
 
     NotificationMenuManager(MenuButton userMenuButton,
@@ -40,14 +36,10 @@ final class NotificationMenuManager {
 
     void start() {
         refreshNotificationMenu(List.of());
-        startNotificationPolling();
         startNotificationWebSocket();
     }
 
     void stop() {
-        if (notificationPoller != null) {
-            notificationPoller.cancel();
-        }
         if (notificationSubscription != null) {
             SessionManager.unsubscribe(notificationSubscription);
             notificationSubscription = null;
@@ -93,31 +85,6 @@ final class NotificationMenuManager {
                     return null;
                 });
         }
-    }
-
-    private void startNotificationPolling() {
-        notificationPoller = new ScheduledService<>() {
-            @Override
-            protected Task<List<NotificationResponse>> createTask() {
-                return new Task<>() {
-                    @Override
-                    protected List<NotificationResponse> call() {
-                        try {
-                            return SessionManager.getApiClient().getNotifications();
-                        } catch (Exception e) {
-                            return List.of();
-                        }
-                    }
-                };
-            }
-        };
-        notificationPoller.setPeriod(Duration.seconds(30));
-        notificationPoller.setOnSucceeded(e -> Platform.runLater(() -> {
-            currentNotifications.clear();
-            currentNotifications.addAll(notificationPoller.getValue());
-            refreshNotificationMenu(List.copyOf(currentNotifications));
-        }));
-        notificationPoller.start();
     }
 
     private void refreshNotificationMenu(List<NotificationResponse> notifications) {
