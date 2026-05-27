@@ -33,12 +33,9 @@ public class LayoutController {
     @FXML
     public void initialize() {
         UserResponse user = SessionManager.getCurrentUser();
-        if (user != null) {
-            userMenuButton.setText("");
-            userMenuButton.setAccessibleText(user.fullName());
-            userNameItem.setText(user.fullName());
-            userEmailItem.setText(user.email());
-        }
+        updateUserMenu(user);
+
+        SessionManager.currentUserProperty().addListener((obs, oldUser, updatedUser) -> updateUserMenu(updatedUser));
 
         notificationMenuManager = new NotificationMenuManager(
             userMenuButton, notificationsHeaderItem, notificationsSeparatorItem);
@@ -111,6 +108,21 @@ public class LayoutController {
 
         boolean active = focused || showing;
         headerSearchShell.pseudoClassStateChanged(HEADER_SEARCH_ACTIVE, active);
+    }
+
+    private void updateUserMenu(UserResponse user) {
+        if (user == null) {
+            userMenuButton.setText("");
+            userMenuButton.setAccessibleText("");
+            userNameItem.setText("");
+            userEmailItem.setText("");
+            return;
+        }
+
+        userMenuButton.setText("");
+        userMenuButton.setAccessibleText(user.fullName());
+        userNameItem.setText(user.fullName());
+        userEmailItem.setText(user.email());
     }
 
     @FXML

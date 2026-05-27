@@ -12,8 +12,10 @@ import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.persist.repository.AuctionRepository;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
 import org.tamtamcatworks.auction.service.event.AuctionEvent;
+import org.tamtamcatworks.auction.service.event.UserStateEvent;
 import org.tamtamcatworks.auction.service.item.ItemService;
 import org.tamtamcatworks.auction.service.mapper.AuctionMapper;
+import org.tamtamcatworks.auction.service.mapper.UserMapper;
 import org.tamtamcatworks.auction.shared.request.AuctionRequest;
 import org.tamtamcatworks.auction.shared.request.CreateAuctionRequest;
 import org.tamtamcatworks.auction.shared.request.ItemRequest;
@@ -32,17 +34,20 @@ public class AuctionService {
     private final ItemService itemService;
     private final UserRepository userRepository;
     private final AuctionMapper auctionMapper;
+    private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
 
     public AuctionService(AuctionRepository auctionRepository,
                           UserRepository userRepository,
                           ItemService itemService,
                           AuctionMapper auctionMapper,
+                          UserMapper userMapper,
                           ApplicationEventPublisher eventPublisher) {
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.itemService = itemService;
         this.auctionMapper = auctionMapper;
+        this.userMapper = userMapper;
         this.eventPublisher = eventPublisher;
     }
 
@@ -114,6 +119,10 @@ public class AuctionService {
         if (leadingBidder != null && currentPrice > 0) {
             leadingBidder.consumeHeldFunds(currentPrice);
             userRepository.save(leadingBidder);
+            eventPublisher.publishEvent(new UserStateEvent(
+                leadingBidder.getId(),
+                userMapper.toResponse(leadingBidder)
+            ));
         }
         Auction saved = auctionRepository.save(auction);
         eventPublisher.publishEvent(new AuctionEvent(
@@ -132,6 +141,10 @@ public class AuctionService {
         if (leadingBidder != null && currentPrice > 0) {
             leadingBidder.releaseHeldFunds(currentPrice);
             userRepository.save(leadingBidder);
+            eventPublisher.publishEvent(new UserStateEvent(
+                leadingBidder.getId(),
+                userMapper.toResponse(leadingBidder)
+            ));
         }
         Auction saved = auctionRepository.save(auction);
         eventPublisher.publishEvent(new AuctionEvent(

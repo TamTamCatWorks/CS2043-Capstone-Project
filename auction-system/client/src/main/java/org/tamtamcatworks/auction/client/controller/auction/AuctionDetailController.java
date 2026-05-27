@@ -317,16 +317,10 @@ public class AuctionDetailController extends BaseController {
 
     AsyncTask.<UserResponse>run(() -> {
           api.placeBid(auctionId, request);
-          if (SessionManager.getCurrentUser() == null) {
-            return null;
-          }
-          return api.getUser(SessionManager.getCurrentUser().id());
+          return null;
         })
         .onSuccess(refreshedUser -> {
           placeBidBtn.setDisable(false);
-          if (refreshedUser != null) {
-            SessionManager.setCurrentUser(refreshedUser);
-          }
           bidAmountField.clear();
           showBidMessage("Bid placed successfully!", false);
           // Refresh the auction detail to show updated price and bid history

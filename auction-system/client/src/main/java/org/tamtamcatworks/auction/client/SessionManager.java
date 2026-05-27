@@ -40,6 +40,7 @@ public class SessionManager {
   private static AuctionWebSocketClient webSocketClient = null;
   private static CompletableFuture<AuctionWebSocketClient> webSocketClientFuture = null;
   private static final List<StompSession.Subscription> activeSubscriptions = new ArrayList<>();
+  private static StompSession.Subscription userStateSubscription = null;
 
   // ── API client ─────────────────────────────────────────────────────────────
 
@@ -68,13 +69,19 @@ public class SessionManager {
    * notified immediately on the calling thread (should be the FX thread).
    */
   public static void setCurrentUser(UserResponse user) {
-    currentUserProp.set(user);
+    Runnable apply = () -> currentUserProp.set(user);
+    if (Platform.isFxApplicationThread()) {
+      apply.run();
+    } else {
+      Platform.runLater(apply);
+    }
+
     if (user != null) {
-      // Establish shared WebSocket connection once for this session.
-      ensureWebSocketConnected().exceptionally(ex -> {
-        System.err.println("WebSocket connect failed: " + (ex != null ? ex.getMessage() : "?"));
-        return null;
-      });
+      ensureWebSocketConnected().thenCompose(ws -> ensureUserStateSubscription(ws, user.id()))
+          .exceptionally(ex -> {
+            System.err.println("WebSocket connect failed: " + (ex != null ? ex.getMessage() : "?"));
+            return null;
+          });
     }
   }
 
@@ -109,7 +116,11 @@ public class SessionManager {
     // Tear down any session-level websocket subscriptions and connection
     // before clearing the user so no callbacks remain active after logout.
     disconnectWebSocket();
-    currentUserProp.set(null);
+    if (Platform.isFxApplicationThread()) {
+      currentUserProp.set(null);
+    } else {
+      Platform.runLater(() -> currentUserProp.set(null));
+    }
   }
 
   // --- WebSocket helpers (session-scoped) ---------------------------------
@@ -124,6 +135,23 @@ public class SessionManager {
     }
 
     return webSocketClientFuture;
+  }
+
+  private static synchronized CompletableFuture<StompSession.Subscription> ensureUserStateSubscription(
+      AuctionWebSocketClient ws, String userId) {
+    if (userStateSubscription != null) {
+      return CompletableFuture.completedFuture(userStateSubscription);
+    }
+
+    StompSession.Subscription sub = ws.subscribeToUserState(userId,
+        user -> Platform.runLater(() -> setCurrentUser(user)));
+    if (sub != null) {
+      userStateSubscription = sub;
+      synchronized (activeSubscriptions) {
+        activeSubscriptions.add(sub);
+      }
+    }
+    return CompletableFuture.completedFuture(sub);
   }
 
   public static CompletableFuture<StompSession.Subscription> subscribeToPrice(String auctionId,
@@ -168,6 +196,7 @@ public class SessionManager {
       try { s.unsubscribe(); } catch (Exception ignored) {}
     }
     activeSubscriptions.clear();
+    userStateSubscription = null;
 
     if (webSocketClient != null) {
       try { webSocketClient.disconnect(); } catch (Exception ignored) {}

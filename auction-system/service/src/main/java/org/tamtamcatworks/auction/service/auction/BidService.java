@@ -11,7 +11,9 @@ import org.tamtamcatworks.auction.persist.repository.AuctionRepository;
 import org.tamtamcatworks.auction.persist.repository.BidTransactionRepository;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
 import org.tamtamcatworks.auction.service.event.BidEvent;
+import org.tamtamcatworks.auction.service.event.UserStateEvent;
 import org.tamtamcatworks.auction.service.mapper.BidMapper;
+import org.tamtamcatworks.auction.service.mapper.UserMapper;
 import org.tamtamcatworks.auction.shared.request.BidRequest;
 import org.tamtamcatworks.auction.shared.response.BidResponse;
 
@@ -26,17 +28,20 @@ public class BidService {
     private final BidTransactionRepository bidRepository;
     private final UserRepository userRepository;
     private final BidMapper bidMapper;
+    private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
 
     public BidService(AuctionRepository auctionRepository,
                       BidTransactionRepository bidRepository,
                       UserRepository userRepository,
                       BidMapper bidMapper,
+                      UserMapper userMapper,
                       ApplicationEventPublisher eventPublisher) {
         this.auctionRepository = auctionRepository;
         this.bidRepository = bidRepository;
         this.userRepository = userRepository;
         this.bidMapper = bidMapper;
+        this.userMapper = userMapper;
         this.eventPublisher = eventPublisher;
     }
 
@@ -85,6 +90,11 @@ public class BidService {
             previousLeader != null ? previousLeader.getId() : null,
             request.amount()
         ));
+
+        eventPublisher.publishEvent(new UserStateEvent(bidder.getId(), userMapper.toResponse(bidder)));
+        if (previousLeader != null && !previousLeader.getId().equals(bidder.getId())) {
+            eventPublisher.publishEvent(new UserStateEvent(previousLeader.getId(), userMapper.toResponse(previousLeader)));
+        }
 
         return bidMapper.toResponse(tx);
     }

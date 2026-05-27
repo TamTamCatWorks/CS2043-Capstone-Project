@@ -68,10 +68,10 @@ public class DashboardController {
     UserResponse user = SessionManager.getCurrentUser();
     populateProfile(user);
 
-    // React to user updates from any controller (e.g. TopUpViewController)
+    // React to user updates from any source, including websocket-driven state changes.
     SessionManager.currentUserProperty().addListener((obs, old, updated) -> {
       if (updated != null) {
-        updateBalanceLabels(updated);
+        populateProfile(updated);
       }
     });
 

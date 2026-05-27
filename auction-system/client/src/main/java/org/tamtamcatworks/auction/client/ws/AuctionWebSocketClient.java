@@ -10,6 +10,7 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 import org.springframework.web.socket.sockjs.client.RestTemplateXhrTransport;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.tamtamcatworks.auction.shared.response.NotificationResponse;
+import org.tamtamcatworks.auction.shared.response.UserResponse;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -142,6 +143,33 @@ public class AuctionWebSocketClient {
             public void handleFrame(@NonNull StompHeaders headers, @Nullable Object payload) {
                 if (payload instanceof NotificationResponse notification) {
                     onNotification.accept(notification);
+                }
+            }
+        });
+    }
+
+    /**
+     * Subscribes to real-time updates for the currently logged-in user.
+     *
+     * @param onUserState callback when a fresh user snapshot arrives
+     * @return the subscription handle, or null if not connected
+     */
+    public StompSession.Subscription subscribeToUserState(String userId,
+            Consumer<UserResponse> onUserState) {
+        if (session == null || !session.isConnected()) {
+            return null;
+        }
+
+        return session.subscribe("/topic/user-state/" + userId, new StompFrameHandler() {
+            @Override
+            public @NonNull Type getPayloadType(@NonNull StompHeaders headers) {
+                return UserResponse.class;
+            }
+
+            @Override
+            public void handleFrame(@NonNull StompHeaders headers, @Nullable Object payload) {
+                if (payload instanceof UserResponse userState) {
+                    onUserState.accept(userState);
                 }
             }
         });

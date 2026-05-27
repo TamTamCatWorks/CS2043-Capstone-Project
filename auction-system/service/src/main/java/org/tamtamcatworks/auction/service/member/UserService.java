@@ -1,5 +1,6 @@
 package org.tamtamcatworks.auction.service.member;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import org.tamtamcatworks.auction.model.user.BuyerProfile;
 import org.tamtamcatworks.auction.model.user.SellerProfile;
 import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
+import org.tamtamcatworks.auction.service.event.UserStateEvent;
 import org.tamtamcatworks.auction.service.mapper.UserMapper;
 import org.tamtamcatworks.auction.shared.request.RegisterRequest;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
@@ -20,13 +22,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       UserMapper userMapper) {
+                       UserMapper userMapper,
+                       ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -90,7 +95,9 @@ public class UserService {
         User user = findById(id);
         user.addBalance(amount);
         userRepository.save(user);
-        return userMapper.toResponse(user);
+        UserResponse response = userMapper.toResponse(user);
+        eventPublisher.publishEvent(new UserStateEvent(id, response));
+        return response;
     }
 
     private void validateRegistrationInputs(String username, String email) {
