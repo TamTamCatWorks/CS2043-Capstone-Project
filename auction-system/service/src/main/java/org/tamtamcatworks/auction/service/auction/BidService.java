@@ -17,6 +17,7 @@ import org.tamtamcatworks.auction.service.mapper.UserMapper;
 import org.tamtamcatworks.auction.shared.request.BidRequest;
 import org.tamtamcatworks.auction.shared.response.BidResponse;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -30,19 +31,22 @@ public class BidService {
     private final BidMapper bidMapper;
     private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final AntiSnipeProperties antiSnipe;
 
     public BidService(AuctionRepository auctionRepository,
                       BidTransactionRepository bidRepository,
                       UserRepository userRepository,
                       BidMapper bidMapper,
                       UserMapper userMapper,
-                      ApplicationEventPublisher eventPublisher) {
+                      ApplicationEventPublisher eventPublisher,
+                      AntiSnipeProperties antiSnipe) {
         this.auctionRepository = auctionRepository;
         this.bidRepository = bidRepository;
         this.userRepository = userRepository;
         this.bidMapper = bidMapper;
         this.userMapper = userMapper;
         this.eventPublisher = eventPublisher;
+        this.antiSnipe = antiSnipe;
     }
 
     @Transactional
@@ -79,6 +83,14 @@ public class BidService {
 
         BidTransaction tx = bidMapper.toEntity(request, auction, bidder);
         auction.recordBid(tx);
+
+        LocalDateTime snipeWindowStart = auction.getEndTime()
+                .minusSeconds(antiSnipe.windowSeconds());
+
+        if (!LocalDateTime.now().isBefore(snipeWindowStart)) {
+            auction.extendEndTime(antiSnipe.extensionSeconds());
+        }
+
         auctionRepository.save(auction);
         userRepository.save(bidder);
 
