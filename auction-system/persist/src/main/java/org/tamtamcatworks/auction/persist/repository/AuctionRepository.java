@@ -9,9 +9,12 @@ import org.tamtamcatworks.auction.model.item.Item;
 import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.AuctionStatus;
 import org.tamtamcatworks.auction.model.user.User;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AuctionRepository extends JpaRepository<Auction, String> {
+    List<Auction> findByStatusAndEndTimeBefore(AuctionStatus status, LocalDateTime time);
     List<Auction> findByStatus(AuctionStatus status);
     List<Auction> findBySeller(User seller);
 
