@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import org.tamtamcatworks.auction.client.AsyncTask;
+import org.tamtamcatworks.auction.client.NavigationState;
 import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
@@ -44,7 +45,7 @@ public class SearchResultsController {
     });
 
     categoryFilter.getItems().addAll("All categories", "Art", "Electronics", "Vehicle", "Other");
-    String pendingCategory = SessionManager.getPendingSearchCategory();
+    String pendingCategory = NavigationState.getPendingSearchCategory();
     categoryFilter.setValue(pendingCategory != null && !pendingCategory.isBlank()
         ? pendingCategory
         : "All categories");
@@ -88,8 +89,8 @@ public class SearchResultsController {
     errorLabel.setManaged(false);
     emptyPane.setVisible(false);
     emptyPane.setManaged(false);
-    String pendingQuery = SessionManager.getPendingSearchQuery();
-    String pendingCategory = categoryFilter != null ? categoryFilter.getValue() : SessionManager.getPendingSearchCategory();
+    String pendingQuery = NavigationState.getPendingSearchQuery();
+    String pendingCategory = categoryFilter != null ? categoryFilter.getValue() : NavigationState.getPendingSearchCategory();
     if (pendingQuery == null) pendingQuery = "";
     if (pendingCategory == null) pendingCategory = "";
 

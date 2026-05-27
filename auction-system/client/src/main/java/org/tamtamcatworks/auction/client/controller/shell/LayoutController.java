@@ -10,6 +10,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.SeparatorMenuItem;
 import org.tamtamcatworks.auction.client.Navigation;
+import org.tamtamcatworks.auction.client.NavigationState;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
@@ -95,8 +96,8 @@ public class LayoutController {
 
         String query = headerSearchField.getText() != null ? headerSearchField.getText().trim() : "";
         String category = headerCategoryFilter != null ? headerCategoryFilter.getValue() : "All categories";
-        SessionManager.addRecentSearch(query.isEmpty() ? category : query);
-        SessionManager.setPendingSearch(query, category);
+            NavigationState.addRecentSearch(query.isEmpty() ? category : query);
+            NavigationState.setPendingSearch(query, category);
         Navigation.navigateTo("/fxml/search-results.fxml");
     }
 
@@ -127,7 +128,7 @@ public class LayoutController {
     @FXML
     private void handleOpenNotificationsFromMenu() {
         // Request dashboard to open the Notifications view and navigate there
-        SessionManager.setDashboardViewPath("/fxml/dashboard/notifications.fxml");
+            NavigationState.setDashboardViewPath("/fxml/dashboard/notifications.fxml");
         Navigation.navigateTo("/fxml/dashboard.fxml");
     }
 }

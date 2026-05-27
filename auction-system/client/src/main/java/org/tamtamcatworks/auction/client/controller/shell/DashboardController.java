@@ -8,6 +8,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.StackPane;
 import org.tamtamcatworks.auction.client.AsyncTask;
 import org.tamtamcatworks.auction.client.Navigation;
+import org.tamtamcatworks.auction.client.NavigationState;
 import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.client.ViewLoader;
@@ -80,14 +81,14 @@ public class DashboardController {
     menuTopUpButton.setOnAction(e -> handleMenuTopUp());
 
     // Honor pending dashboard view request (e.g. from notification menu)
-    String pending = SessionManager.getDashboardViewPath();
+    String pending = NavigationState.getDashboardViewPath();
     if (pending != null && !pending.isBlank()) {
       Button preselect = pending.endsWith("notifications.fxml") ? menuNotificationsButton
           : pending.endsWith("topup.fxml") ? menuTopUpButton
           : menuHomeButton;
       menuTabs.select(preselect);
       ViewLoader.into(rightContentArea).load(pending);
-      SessionManager.setDashboardViewPath(null);
+      NavigationState.setDashboardViewPath(null);
     } else {
       menuTabs.select(menuHomeButton);
       ViewLoader.into(rightContentArea).load("/fxml/dashboard/home.fxml");

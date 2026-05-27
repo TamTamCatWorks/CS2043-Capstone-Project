@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import org.tamtamcatworks.auction.client.AsyncTask;
+import org.tamtamcatworks.auction.client.NavigationState;
 import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
@@ -28,8 +29,8 @@ public class AuctionsListController {
 
   @FXML
   public void initialize() {
-    String pendingQuery = SessionManager.getPendingSearchQuery();
-    String pendingCategory = SessionManager.getPendingSearchCategory();
+    String pendingQuery = NavigationState.getPendingSearchQuery();
+    String pendingCategory = NavigationState.getPendingSearchCategory();
     if (pendingQuery != null) {
       searchQuery = pendingQuery.trim();
     }
@@ -37,7 +38,7 @@ public class AuctionsListController {
       searchCategory = pendingCategory.trim();
     }
     if (pendingQuery != null || pendingCategory != null) {
-      SessionManager.clearPendingSearch();
+      NavigationState.clearPendingSearch();
     }
 
     statusFilter.getItems().addAll("ALL", "ACTIVE", "PENDING", "CLOSED");
