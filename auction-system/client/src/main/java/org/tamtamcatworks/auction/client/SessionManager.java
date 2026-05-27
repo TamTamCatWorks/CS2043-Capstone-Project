@@ -1,14 +1,13 @@
 package org.tamtamcatworks.auction.client;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import org.tamtamcatworks.auction.shared.response.UserResponse;
 import org.tamtamcatworks.auction.client.ws.AuctionWebSocketClient;
+import org.tamtamcatworks.auction.shared.response.UserResponse;
 import org.springframework.messaging.simp.stomp.StompSession;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -82,6 +81,25 @@ public class SessionManager {
   /** Returns {@code true} when a user is logged in. */
   public static boolean isLoggedIn() {
     return currentUserProp.get() != null;
+  }
+
+  /**
+   * Refresh the current user from the API and publish the updated session
+   * state on the JavaFX thread.
+   */
+  public static CompletableFuture<UserResponse> refreshCurrentUser() {
+    UserResponse currentUser = getCurrentUser();
+    if (currentUser == null) {
+      return CompletableFuture.completedFuture(null);
+    }
+
+    return CompletableFuture.supplyAsync(() -> apiClient.getUser(currentUser.id()))
+        .whenComplete((updatedUser, ex) -> {
+          if (ex != null || updatedUser == null) {
+            return;
+          }
+          Platform.runLater(() -> setCurrentUser(updatedUser));
+        });
   }
 
   /**

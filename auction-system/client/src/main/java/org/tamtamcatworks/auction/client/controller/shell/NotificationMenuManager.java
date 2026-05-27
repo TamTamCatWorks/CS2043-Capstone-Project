@@ -85,6 +85,14 @@ final class NotificationMenuManager {
         currentNotifications.removeIf(existing -> existing.id().equals(notification.id()));
         currentNotifications.add(0, notification);
         refreshNotificationMenu(List.copyOf(currentNotifications));
+
+        if ("OUTBID".equals(notification.type())) {
+            SessionManager.refreshCurrentUser()
+                .exceptionally(ex -> {
+                    System.err.println("Session refresh failed: " + (ex != null ? ex.getMessage() : "?"));
+                    return null;
+                });
+        }
     }
 
     private void startNotificationPolling() {
