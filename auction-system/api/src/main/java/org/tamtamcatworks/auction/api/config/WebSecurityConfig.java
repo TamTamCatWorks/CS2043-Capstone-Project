@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,8 +17,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 @Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
 public class WebSecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -59,8 +63,10 @@ public class WebSecurityConfig {
                 "/notifications",
                 "/notifications/*/read",
                 "/notifications/read-all",
-                "/ws/**"
+                "/ws/**",
+                "/admin/**"
             ))
+
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .securityContext(context -> context.securityContextRepository(securityContextRepository()))
             .exceptionHandling(exception -> exception
@@ -71,6 +77,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/users/register", "/users/login").permitAll()
                 .requestMatchers(HttpMethod.GET, "/items/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/auctions", "/auctions/*", "/auctions/*/bids").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/notifications/**").authenticated()
                 .anyRequest().authenticated()
             );
