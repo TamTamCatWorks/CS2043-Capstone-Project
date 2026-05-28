@@ -61,6 +61,26 @@ public class NotificationService {
             default                -> "";
         };
         repo.save(new Notification(event.sellerId(), type, msg));
+
+        // Notify winner (leading bidder) upon closure
+        if (type == NotificationType.AUCTION_CLOSED && event.leadingBidderId() != null) {
+            repo.save(new Notification(
+                event.leadingBidderId(),
+                NotificationType.AUCTION_CLOSED,
+                String.format("Congratulations! You won the auction \"%s\" for $%.2f.",
+                    event.auctionTitle(), event.currentPrice())
+            ));
+        }
+
+        // Notify leading bidder upon cancellation
+        if (type == NotificationType.AUCTION_CANCELLED && event.leadingBidderId() != null) {
+            repo.save(new Notification(
+                event.leadingBidderId(),
+                NotificationType.AUCTION_CANCELLED,
+                String.format("The auction \"%s\" was cancelled. Your bid of $%.2f has been refunded.",
+                    event.auctionTitle(), event.currentPrice())
+            ));
+        }
     }
 
     // ── Query Methods ─────────────────────────────────────────────────────────

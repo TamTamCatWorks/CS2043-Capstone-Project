@@ -16,6 +16,8 @@ public record AuctionEvent(
     String auctionId,
     String auctionTitle,
     String sellerId,
+    String leadingBidderId,
+    double currentPrice,
     AuctionStatus newStatus,
     String reason   // non-null only when CANCELLED
 ) {}
