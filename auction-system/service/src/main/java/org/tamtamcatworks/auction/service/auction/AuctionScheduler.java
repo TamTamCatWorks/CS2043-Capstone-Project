@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.AuctionStatus;
-import org.tamtamcatworks.auction.persist.repository.AuctionRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,22 +16,22 @@ public class AuctionScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(AuctionScheduler.class);
 
-    private final AuctionRepository auctionRepository;
+    private final AuctionService auctionService;
 
-    public AuctionScheduler(AuctionRepository auctionRepository) {
-        this.auctionRepository = auctionRepository;
+    public AuctionScheduler(AuctionService auctionService) {
+        this.auctionService = auctionService;
     }
 
     @Scheduled(fixedRate = 30_000)   // runs every 30 seconds
     @Transactional
     public void closeExpiredAuctions() {
-        List<Auction> expired = auctionRepository
-                .findByStatusAndEndTimeBefore(AuctionStatus.ACTIVE, LocalDateTime.now());
+        List<Auction> expired = auctionService.findByStatus(AuctionStatus.ACTIVE).stream()
+            .filter(auction -> auction.getEndTime().isBefore(LocalDateTime.now()))
+            .toList();
 
         for (Auction auction : expired) {
             try {
-                auction.close();
-                auctionRepository.save(auction);
+                auctionService.close(auction.getId());
                 log.info("Auto-closed auction: {} ({})", auction.getTitle(), auction.getId());
             } catch (IllegalStateException e) {
                 log.warn("Could not auto-close auction {}: {}", auction.getId(), e.getMessage());
