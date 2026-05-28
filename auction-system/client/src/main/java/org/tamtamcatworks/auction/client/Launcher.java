@@ -43,7 +43,12 @@ public class Launcher extends Application {
             org.tamtamcatworks.auction.client.controller.auction.AuctionDetailController.class,
             org.tamtamcatworks.auction.client.controller.auction.CreateAuctionController.class,
             org.tamtamcatworks.auction.client.controller.auction.SearchResultsController.class,
-            org.tamtamcatworks.auction.client.controller.shell.DashboardController.class
+            org.tamtamcatworks.auction.client.controller.shell.DashboardController.class,
+            org.tamtamcatworks.auction.client.controller.admin.dashboard.AdminDashboardController.class,
+            org.tamtamcatworks.auction.client.controller.admin.users.UsersManagementController.class,
+            org.tamtamcatworks.auction.client.controller.admin.auctions.AuctionsManagementController.class,
+            org.tamtamcatworks.auction.client.controller.admin.reports.ReportsManagementController.class,
+            org.tamtamcatworks.auction.client.controller.admin.logs.AuditLogsController.class
         );
 
         // Set Navigation stage
@@ -56,7 +61,8 @@ public class Launcher extends Application {
         stage.setMaxHeight(900);
 
         // Load initial view — login screen using layout routing
-        Navigation.navigateTo(FXML_DIR + "login.fxml");
+        Navigation.navigateTo(
+            FXML_DIR + "login.fxml");
 
         Platform.runLater(() -> {
             stage.show();

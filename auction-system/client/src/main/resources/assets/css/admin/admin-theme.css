@@ -1,0 +1,91 @@
+.root {
+
+    -fx-font-family: "Segoe UI";
+
+    -fx-background-color: #f5f7fa;
+}
+
+/* =========================
+   COLORS
+========================= */
+
+.primary-button {
+
+    -fx-background-color: #2563eb;
+
+    -fx-text-fill: white;
+
+    -fx-background-radius: 8;
+}
+
+.danger-button {
+
+    -fx-background-color: #dc2626;
+
+    -fx-text-fill: white;
+
+    -fx-background-radius: 8;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.admin-card {
+
+    -fx-background-color: white;
+
+    -fx-border-color: #d1d5db;
+
+    -fx-border-radius: 12;
+
+    -fx-background-radius: 12;
+
+    -fx-padding: 20;
+}
+
+/* =========================
+   TITLES
+========================= */
+
+.page-title {
+
+    -fx-font-size: 28px;
+
+    -fx-font-weight: bold;
+}
+
+.section-title {
+
+    -fx-font-size: 20px;
+
+    -fx-font-weight: bold;
+}
+
+.toast {
+
+    -fx-padding: 12 20 12 20;
+
+    -fx-text-fill: white;
+
+    -fx-background-radius: 12;
+
+    -fx-font-size: 14px;
+
+    -fx-font-weight: bold;
+}
+
+.toast-success {
+
+    -fx-background-color: #16a34a;
+}
+
+.toast-error {
+
+    -fx-background-color: #dc2626;
+}
+
+.toast-info {
+
+    -fx-background-color: #2563eb;
+}

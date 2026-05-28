@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      spacing="20"
+      prefWidth="1200"
+      prefHeight="800"
+      alignment="TOP_LEFT"
+      fx:controller="org.tamtamcatworks.auction.client.controller.admin.dashboard.AdminDashboardController">
+
+    <Label text="Admin Dashboard"
+           styleClass="section-title"/>
+
+    <HBox fx:id="statsContainer"
+           spacing="20"/>
+
+    <VBox spacing="10">
+
+        <Label text="System Overview"
+               styleClass="section-title"/>
+
+        <Label fx:id="systemOverviewLabel"
+               text="Loading..."/>
+
+    </VBox>
+
+    <VBox spacing="20">
+
+        <Label text="Analytics"
+              styleClass="section-title"/>
+
+        <VBox fx:id="analyticsContainer"/>
+    </VBox>
+
+</VBox>
