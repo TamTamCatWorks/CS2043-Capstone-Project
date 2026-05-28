@@ -5,6 +5,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.tamtamcatworks.auction.model.user.AdminProfile;
 import org.tamtamcatworks.auction.model.user.BuyerProfile;
 import org.tamtamcatworks.auction.model.user.SellerProfile;
 import org.tamtamcatworks.auction.model.user.User;
@@ -14,6 +15,7 @@ import org.tamtamcatworks.auction.service.mapper.UserMapper;
 import org.tamtamcatworks.auction.shared.request.RegisterRequest;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -107,5 +109,29 @@ public class UserService {
         if (userRepository.existsByUsername(username)) {
             throw new IllegalArgumentException("Username already taken.");
         }
+    }
+
+    @Transactional
+    public UserResponse promoteToAdmin(String userId, List<String> permissions) {
+        User user = findById(userId);
+        AdminProfile adminProfile = user.getAdminProfile();
+        if (adminProfile == null) {
+            adminProfile = new AdminProfile(permissions);
+            user.setAdminProfile(adminProfile);
+        } else {
+            adminProfile.setPermissions(permissions);
+        }
+        adminProfile.logAction("Promoted to admin with permissions: " + permissions);
+        User saved = userRepository.save(user);
+        return toResponse(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getAdminActionLogs(String adminUserId) {
+        User user = findById(adminUserId);
+        if (user.getAdminProfile() == null) {
+            throw new IllegalArgumentException("User is not an administrator.");
+        }
+        return user.getAdminProfile().getActionLog();
     }
 }
