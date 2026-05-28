@@ -205,4 +205,20 @@ public class SessionManager {
     webSocketClientFuture = null;
   }
 
+  public static boolean isAdmin() {
+
+    var user = getCurrentUser();
+
+    return user != null
+            && user.isAdmin();
+  }
+
+  public static boolean hasPermission(String permission) {
+
+    var user = getCurrentUser();
+
+    return user != null
+            && user.permissions() != null
+            && user.permissions().contains(permission);
+  }
 }
