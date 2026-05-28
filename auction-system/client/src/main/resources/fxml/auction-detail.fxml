@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
@@ -88,6 +90,24 @@
                 </VBox>
             </VBox>
 
+            <!-- Bid Trend Chart -->
+            <VBox fx:id="bidTrendBox" styleClass="detail-panel bid-chart-panel" spacing="10.0" VBox.vgrow="ALWAYS"
+                visible="false" managed="false">
+                <Label text="BID TREND" styleClass="info-value"/>
+                <LineChart fx:id="bidHistoryChart" animated="false" createSymbols="true" legendVisible="false"
+                           minHeight="220.0" prefHeight="240.0" verticalZeroLineVisible="false"
+                           styleClass="bid-trend-chart">
+                    <xAxis>
+                        <NumberAxis fx:id="bidHistoryXAxis" autoRanging="false" lowerBound="1" upperBound="1"
+                                    tickUnit="1" label="Bid #"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis fx:id="bidHistoryYAxis" autoRanging="false" lowerBound="0" upperBound="1"
+                                    tickUnit="1" label="Amount ($)"/>
+                    </yAxis>
+                </LineChart>
+            </VBox>
+            
             <!-- Owner Controls -->
             <HBox fx:id="ownerControls" spacing="10.0" visible="false" managed="false">
                 <Button fx:id="openBtn" text="Open Auction" onAction="#handleOpenAuction" styleClass="btn-success"/>

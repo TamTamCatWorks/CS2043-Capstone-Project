@@ -4,6 +4,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
@@ -64,6 +67,10 @@ public class AuctionDetailController extends BaseController {
 
   // Bidding panel
   @FXML private Label currentPriceLabel;
+  @FXML private VBox bidTrendBox;
+  @FXML private LineChart<Number, Number> bidHistoryChart;
+  @FXML private NumberAxis bidHistoryXAxis;
+  @FXML private NumberAxis bidHistoryYAxis;
   @FXML private VBox bidFormBox;
   @FXML private TextField bidAmountField;
   @FXML private Label bidMessageLabel;
@@ -252,11 +259,13 @@ public class AuctionDetailController extends BaseController {
         .onSuccess(bids -> {
           bidHistoryContainer.getChildren().clear();
           if (bids == null || bids.isEmpty()) {
+            clearBidChart();
             noBidsLabel.setVisible(true);
             noBidsLabel.setManaged(true);
           } else {
             noBidsLabel.setVisible(false);
             noBidsLabel.setManaged(false);
+            populateBidChart(bids);
             for (BidResponse bid : bids) {
               bidHistoryContainer.getChildren().add(createBidRow(bid));
             }
@@ -268,6 +277,61 @@ public class AuctionDetailController extends BaseController {
           noBidsLabel.setManaged(true);
         })
         .start();
+  }
+
+  private void populateBidChart(List<BidResponse> bids) {
+    if (bidHistoryChart == null) {
+      return;
+    }
+
+    XYChart.Series<Number, Number> series = new XYChart.Series<>();
+    series.setName("Bid amount");
+
+    int bidIndex = 1;
+    double highestBid = Double.NEGATIVE_INFINITY;
+    for (BidResponse bid : bids) {
+      double amount = bid.amount();
+      series.getData().add(new XYChart.Data<>(bidIndex++, amount));
+      highestBid = Math.max(highestBid, amount);
+    }
+
+    if (bidTrendBox != null) {
+      bidTrendBox.setVisible(true);
+      bidTrendBox.setManaged(true);
+    }
+    bidHistoryChart.getData().clear();
+    bidHistoryChart.getData().add(series);
+    bidHistoryChart.setVisible(true);
+    bidHistoryChart.setManaged(true);
+
+    if (bidHistoryXAxis != null) {
+      bidHistoryXAxis.setAutoRanging(false);
+      bidHistoryXAxis.setLowerBound(1);
+      bidHistoryXAxis.setUpperBound(Math.max(2, bids.size()));
+      bidHistoryXAxis.setTickUnit(1);
+      bidHistoryXAxis.setLabel("Bid #");
+    }
+
+    if (bidHistoryYAxis != null) {
+      bidHistoryYAxis.setAutoRanging(false);
+      double upperBound = highestBid == Double.NEGATIVE_INFINITY ? 1.0 : highestBid;
+      bidHistoryYAxis.setLowerBound(0);
+      bidHistoryYAxis.setUpperBound(Math.max(1.0, upperBound * 1.1));
+      bidHistoryYAxis.setTickUnit(Math.max(1.0, upperBound / 4.0));
+      bidHistoryYAxis.setLabel("Amount ($)");
+    }
+  }
+
+  private void clearBidChart() {
+    if (bidHistoryChart == null) {
+      return;
+    }
+
+    bidHistoryChart.getData().clear();
+    if (bidTrendBox != null) {
+      bidTrendBox.setVisible(false);
+      bidTrendBox.setManaged(false);
+    }
   }
 
   private HBox createBidRow(BidResponse bid) {
