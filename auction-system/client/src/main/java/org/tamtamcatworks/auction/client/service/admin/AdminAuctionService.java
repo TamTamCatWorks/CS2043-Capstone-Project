@@ -1,5 +1,8 @@
 package org.tamtamcatworks.auction.client.service.admin;
 
+import java.util.List;
+
+import org.springframework.core.ParameterizedTypeReference;
 import org.tamtamcatworks.auction.client.exception.AdminApiException;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 
@@ -9,34 +12,19 @@ public class AdminAuctionService
         String auctionId
     ) {
 
-        try {
-
-            apiClient.closeAuction(
-                    auctionId
-            );
-
-        } catch (Exception ex) {
-
-            throw new AdminApiException(
-                    "Failed to close auction",
-                    ex
-            );
-        }
+        apiClient.client()
+            .patch()
+            .uri("/admin/auctions/{id}/close", auctionId)
+            .retrieve()
+            .toBodilessEntity();
     }
 
-    public java.util.List<AuctionResponse>
-        getAuctions() {
+    public List<AuctionResponse> getAuctions() {
 
-        try {
-
-            return apiClient.getAllAuctions();
-
-        } catch (Exception ex) {
-
-            throw new AdminApiException(
-                    "Failed to load auctions",
-                    ex
-            );
-        }
+        return apiClient.client()
+            .get()
+            .uri("/admin/auctions")
+            .retrieve()
+            .body(new ParameterizedTypeReference<>() {});
     }
 }

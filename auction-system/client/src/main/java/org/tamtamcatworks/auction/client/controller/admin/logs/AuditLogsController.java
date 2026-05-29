@@ -5,6 +5,8 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.VBox;
 
 import org.tamtamcatworks.auction.client.Route;
+import org.tamtamcatworks.auction.client.auth.admin.AdminAuthorizationService;
+import org.tamtamcatworks.auction.client.auth.admin.AdminPermission;
 import org.tamtamcatworks.auction.client.component.admin.table.PaginatedTableView;
 import org.tamtamcatworks.auction.client.component.admin.table.TableColumnFactory;
 import org.tamtamcatworks.auction.client.component.admin.table.TableToolbar;
@@ -12,6 +14,12 @@ import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.client.service.admin.AdminAuditLogService;
 import org.tamtamcatworks.auction.client.util.admin.AdminPermissionGuard;
 import org.tamtamcatworks.auction.shared.response.AdminAuditLogResponse;
+import org.tamtamcatworks.auction.client.component.admin.feedback.LoadingOverlay;
+import org.tamtamcatworks.auction.client.util.admin.AsyncExecutor;
+
+import org.tamtamcatworks.auction.client.component.admin.feedback.Toast;
+import org.tamtamcatworks.auction.client.component.admin.feedback.ToastType;
+import org.tamtamcatworks.auction.client.component.admin.feedback.ErrorDialog;
 
 @Route(
     fxml = "/fxml/admin/logs/audit-logs.fxml",
@@ -37,10 +45,19 @@ public class AuditLogsController
             auditLogService =
             new AdminAuditLogService();
 
+    private final LoadingOverlay
+            loadingOverlay =
+            new LoadingOverlay();
+
     @FXML
     public void initialize() {
 
-        AdminPermissionGuard.requireAdmin();
+        if (!AdminAuthorizationService.hasPermission(AdminPermission.USER_MANAGE)) {
+
+                throw new RuntimeException(
+                "Access denied"
+                );
+        }
 
         buildToolbar();
 
@@ -87,22 +104,59 @@ public class AuditLogsController
                 )
         );
 
-        tableContainer.getChildren().add(
-                paginatedTable
+        tableContainer.getChildren().addAll(
+                paginatedTable,
+                loadingOverlay
         );
     }
 
     private void loadLogs() {
 
-        var logs =
-                auditLogService.getAuditLogs();
+        loadingOverlay.show();
 
-        paginatedTable.getTableView().setItems(
+        AsyncExecutor.execute(
 
-                FXCollections
-                        .observableArrayList(
-                                logs
-                        )
-        );
-    }
+                () -> {
+
+                        var logs =
+                                auditLogService
+                                        .getAuditLogs();
+
+                        javafx.application.Platform.runLater(() ->
+
+                                paginatedTable
+                                        .getTableView()
+                                        .setItems(
+
+                                                FXCollections
+                                                        .observableArrayList(
+                                                                logs
+                                                        )
+                                        )
+                        );
+                },
+
+                () -> {
+
+                        loadingOverlay.hide();
+
+                        Toast.show(
+
+                                "Audit logs loaded",
+
+                                ToastType.INFO
+                        );
+                },
+
+                () -> {
+
+                        loadingOverlay.hide();
+
+                        ErrorDialog.show(
+
+                                "Failed to load audit logs"
+                        );
+                }
+                );
+        }
 }

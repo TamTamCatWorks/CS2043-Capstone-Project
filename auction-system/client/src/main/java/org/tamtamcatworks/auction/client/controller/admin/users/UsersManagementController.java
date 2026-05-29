@@ -20,6 +20,10 @@ import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.client.service.admin.AdminUserService;
 import org.tamtamcatworks.auction.client.util.admin.AdminPermissionGuard;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
+import org.tamtamcatworks.auction.client.auth.admin.AdminAuthorizationService;
+import org.tamtamcatworks.auction.client.auth.admin.AdminPermission;
+import org.tamtamcatworks.auction.client.component.admin.feedback.LoadingOverlay;
+import org.tamtamcatworks.auction.client.util.admin.AsyncExecutor;
 
 @Route(
     fxml = "/fxml/admin/users/users-list.fxml",
@@ -43,11 +47,19 @@ public class UsersManagementController
     private final PaginatedTableView<UserResponse>
             paginatedTable =
             new PaginatedTableView<>();
+    private final LoadingOverlay
+            loadingOverlay =
+            new LoadingOverlay();
 
     @FXML
     public void initialize() {
 
-        AdminPermissionGuard.requireAdmin();
+        if (!AdminAuthorizationService.hasPermission(AdminPermission.USER_MANAGE)) {
+
+            throw new RuntimeException(
+                "Access denied"
+            );
+        }
 
         buildToolbar();
 
@@ -97,26 +109,60 @@ public class UsersManagementController
                 buildActionsColumn()
         );
 
-        tableContainer.getChildren().add(
-                paginatedTable
+        tableContainer.getChildren().addAll(
+                paginatedTable,
+                loadingOverlay
         );
     }
 
     private void loadUsers() {
 
-        paginatedTable.showLoading();
+        loadingOverlay.show();
 
-        var users =
-                adminUserService.getUsers();
+        AsyncExecutor.execute(
 
-        paginatedTable.getTableView().setItems(
+                () -> {
 
-                FXCollections.observableArrayList(
-                        users
-                )
+                    var users =
+                            adminUserService
+                                    .getUsers();
+
+                    javafx.application.Platform.runLater(() ->
+
+                            paginatedTable
+                                    .getTableView()
+                                    .setItems(
+
+                                            FXCollections
+                                                    .observableArrayList(
+                                                            users
+                                                    )
+                                    )
+                    );
+                },
+
+                () -> {
+
+                    loadingOverlay.hide();
+
+                    Toast.show(
+
+                            "Users loaded",
+
+                            ToastType.INFO
+                    );
+                },
+
+                () -> {
+
+                    loadingOverlay.hide();
+
+                    ErrorDialog.show(
+
+                            "Failed to load users"
+                    );
+                }
         );
-
-        paginatedTable.hideLoading();
     }
 
     private void searchUsers(

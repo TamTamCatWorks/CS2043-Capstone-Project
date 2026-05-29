@@ -89,3 +89,40 @@
 
     -fx-background-color: #2563eb;
 }
+
+.dashboard-stat-card {
+
+    -fx-background-color: white;
+
+    -fx-background-radius: 16;
+
+    -fx-padding: 24;
+
+    -fx-effect:
+        dropshadow(
+            gaussian,
+            rgba(0,0,0,0.08),
+            12,
+            0,
+            0,
+            4
+        );
+
+    -fx-min-width: 220;
+}
+
+.dashboard-card-title {
+
+    -fx-font-size: 14px;
+
+    -fx-text-fill: #6b7280;
+}
+
+.dashboard-card-value {
+
+    -fx-font-size: 28px;
+
+    -fx-font-weight: bold;
+
+    -fx-text-fill: #111827;
+}

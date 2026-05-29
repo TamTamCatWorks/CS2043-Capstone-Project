@@ -1,4 +1,6 @@
 package org.tamtamcatworks.auction.client.component.admin.sidebar;
+import org.tamtamcatworks.auction.client.auth.admin.AdminFeatureGate;
+import org.tamtamcatworks.auction.client.auth.admin.AdminPermission;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -86,6 +88,34 @@ public class AdminSidebar
 
                         "/fxml/admin/logs/audit-logs.fxml"
                 )
+        );
+
+        AdminFeatureGate.requirePermission(
+
+                usersButton,
+
+                AdminPermission.USER_MANAGE
+        );
+
+        AdminFeatureGate.requirePermission(
+
+                auctionsButton,
+
+                AdminPermission.AUCTION_MANAGE
+        );
+
+        AdminFeatureGate.requirePermission(
+
+                reportsButton,
+
+                AdminPermission.REPORT_MODERATE
+        );
+
+        AdminFeatureGate.requirePermission(
+
+                logsButton,
+
+                AdminPermission.AUDIT_VIEW
         );
 
         getChildren().addAll(

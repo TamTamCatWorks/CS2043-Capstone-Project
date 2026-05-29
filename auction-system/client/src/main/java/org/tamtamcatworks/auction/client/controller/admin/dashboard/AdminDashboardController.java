@@ -4,7 +4,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
 
+import org.tamtamcatworks.auction.client.component.admin.dashboard.DashboardStatCard;
+import org.tamtamcatworks.auction.client.service.admin.AdminDashboardService;
 import org.tamtamcatworks.auction.client.component.admin.analytics.AnalyticsChart;
 import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.component.admin.dashboard.StatCard;
@@ -39,6 +42,69 @@ public class AdminDashboardController extends BaseController {
         analyticsContainer.getChildren().add(chart);
     }
 
+    private void loadAnalytics() {
+
+        var analytics =
+                    dashboardService
+                            .getDashboardAnalytics();
+
+        DashboardStatCard usersCard =
+                    new DashboardStatCard(
+
+                            "Total Users",
+
+                            String.valueOf(
+                                    analytics.totalUsers()
+                                )
+                        );
+
+        DashboardStatCard auctionsCard =
+                    new DashboardStatCard(
+
+                            "Active Auctions",
+
+                            String.valueOf(
+                                    analytics.activeAuctions()
+                                )
+                        );
+
+        DashboardStatCard reportsCard =
+                    new DashboardStatCard(
+
+                            "Pending Reports",
+
+                            String.valueOf(
+                                    analytics.pendingReports()
+                                )
+                        );
+
+        DashboardStatCard revenueCard =
+                    new DashboardStatCard(
+
+                            "Revenue",
+
+                            "$" + analytics.totalRevenue()
+                        );
+
+        statsContainer.getChildren().setAll(
+
+                usersCard,
+
+                auctionsCard,
+
+                reportsCard,
+
+                revenueCard
+        );
+        }
+
+    private final AdminDashboardService
+        dashboardService =
+        new AdminDashboardService();
+
+    @FXML
+    private GridPane statsGrid;
+
     @FXML
     private HBox statsContainer;
 
@@ -58,6 +124,8 @@ public class AdminDashboardController extends BaseController {
         loadOverview();
 
         buildAnalytics();
+
+        loadAnalytics();
     }
 
     private void buildStatistics() {

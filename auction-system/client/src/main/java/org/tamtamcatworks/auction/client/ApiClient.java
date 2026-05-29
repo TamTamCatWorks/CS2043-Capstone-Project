@@ -30,6 +30,11 @@ public class ApiClient {
 
     private final RestClient client;
 
+    public RestClient client() {
+
+        return client;
+    }
+
     public ApiClient() {
         String baseUrl = System.getProperty("api.baseUrl", "http://localhost:8080");
 

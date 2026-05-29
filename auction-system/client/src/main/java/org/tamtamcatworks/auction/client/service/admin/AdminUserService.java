@@ -2,6 +2,7 @@ package org.tamtamcatworks.auction.client.service.admin;
 
 import java.util.List;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.tamtamcatworks.auction.client.exception.AdminApiException;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
@@ -10,53 +11,32 @@ public class AdminUserService
 
     public List<UserResponse> getUsers() {
 
-        try {
-
-            return List.of(
-                    apiClient.getUser("1")
-            );
-
-        } catch (Exception ex) {
-
-            throw new AdminApiException(
-                    "Failed to load users",
-                    ex
-            );
-        }
+        return apiClient.client()
+            .get()
+            .uri("/admin/users")
+            .retrieve()
+            .body(new ParameterizedTypeReference<>() {});
     }
 
-    public void suspendUser(String userId) {
+    public void suspendUser(
+        String userId
+    ) {
 
-        try {
-
-        /*
-         * TODO:
-         * backend endpoint later
-         */
-
-            System.out.println("Suspended user: " + userId);
-
-        } catch (Exception ex) {
-
-            throw new AdminApiException(
-                "Failed to suspend user",
-                ex
-            );
-        }
+        apiClient.client()
+            .patch()
+            .uri("/admin/users/{id}/suspend", userId)
+            .retrieve()
+            .toBodilessEntity();
     }
 
-    public void activateUser(String userId) {
+    public void activateUser(
+        String userId
+    ) {
 
-        try {
-
-            System.out.println("Activated user: " + userId);
-
-        } catch (Exception ex) {
-
-            throw new AdminApiException(
-                "Failed to activate user",
-                ex
-            );
-        }
+        apiClient.client()
+            .patch()
+            .uri("/admin/users/{id}/activate", userId)
+            .retrieve()
+            .toBodilessEntity();
     }
 }

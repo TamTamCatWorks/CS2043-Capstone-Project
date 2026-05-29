@@ -8,6 +8,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import org.tamtamcatworks.auction.client.Route;
+import org.tamtamcatworks.auction.client.auth.admin.AdminAuthorizationService;
+import org.tamtamcatworks.auction.client.auth.admin.AdminPermission;
 import org.tamtamcatworks.auction.client.component.admin.action.AdminActionButton;
 import org.tamtamcatworks.auction.client.component.admin.action.ConfirmDialog;
 import org.tamtamcatworks.auction.client.component.admin.feedback.ErrorDialog;
@@ -20,6 +22,12 @@ import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.client.service.admin.AdminAuctionService;
 import org.tamtamcatworks.auction.client.util.admin.AdminPermissionGuard;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
+import org.tamtamcatworks.auction.client.component.admin.feedback.LoadingOverlay;
+import org.tamtamcatworks.auction.client.util.admin.AsyncExecutor;
+
+import org.tamtamcatworks.auction.client.component.admin.feedback.Toast;
+import org.tamtamcatworks.auction.client.component.admin.feedback.ToastType;
+import org.tamtamcatworks.auction.client.component.admin.feedback.ErrorDialog;
 
 @Route(
     fxml = "/fxml/admin/auctions/auctions-list.fxml",
@@ -32,23 +40,31 @@ public class AuctionsManagementController
     private VBox toolbarContainer;
 
     @FXML
-    private VBox tableContainer;
+        private VBox tableContainer;
 
-    private final TableToolbar toolbar =
+        private final TableToolbar toolbar =
             new TableToolbar();
 
-    private final PaginatedTableView<AuctionResponse>
+        private final PaginatedTableView<AuctionResponse>
             paginatedTable =
             new PaginatedTableView<>();
 
-    private final AdminAuctionService
+        private final AdminAuctionService
             adminAuctionService =
             new AdminAuctionService();
 
+        private final LoadingOverlay
+        loadingOverlay =
+        new LoadingOverlay();
     @FXML
     public void initialize() {
 
-        AdminPermissionGuard.requireAdmin();
+        if (!AdminAuthorizationService.hasPermission(AdminPermission.USER_MANAGE)) {
+
+                throw new RuntimeException(
+                "Access denied"
+                );
+        }
 
         buildToolbar();
 
@@ -87,8 +103,9 @@ public class AuctionsManagementController
                 buildActionsColumn()
         );
 
-        tableContainer.getChildren().add(
-                paginatedTable
+        tableContainer.getChildren().addAll(
+                paginatedTable,
+                loadingOverlay
         );
     }
 
@@ -188,19 +205,51 @@ public class AuctionsManagementController
 
     private void loadAuctions() {
 
-        paginatedTable.showLoading();
+        loadingOverlay.show();
 
-        var auctions =
-                adminAuctionService
-                        .getAuctions();
+        AsyncExecutor.execute(
 
-        paginatedTable.getTableView().setItems(
+                    () -> {
 
-                FXCollections.observableArrayList(
-                        auctions
-                )
-        );
+                        var auctions =
+                                adminAuctionService
+                                        .getAuctions();
 
-        paginatedTable.hideLoading();
-    }
+                        javafx.application.Platform.runLater(() ->
+
+                                paginatedTable
+                                        .getTableView()
+                                        .setItems(
+
+                                                FXCollections
+                                                        .observableArrayList(
+                                                                auctions
+                                                        )
+                                        )
+                        );
+                },
+
+                    () -> {
+
+                        loadingOverlay.hide();
+
+                        Toast.show(
+
+                                "Auctions loaded",
+
+                                ToastType.INFO
+                        );
+                    },
+
+                    () -> {
+
+                                loadingOverlay.hide();
+
+                                ErrorDialog.show(
+
+                                        "Failed to load auctions"
+                                );
+                        }
+                );
+        }
 }

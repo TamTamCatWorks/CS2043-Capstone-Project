@@ -8,6 +8,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import org.tamtamcatworks.auction.client.Route;
+import org.tamtamcatworks.auction.client.auth.admin.AdminAuthorizationService;
+import org.tamtamcatworks.auction.client.auth.admin.AdminPermission;
 import org.tamtamcatworks.auction.client.component.admin.action.AdminActionButton;
 import org.tamtamcatworks.auction.client.component.admin.action.ConfirmDialog;
 import org.tamtamcatworks.auction.client.component.admin.feedback.ErrorDialog;
@@ -20,6 +22,12 @@ import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.client.service.admin.AdminReportService;
 import org.tamtamcatworks.auction.client.util.admin.AdminPermissionGuard;
 import org.tamtamcatworks.auction.shared.response.AdminReportResponse;
+import org.tamtamcatworks.auction.client.component.admin.feedback.LoadingOverlay;
+import org.tamtamcatworks.auction.client.util.admin.AsyncExecutor;
+
+import org.tamtamcatworks.auction.client.component.admin.feedback.Toast;
+import org.tamtamcatworks.auction.client.component.admin.feedback.ToastType;
+import org.tamtamcatworks.auction.client.component.admin.feedback.ErrorDialog;
 
 @Route(
     fxml = "/fxml/admin/reports/reports-list.fxml",
@@ -32,23 +40,31 @@ public class ReportsManagementController
     private VBox toolbarContainer;
 
     @FXML
-    private VBox tableContainer;
+        private VBox tableContainer;
 
-    private final TableToolbar toolbar =
+        private final TableToolbar toolbar =
             new TableToolbar();
 
-    private final PaginatedTableView<AdminReportResponse>
+        private final PaginatedTableView<AdminReportResponse>
             paginatedTable =
             new PaginatedTableView<>();
 
-    private final AdminReportService
+        private final AdminReportService
             adminReportService =
             new AdminReportService();
+        private final LoadingOverlay
+                loadingOverlay =
+                new LoadingOverlay();
 
     @FXML
     public void initialize() {
 
-        AdminPermissionGuard.requireAdmin();
+        if (!AdminAuthorizationService.hasPermission(AdminPermission.USER_MANAGE)) {
+
+                throw new RuntimeException(
+                "Access denied"
+                );
+        }
 
         buildToolbar();
 
@@ -97,8 +113,9 @@ public class ReportsManagementController
                 buildActionsColumn()
         );
 
-        tableContainer.getChildren().add(
-                paginatedTable
+        tableContainer.getChildren().addAll(
+                paginatedTable,
+                loadingOverlay
         );
     }
 
@@ -243,16 +260,51 @@ public class ReportsManagementController
 
     private void loadReports() {
 
-        var reports =
-                adminReportService
-                        .getReports();
+        loadingOverlay.show();
 
-        paginatedTable.getTableView().setItems(
+        AsyncExecutor.execute(
 
-                FXCollections
-                        .observableArrayList(
-                                reports
-                        )
-        );
-    }
+                () -> {
+
+                        var reports =
+                                adminReportService
+                                        .getReports();
+
+                        javafx.application.Platform.runLater(() ->
+
+                                paginatedTable
+                                        .getTableView()
+                                        .setItems(
+
+                                                FXCollections
+                                                        .observableArrayList(
+                                                                reports
+                                                        )
+                                        )
+                        );
+                },
+
+                () -> {
+
+                        loadingOverlay.hide();
+
+                        Toast.show(
+
+                                "Reports loaded",
+
+                                ToastType.INFO
+                        );
+                },
+
+                () -> {
+
+                        loadingOverlay.hide();
+
+                        ErrorDialog.show(
+
+                                "Failed to load reports"
+                        );
+                }
+                );
+        }
 }
