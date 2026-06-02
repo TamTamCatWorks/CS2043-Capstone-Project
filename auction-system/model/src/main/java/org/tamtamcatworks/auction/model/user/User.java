@@ -32,6 +32,9 @@ public class User extends BaseEntity {
     @Column(name = "hold_balance", nullable = false)
     private double holdBalance;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "buyer_profile_id")
     private BuyerProfile buyerProfile;
@@ -77,6 +80,15 @@ public class User extends BaseEntity {
 
     protected User() {} // for JPA
 
+    // ── Account Status ─────────────────────────────────────────────────────
+
+    public boolean isActive() {
+       return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     // ── Balance Management ─────────────────────────────────────────────────────
 

@@ -6,12 +6,11 @@ public class AdminDashboardService
         extends BaseAdminService {
 
     public AdminDashboardResponse
-    getDashboardAnalytics() {
+    getDashboard() {
 
-        return apiClient.client()
-                .get()
-                .uri("/admin/dashboard")
-                .retrieve()
-                .body(AdminDashboardResponse.class);
+        return get(
+                "/admin/dashboard",
+                AdminDashboardResponse.class
+        );
     }
 }

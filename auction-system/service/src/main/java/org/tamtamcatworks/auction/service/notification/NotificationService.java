@@ -107,4 +107,24 @@ public class NotificationService {
             repo.save(n);
         });
     }
+
+    @Transactional(readOnly = true)
+    public List<NotificationResponse> getAllNotifications() {
+
+        return repo.findAll()
+                .stream()
+                .sorted(
+                    java.util.Comparator.comparing(
+                        Notification::getCreationDate
+                    ).reversed()
+                )
+                .map(n -> new NotificationResponse(
+                    n.getId(),
+                    n.getType().name(),
+                    n.getMessage(),
+                    n.isRead(),
+                    n.getCreationDate().toString()
+                ))
+                .toList();
+    }
 }

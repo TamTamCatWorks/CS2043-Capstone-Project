@@ -4,13 +4,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.GridPane;
 
 import org.tamtamcatworks.auction.client.component.admin.dashboard.DashboardStatCard;
 import org.tamtamcatworks.auction.client.service.admin.AdminDashboardService;
 import org.tamtamcatworks.auction.client.component.admin.analytics.AnalyticsChart;
 import org.tamtamcatworks.auction.client.Route;
-import org.tamtamcatworks.auction.client.component.admin.dashboard.StatCard;
 import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.client.util.admin.AdminPermissionGuard;
 
@@ -24,9 +22,7 @@ public class AdminDashboardController extends BaseController {
 
         AnalyticsChart chart = new AnalyticsChart();
 
-        java.util.Map<String, Number> userGrowth =
-            java.util.Map.of(
-
+        java.util.Map<String, Number> userGrowth = java.util.Map.of(
                     "Mon", 10,
                     "Tue", 20,
                     "Wed", 18,
@@ -44,66 +40,30 @@ public class AdminDashboardController extends BaseController {
 
     private void loadAnalytics() {
 
-        var analytics =
-                    dashboardService
-                            .getDashboardAnalytics();
+        var dashboard = dashboardService.getDashboard();
 
-        DashboardStatCard usersCard =
-                    new DashboardStatCard(
+        DashboardStatCard usersCard = new DashboardStatCard(
+                    "Total Users",
+                    String.valueOf(dashboard.totalUsers())
+                );
 
-                            "Total Users",
+        DashboardStatCard adminsCard = new DashboardStatCard(
+                    "Total Admins",
+                    String.valueOf(dashboard.totalAdmins())
+                );
 
-                            String.valueOf(
-                                    analytics.totalUsers()
-                                )
-                        );
-
-        DashboardStatCard auctionsCard =
-                    new DashboardStatCard(
-
-                            "Active Auctions",
-
-                            String.valueOf(
-                                    analytics.activeAuctions()
-                                )
-                        );
-
-        DashboardStatCard reportsCard =
-                    new DashboardStatCard(
-
-                            "Pending Reports",
-
-                            String.valueOf(
-                                    analytics.pendingReports()
-                                )
-                        );
-
-        DashboardStatCard revenueCard =
-                    new DashboardStatCard(
-
-                            "Revenue",
-
-                            "$" + analytics.totalRevenue()
-                        );
+        DashboardStatCard auctionsCard = new DashboardStatCard(
+                    "Total Auctions",
+                    String.valueOf(dashboard.totalAuctions())
+                );
 
         statsContainer.getChildren().setAll(
-
-                usersCard,
-
-                auctionsCard,
-
-                reportsCard,
-
-                revenueCard
-        );
+                        usersCard,
+                        adminsCard,
+                        auctionsCard
+                );
         }
-
-    private final AdminDashboardService
-        dashboardService =
-        new AdminDashboardService();
-
-    @FXML
-    private GridPane statsGrid;
+    private final AdminDashboardService dashboardService = new AdminDashboardService();
 
     @FXML
     private HBox statsContainer;
@@ -119,8 +79,6 @@ public class AdminDashboardController extends BaseController {
 
         AdminPermissionGuard.requireAdmin();
 
-        buildStatistics();
-
         loadOverview();
 
         buildAnalytics();
@@ -128,45 +86,19 @@ public class AdminDashboardController extends BaseController {
         loadAnalytics();
     }
 
-    private void buildStatistics() {
-
-        StatCard totalUsersCard =
-                new StatCard(
-                        "Total Users",
-                        "125"
-                );
-
-        StatCard activeAuctionsCard =
-                new StatCard(
-                        "Active Auctions",
-                        "32"
-                );
-
-        StatCard totalRevenueCard =
-                new StatCard(
-                        "Revenue",
-                        "$12,500"
-                );
-
-        statsContainer.getChildren().addAll(
-
-                totalUsersCard,
-                activeAuctionsCard,
-                totalRevenueCard
-        );
-    }
-
     private void loadOverview() {
 
-        systemOverviewLabel.setText(
+        var dashboard = dashboardService.getDashboard();
 
-                """
-                System status: ONLINE
-                
-                Active auctions are running normally.
-                
-                No critical alerts detected.
-                """
-        );
-    }
+        systemOverviewLabel.setText(
+                "Users: "
+                    + dashboard.totalUsers()
+
+                    + "\nAdmins: "
+                    + dashboard.totalAdmins()
+
+                    + "\nAuctions: "
+                    + dashboard.totalAuctions()
+                );
+        }
 }

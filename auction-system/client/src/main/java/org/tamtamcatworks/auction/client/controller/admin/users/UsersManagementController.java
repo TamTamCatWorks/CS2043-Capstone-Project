@@ -18,7 +18,6 @@ import org.tamtamcatworks.auction.client.component.admin.table.TableColumnFactor
 import org.tamtamcatworks.auction.client.component.admin.table.TableToolbar;
 import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.client.service.admin.AdminUserService;
-import org.tamtamcatworks.auction.client.util.admin.AdminPermissionGuard;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 import org.tamtamcatworks.auction.client.auth.admin.AdminAuthorizationService;
 import org.tamtamcatworks.auction.client.auth.admin.AdminPermission;
@@ -29,8 +28,7 @@ import org.tamtamcatworks.auction.client.util.admin.AsyncExecutor;
     fxml = "/fxml/admin/users/users-list.fxml",
     layout = "/fxml/admin/layout/admin-layout.fxml"
 )
-public class UsersManagementController
-        extends BaseController {
+public class UsersManagementController extends BaseController {
 
     @FXML
     private VBox toolbarContainer;
@@ -104,6 +102,12 @@ public class UsersManagementController
                 TableColumnFactory.createStringColumn(
                         "Full Name",
                         UserResponse::fullName
+                ),
+
+                TableColumnFactory.createStringColumn(
+
+                        "Status",
+                        user -> user.isActive()? "ACTIVE": "SUSPENDED"
                 ),
 
                 buildActionsColumn()
@@ -194,8 +198,7 @@ public class UsersManagementController
         );
     }
 
-    private TableColumn<UserResponse, Void>
-    buildActionsColumn() {
+    private TableColumn<UserResponse, Void> buildActionsColumn() {
 
         TableColumn<UserResponse, Void>
                 actionsColumn =
@@ -240,6 +243,7 @@ public class UsersManagementController
                                         .suspendUser(
                                             user.id()
                                         );
+                                    loadUsers();
 
                                     Toast.show(
 
@@ -283,7 +287,7 @@ public class UsersManagementController
                                         .activateUser(
                                             user.id()
                                         );
-
+                                    loadUsers();
                                     Toast.show(
 
                                     "User activated successfully",
@@ -311,13 +315,20 @@ public class UsersManagementController
                         super.updateItem(item, empty);
 
                         if (empty) {
-
                             setGraphic(null);
-
+                            return;
+                        } 
+                        
+                        UserResponse user = getTableView().getItems()
+                                                          .get(getIndex());
+                        
+                        if (user.isActive()) {
+                            actionsBox.getChildren().setAll(suspendButton);
                         } else {
-
-                            setGraphic(actionsBox);
+                            actionsBox.getChildren().setAll(activateButton);
                         }
+
+                        setGraphic(actionsBox);
                     }
                 }
             );

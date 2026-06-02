@@ -19,6 +19,7 @@ import org.tamtamcatworks.auction.shared.response.BidResponse;
 import org.tamtamcatworks.auction.shared.response.ItemResponse;
 import org.tamtamcatworks.auction.shared.response.NotificationResponse;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
+import org.tamtamcatworks.auction.shared.response.AdminDashboardResponse;
 
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -93,6 +94,21 @@ public class ApiClient {
             .body(UserResponse.class);
     }
 
+    public List<UserResponse> getAdminUsers() {
+
+        return client.get()
+                .uri("/admin/users")
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+    }
+
+    public AdminDashboardResponse getAdminDashboard() {
+
+        return client.get()
+            .uri("/admin/dashboard")
+            .retrieve()
+            .body(AdminDashboardResponse.class);
+    }
     // ── Auctions ──────────────────────────────────────────────────────────────
 
     public List<AuctionResponse> getAllAuctions() {

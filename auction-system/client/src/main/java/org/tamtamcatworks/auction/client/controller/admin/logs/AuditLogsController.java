@@ -12,7 +12,6 @@ import org.tamtamcatworks.auction.client.component.admin.table.TableColumnFactor
 import org.tamtamcatworks.auction.client.component.admin.table.TableToolbar;
 import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.client.service.admin.AdminAuditLogService;
-import org.tamtamcatworks.auction.client.util.admin.AdminPermissionGuard;
 import org.tamtamcatworks.auction.shared.response.AdminAuditLogResponse;
 import org.tamtamcatworks.auction.client.component.admin.feedback.LoadingOverlay;
 import org.tamtamcatworks.auction.client.util.admin.AsyncExecutor;

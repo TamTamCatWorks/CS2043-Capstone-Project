@@ -1,6 +1,5 @@
 package org.tamtamcatworks.auction.client.service.admin;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -12,10 +11,11 @@ public class AdminAuditLogService
     public List<AdminAuditLogResponse>
     getAuditLogs() {
 
-        return apiClient.client()
-            .get()
-            .uri("/admin/audit-logs")
-            .retrieve()
-            .body(new ParameterizedTypeReference<>() {});
+        return get(
+
+                "/admin/audit-logs",
+
+                new ParameterizedTypeReference<>() {}
+        );
     }
 }

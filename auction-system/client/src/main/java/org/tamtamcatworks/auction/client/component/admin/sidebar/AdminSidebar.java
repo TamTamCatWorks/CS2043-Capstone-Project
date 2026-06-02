@@ -26,8 +26,8 @@ public class AdminSidebar
         Button logsButton =
                 new Button("Audit Logs");
 
-        Button reportsButton =
-                new Button("Reports");
+        Button notificationsButton =
+                new Button("Notification");
 
         Button dashboardButton =
                 new Button("Dashboard");
@@ -47,6 +47,10 @@ public class AdminSidebar
         );
 
         auctionsButton.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        notificationsButton.setMaxWidth(
                 Double.MAX_VALUE
         );
 
@@ -74,7 +78,7 @@ public class AdminSidebar
                 )
         );
 
-        reportsButton.setOnAction(event ->
+        notificationsButton.setOnAction(event ->
 
                 Navigation.navigateTo(
 
@@ -106,9 +110,9 @@ public class AdminSidebar
 
         AdminFeatureGate.requirePermission(
 
-                reportsButton,
+                notificationsButton,
 
-                AdminPermission.REPORT_MODERATE
+                AdminPermission.AUDIT_VIEW
         );
 
         AdminFeatureGate.requirePermission(
@@ -123,7 +127,7 @@ public class AdminSidebar
                 dashboardButton,
                 usersButton,
                 auctionsButton,
-                reportsButton,
+                notificationsButton,
                 logsButton
         );
     }

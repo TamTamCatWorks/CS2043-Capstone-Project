@@ -36,6 +36,7 @@ public interface UserMapper {
             user.getFullName(),
             user.getBalance(),
             user.getHoldBalance(),
+            user.isActive(),
             isAdmin,
             permissions
         );
