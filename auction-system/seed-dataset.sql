@@ -106,7 +106,7 @@ INSERT INTO art_items (item_id, artist, year_created, medium, dimensions, has_ce
 INSERT INTO electronics_items (item_id, brand, model, warranty_months) VALUES
 ('item-elec-0001', 'LG Electronics', 'OLED55C3PSA', 24);
 
-INSERT INTO vehicle_items (item_id, make, model, year, mileage_km, color, fuel_type) VALUES
+INSERT INTO vehicle_items (item_id, make, model, manufacture_year, mileage_km, color, fuel_type) VALUES
 ('item-veh-0001', 'Tesla Motors', 'Model 3 Long Range', 2021, 24300, 'Midnight Silver Metallic', 'Electric');
 
 INSERT INTO other_items (item_id) VALUES

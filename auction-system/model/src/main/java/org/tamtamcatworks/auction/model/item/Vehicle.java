@@ -21,7 +21,7 @@ public class Vehicle extends Item {
     @Column(nullable = false)
     private String model;
 
-    @Column(nullable = false)
+    @Column(name = "manufacture_year", nullable = false)
     private int year;
 
     @Column(nullable = false)
