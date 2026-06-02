@@ -14,3 +14,8 @@ spring:
   h2:
     console:
       enabled: false           # no need for console in tests
+  
+  minio:
+    endpoint: http://localhost:9000
+    accessKey: dummy
+    secretKey: dummy
