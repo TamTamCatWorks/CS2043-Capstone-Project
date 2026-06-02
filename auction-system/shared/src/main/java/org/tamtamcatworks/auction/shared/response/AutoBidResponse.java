@@ -15,6 +15,6 @@ public record AutoBidResponse(
     String auctionId,
     String bidderId,
     double maxBid,
-    double increment,
+    double increment, // read-only, là mininum increment của chính auction đó
     boolean active
 ) {}

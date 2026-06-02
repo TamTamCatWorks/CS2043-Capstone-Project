@@ -85,10 +85,10 @@ public class AutoBidService {
 
         AutoBid autoBid = autoBidRepository.findByAuctionAndBidder(auction, bidder)
             .map(existing -> {
-                existing.update(request.maxBid(), request.increment());
+                existing.update(request.maxBid());
                 return existing;
             })
-            .orElseGet(() -> new AutoBid(auction, bidder, request.maxBid(), request.increment()));
+            .orElseGet(() -> new AutoBid(auction, bidder, request.maxBid()));
 
         return toResponse(autoBidRepository.save(autoBid));
     }
@@ -144,33 +144,24 @@ public class AutoBidService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onBidPlaced(BidEvent event) {
         Auction auction = auctionRepository.findById(event.auctionId()).orElse(null);
-        if (auction == null || !auction.isAcceptingBids()) {
-            return;
-        }
+        if (auction == null || !auction.isAcceptingBids()) return;
 
         List<AutoBid> candidates = autoBidRepository.findByAuctionAndActiveTrue(auction);
 
-        // PriorityQueue max-heap: người có maxBid cao nhất được xử lý trước
         PriorityQueue<AutoBid> queue = new PriorityQueue<>(
-            Comparator.comparingDouble(AutoBid::getMaxBid).reversed()
+                Comparator.comparingDouble(AutoBid::getMaxBid).reversed()
         );
-
         for (AutoBid ab : candidates) {
-            // Không tính người đang dẫn đầu (họ vừa bid, không cần auto-bid ngay)
             if (!ab.getBidder().getId().equals(event.bidderId())) {
                 queue.offer(ab);
             }
         }
-
-        if (queue.isEmpty()) {
-            return;
-        }
+        if (queue.isEmpty()) return;
 
         AutoBid best = queue.poll();
-        double nextBid = auction.getCurrentPrice() + best.getIncrement();
+        double nextBid = auction.getCurrentPrice() + auction.getMinimumIncrement();
 
         if (nextBid > best.getMaxBid()) {
-            // Vượt ngưỡng → tắt auto-bid của người này
             best.deactivate();
             autoBidRepository.save(best);
             return;
@@ -178,9 +169,8 @@ public class AutoBidService {
 
         try {
             bidService.placeBid(event.auctionId(), best.getBidder().getId(),
-                new BidRequest(nextBid, "AUTO"));
+                    new BidRequest(nextBid, "AUTO"));
         } catch (IllegalArgumentException | IllegalStateException e) {
-            // Bid không hợp lệ (ví dụ increment < minimumIncrement) → tắt auto-bid
             best.deactivate();
             autoBidRepository.save(best);
         }
@@ -188,12 +178,12 @@ public class AutoBidService {
 
     private AutoBidResponse toResponse(AutoBid ab) {
         return new AutoBidResponse(
-            ab.getId(),
-            ab.getAuction().getId(),
-            ab.getBidder().getId(),
-            ab.getMaxBid(),
-            ab.getIncrement(),
-            ab.isActive()
+                ab.getId(),
+                ab.getAuction().getId(),
+                ab.getBidder().getId(),
+                ab.getMaxBid(),
+                ab.getAuction().getMinimumIncrement(),  // derived, not stored
+                ab.isActive()
         );
     }
 }

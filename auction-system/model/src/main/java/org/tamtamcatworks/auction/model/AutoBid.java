@@ -31,8 +31,6 @@ public class AutoBid extends BaseEntity {
 
     private double maxBid;
 
-    private double increment;
-
     private boolean active;
 
     protected AutoBid() {}
@@ -43,15 +41,11 @@ public class AutoBid extends BaseEntity {
      * @param auction   phiên đấu giá muốn auto-bid
      * @param bidder    người đặt auto-bid
      * @param maxBid    mức giá tối đa sẵn sàng trả
-     * @param increment bước tăng giá mỗi lần tự động đấu
      */
-    public AutoBid(Auction auction, User bidder, double maxBid, double increment) {
+    public AutoBid(Auction auction, User bidder, double maxBid) {
         super();
         if (maxBid <= 0) {
             throw new IllegalArgumentException("maxBid phải > 0.");
-        }
-        if (increment <= 0) {
-            throw new IllegalArgumentException("increment phải > 0.");
         }
         if (maxBid <= auction.getCurrentPrice()) {
             throw new IllegalArgumentException(
@@ -60,7 +54,6 @@ public class AutoBid extends BaseEntity {
         this.auction = auction;
         this.bidder = bidder;
         this.maxBid = maxBid;
-        this.increment = increment;
         this.active = true;
     }
 
@@ -68,17 +61,13 @@ public class AutoBid extends BaseEntity {
      * Cập nhật cấu hình auto-bid (upsert).
      *
      * @param maxBid    mức giá tối đa mới
-     * @param increment bước tăng giá mới
      */
-    public void update(double maxBid, double increment) {
+    public void update(double maxBid) {
         if (maxBid <= 0) {
             throw new IllegalArgumentException("maxBid phải > 0.");
         }
-        if (increment <= 0) {
-            throw new IllegalArgumentException("increment phải > 0.");
-        }
+
         this.maxBid = maxBid;
-        this.increment = increment;
         this.active = true;
     }
 
@@ -96,10 +85,6 @@ public class AutoBid extends BaseEntity {
 
     public double getMaxBid() {
         return maxBid;
-    }
-
-    public double getIncrement() {
-        return increment;
     }
 
     public boolean isActive() {
