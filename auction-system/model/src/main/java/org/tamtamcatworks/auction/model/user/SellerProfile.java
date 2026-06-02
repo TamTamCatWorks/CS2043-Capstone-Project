@@ -1,5 +1,6 @@
 package org.tamtamcatworks.auction.model.user;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class SellerProfile extends BaseEntity {
     private int totalSold;
 
     @ElementCollection
-    private List<String> listings;
+    private List<String> listings = new ArrayList<>();
 
     public SellerProfile() {
         this.rating = 0.0;
