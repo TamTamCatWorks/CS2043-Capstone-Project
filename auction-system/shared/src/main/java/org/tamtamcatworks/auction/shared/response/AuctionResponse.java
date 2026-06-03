@@ -13,6 +13,7 @@ public record AuctionResponse(
     String leadingBidderName,
     double startingPrice,
     double currentPrice,
+    double minimumIncrement,
     String status,
     LocalDateTime startTime,
     LocalDateTime endTime,

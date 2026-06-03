@@ -136,6 +136,22 @@
                         maxWidth="Infinity" styleClass="btn-primary"/>
             </VBox>
 
+            <VBox fx:id="autoBidFormBox" styleClass="detail-panel" spacing="12.0" visible="false" managed="false">
+                <Label text="Set Auto-Bid" styleClass="info-value"/>
+                <VBox spacing="4.0">
+                    <Label text="Auction increment" styleClass="info-label"/>
+                    <Label fx:id="autoBidIncrementLabel" text="\$0.00" styleClass="info-value"/>
+                </VBox>
+                <HBox spacing="8.0" alignment="CENTER_LEFT" styleClass="bid-input-group">
+                    <Label text="\$" styleClass="info-value"/>
+                    <TextField fx:id="autoBidMaxField" promptText="Enter maximum bid" HBox.hgrow="ALWAYS"
+                               styleClass="edge-to-edge-field"/>
+                </HBox>
+                <Label fx:id="autoBidMessageLabel" wrapText="true" visible="false" managed="false"/>
+                <Button fx:id="autoBidBtn" text="Place Auto-Bid" onAction="#handlePlaceAutoBid"
+                        maxWidth="Infinity" styleClass="btn-secondary"/>
+            </VBox>
+
             <!-- Bid History -->
             <VBox styleClass="detail-panel" spacing="8.0" VBox.vgrow="ALWAYS">
                 <Label text="Bid History" styleClass="info-value"/>

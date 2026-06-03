@@ -24,8 +24,10 @@ import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.springframework.messaging.simp.stomp.StompSession;
+import org.tamtamcatworks.auction.shared.request.AutoBidRequest;
 import org.tamtamcatworks.auction.shared.request.BidRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
+import org.tamtamcatworks.auction.shared.response.AutoBidResponse;
 import org.tamtamcatworks.auction.shared.response.BidResponse;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
@@ -75,6 +77,11 @@ public class AuctionDetailController extends BaseController {
   @FXML private TextField bidAmountField;
   @FXML private Label bidMessageLabel;
   @FXML private Button placeBidBtn;
+  @FXML private VBox autoBidFormBox;
+  @FXML private Label autoBidIncrementLabel;
+  @FXML private TextField autoBidMaxField;
+  @FXML private Label autoBidMessageLabel;
+  @FXML private Button autoBidBtn;
   @FXML private VBox bidHistoryContainer;
   @FXML private Label noBidsLabel;
 
@@ -111,6 +118,7 @@ public class AuctionDetailController extends BaseController {
               currentAuction.leadingBidderName(),
               currentAuction.startingPrice(),
               priceUpdate.newPrice(),
+              currentAuction.minimumIncrement(),
               currentAuction.status(),
               currentAuction.startTime(),
               currentAuction.endTime(),
@@ -199,6 +207,7 @@ public class AuctionDetailController extends BaseController {
     sellerLabel.setText(auction.sellerName() != null ? auction.sellerName() : "-");
     itemLabel.setText(auction.itemName() != null ? auction.itemName() : "-");
     startPriceLabel.setText(String.format("$%.2f", auction.startingPrice()));
+    autoBidIncrementLabel.setText(String.format("$%.2f", auction.minimumIncrement()));
     currentPriceLabel.setText(String.format("$%.2f", auction.currentPrice()));
 
     leadingBidderLabel.setText(
@@ -241,6 +250,13 @@ public class AuctionDetailController extends BaseController {
     if (isActive && !isOwner) {
       bidFormBox.setVisible(true);
       bidFormBox.setManaged(true);
+      autoBidFormBox.setVisible(true);
+      autoBidFormBox.setManaged(true);
+    } else {
+      bidFormBox.setVisible(false);
+      bidFormBox.setManaged(false);
+      autoBidFormBox.setVisible(false);
+      autoBidFormBox.setManaged(false);
     }
 
     // Show owner controls
@@ -251,6 +267,9 @@ public class AuctionDetailController extends BaseController {
       openBtn.setManaged("PENDING".equalsIgnoreCase(status));
       closeBtn.setVisible("ACTIVE".equalsIgnoreCase(status));
       closeBtn.setManaged("ACTIVE".equalsIgnoreCase(status));
+    } else {
+      ownerControls.setVisible(false);
+      ownerControls.setManaged(false);
     }
   }
 
@@ -399,6 +418,46 @@ public class AuctionDetailController extends BaseController {
   }
 
   @FXML
+  private void handlePlaceAutoBid() {
+    String text = autoBidMaxField.getText().trim();
+    if (text.isEmpty()) {
+      showAutoBidMessage("Please enter a maximum bid.", true);
+      return;
+    }
+
+    double maxBid;
+    try {
+      maxBid = Double.parseDouble(text);
+    } catch (NumberFormatException e) {
+      showAutoBidMessage("Please enter a valid number.", true);
+      return;
+    }
+
+    if (currentAuction != null && maxBid <= currentAuction.currentPrice()) {
+      showAutoBidMessage(String.format("Maximum bid must be higher than $%.2f",
+          currentAuction.currentPrice()), true);
+      return;
+    }
+
+    autoBidBtn.setDisable(true);
+    AutoBidRequest request = new AutoBidRequest(maxBid);
+
+    AsyncTask.<AutoBidResponse>run(() -> api.registerAutoBid(auctionId, request))
+        .onSuccess(response -> {
+          autoBidBtn.setDisable(false);
+          autoBidMaxField.clear();
+          showAutoBidMessage("Auto-bid placed successfully!", false);
+          loadAuctionDetail();
+        })
+        .onFailure(ex -> {
+          autoBidBtn.setDisable(false);
+          showAutoBidMessage("Auto-bid failed: "
+              + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"), true);
+        })
+        .start();
+  }
+
+  @FXML
   private void handleOpenAuction() {
     runAuctionAction(() -> api.openAuction(auctionId));
   }
@@ -429,6 +488,14 @@ public class AuctionDetailController extends BaseController {
     bidMessageLabel.setManaged(true);
     bidMessageLabel.getStyleClass().removeAll("error-label", "success-label");
     bidMessageLabel.getStyleClass().add(isError ? "error-label" : "success-label");
+  }
+
+  private void showAutoBidMessage(String msg, boolean isError) {
+    autoBidMessageLabel.setText(msg);
+    autoBidMessageLabel.setVisible(true);
+    autoBidMessageLabel.setManaged(true);
+    autoBidMessageLabel.getStyleClass().removeAll("error-label", "success-label");
+    autoBidMessageLabel.getStyleClass().add(isError ? "error-label" : "success-label");
   }
 
   private String getStatusClass(String status) {

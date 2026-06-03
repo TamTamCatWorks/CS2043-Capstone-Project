@@ -160,7 +160,7 @@ public class SharedRecordTest {
     // AuctionResponse
     AuctionResponse aucRes = new AuctionResponse(
         "a-1", "Auction", "s-1", "Seller", "i-1", "Item", "b-1", "Bidder",
-        10.0, 15.0, "ACTIVE", now, now.plusDays(1), "url", "desc", "ART", "spec"
+        10.0, 15.0, 1000.0, "ACTIVE", now, now.plusDays(1), "url", "desc", "ART", "spec"
     );
     assertEquals("a-1", aucRes.id());
     assertEquals("Auction", aucRes.title());
@@ -172,6 +172,7 @@ public class SharedRecordTest {
     assertEquals("Bidder", aucRes.leadingBidderName());
     assertEquals(10.0, aucRes.startingPrice());
     assertEquals(15.0, aucRes.currentPrice());
+    assertEquals(1000.0, aucRes.minimumIncrement());
     assertEquals("ACTIVE", aucRes.status());
     assertEquals(now, aucRes.startTime());
     assertEquals(now.plusDays(1), aucRes.endTime());
