@@ -48,7 +48,7 @@ class UserControllerTest {
     @Test
     void testRegisterUserEndpoint() throws Exception {
         RegisterRequest req = new RegisterRequest("alice", "alice@example.com", "pass123", "Alice Smith");
-        UserResponse resp = new UserResponse("user123", "alice", "alice@example.com", "Alice Smith", 0.0, 0.0, false, null);
+        UserResponse resp = new UserResponse("user123", "alice", "alice@example.com", "Alice Smith", 0.0, 0.0, true, false, null);
         when(userService.registerByRequest(any(RegisterRequest.class))).thenReturn(resp);
         mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -59,7 +59,7 @@ class UserControllerTest {
     }
     @Test
     void testGetUserEndpoint() throws Exception {
-        UserResponse resp = new UserResponse("user123", "alice", "alice@example.com", "Alice Smith", 100.0, 0.0, false, null);
+        UserResponse resp = new UserResponse("user123", "alice", "alice@example.com", "Alice Smith", 100.0, 0.0, true, false, null);
         when(userService.findResponseById("user123")).thenReturn(resp);
         mockMvc.perform(get("/users/user123"))
                 .andExpect(status().isOk())

@@ -42,7 +42,7 @@ class UserServiceTest {
 
   @BeforeEach
   void setUp() {
-    userService = new UserService(userRepository, passwordEncoder, userMapper, eventPublisher);
+    userService = new UserService(userRepository, passwordEncoder, userMapper, eventPublisher, null);
   }
 
   @Test
@@ -103,7 +103,7 @@ class UserServiceTest {
     when(userRepository.findById("id123")).thenReturn(Optional.of(user));
     when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
     
-    UserResponse mockResponse = new UserResponse("id123", "tester", "test@example.com", "Test User", 110.0, 0.0, false, List.of());
+    UserResponse mockResponse = new UserResponse("id123", "tester", "test@example.com", "Test User", 110.0, 0.0, true, false, List.of());
     when(userMapper.toResponse(any(User.class))).thenReturn(mockResponse);
 
     UserResponse response = userService.topUp("id123", 100.0);

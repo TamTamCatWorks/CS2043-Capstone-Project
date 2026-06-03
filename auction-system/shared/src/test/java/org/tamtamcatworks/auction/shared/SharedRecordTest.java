@@ -1,6 +1,7 @@
 package org.tamtamcatworks.auction.shared;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -104,11 +105,10 @@ public class SharedRecordTest {
     assertEquals(now, audit.timestamp());
 
     // AdminDashboardResponse
-    AdminDashboardResponse dash = new AdminDashboardResponse(10, 5, 2, 1500.0);
+    AdminDashboardResponse dash = new AdminDashboardResponse(10, 5, 2);
     assertEquals(10, dash.totalUsers());
-    assertEquals(5, dash.activeAuctions());
-    assertEquals(2, dash.pendingReports());
-    assertEquals(1500.0, dash.totalRevenue());
+    assertEquals(5, dash.totalAdmins());
+    assertEquals(2, dash.totalAuctions());
 
     // AdminReportResponse
     AdminReportResponse report = new AdminReportResponse(
@@ -135,7 +135,7 @@ public class SharedRecordTest {
 
     // UserResponse
     UserResponse userRes = new UserResponse(
-        "u-1", "user1", "user1@example.com", "User One", 100.0, 10.0, true, List.of("ALL")
+        "u-1", "user1", "user1@example.com", "User One", 100.0, 10.0, true, false, List.of("ALL")
     );
     assertEquals("u-1", userRes.id());
     assertEquals("user1", userRes.username());
@@ -143,7 +143,8 @@ public class SharedRecordTest {
     assertEquals("User One", userRes.fullName());
     assertEquals(100.0, userRes.balance());
     assertEquals(10.0, userRes.holdBalance());
-    assertTrue(userRes.isAdmin());
+    assertTrue(userRes.isActive());
+    assertFalse(userRes.isAdmin());
     assertEquals(List.of("ALL"), userRes.permissions());
 
     // NotificationResponse
