@@ -146,19 +146,29 @@ public class AutoBidService {
         Auction auction = auctionRepository.findById(event.auctionId()).orElse(null);
         if (auction == null || !auction.isAcceptingBids()) return;
 
+        String currentLeaderId = auction.getLeadingBidder() != null
+                ? auction.getLeadingBidder().getId()
+                : null;
+
         List<AutoBid> candidates = autoBidRepository.findByAuctionAndActiveTrue(auction);
 
         PriorityQueue<AutoBid> queue = new PriorityQueue<>(
                 Comparator.comparingDouble(AutoBid::getMaxBid).reversed()
         );
+
         for (AutoBid ab : candidates) {
-            if (!ab.getBidder().getId().equals(event.bidderId())) {
+            if (!ab.getBidder().getId().equals(currentLeaderId)) {
                 queue.offer(ab);
             }
         }
         if (queue.isEmpty()) return;
 
         AutoBid best = queue.poll();
+
+        if (best.getBidder().getId().equals(currentLeaderId)) {
+            return;
+        }
+
         double nextBid = auction.getCurrentPrice() + auction.getMinimumIncrement();
 
         if (nextBid > best.getMaxBid()) {
