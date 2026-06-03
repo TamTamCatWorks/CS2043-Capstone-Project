@@ -55,8 +55,11 @@ public class Launcher extends Application {
         stage.setTitle(System.getProperty("app.name", "Auction System"));
         stage.getIcons().add(new Image(APP_ICON_PATH));
         stage.setOnCloseRequest(t -> Platform.exit());
-        stage.setMaxWidth(1280);
-        stage.setMaxHeight(900);
+        Platform.runLater(() -> {
+            stage.show();
+            stage.setMaximized(true);
+            stage.requestFocus();
+        });
 
         // Load initial view — login screen using layout routing
         Navigation.navigateTo(

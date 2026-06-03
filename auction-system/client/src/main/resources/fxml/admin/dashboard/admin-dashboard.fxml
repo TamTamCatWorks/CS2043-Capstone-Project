@@ -27,12 +27,4 @@
 
     </VBox>
 
-    <VBox spacing="20">
-
-        <Label text="Analytics"
-              styleClass="section-title"/>
-
-        <VBox fx:id="analyticsContainer"/>
-    </VBox>
-
 </VBox>
