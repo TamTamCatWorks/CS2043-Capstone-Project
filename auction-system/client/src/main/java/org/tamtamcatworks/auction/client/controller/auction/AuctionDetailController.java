@@ -79,9 +79,12 @@ public class AuctionDetailController extends BaseController {
   @FXML private Button placeBidBtn;
   @FXML private VBox autoBidFormBox;
   @FXML private Label autoBidIncrementLabel;
+  @FXML private Label autoBidStateLabel;
+  @FXML private Label autoBidMaxLabel;
   @FXML private TextField autoBidMaxField;
   @FXML private Label autoBidMessageLabel;
   @FXML private Button autoBidBtn;
+  @FXML private Button cancelAutoBidBtn;
   @FXML private VBox bidHistoryContainer;
   @FXML private Label noBidsLabel;
 
@@ -168,6 +171,7 @@ public class AuctionDetailController extends BaseController {
           currentAuction = auction;
           populateAuctionInfo(currentAuction);
           loadBidHistory();
+          loadAutoBidState();
         })
         .onFailure(ex -> {
           setLoading(false);
@@ -296,6 +300,59 @@ public class AuctionDetailController extends BaseController {
           noBidsLabel.setManaged(true);
         })
         .start();
+  }
+
+  private void loadAutoBidState() {
+    if (currentAuction == null || currentAuction.sellerId() == null) {
+      clearAutoBidState();
+      return;
+    }
+
+    String currentUserId = SessionManager.getCurrentUser() != null
+        ? SessionManager.getCurrentUser().id() : null;
+    boolean canManageAutoBid = currentUserId != null && !currentUserId.equals(currentAuction.sellerId())
+        && "ACTIVE".equalsIgnoreCase(currentAuction.status());
+    if (!canManageAutoBid) {
+      clearAutoBidState();
+      return;
+    }
+
+    AsyncTask.<AutoBidResponse>run(() -> api.getAutoBid(auctionId))
+        .onSuccess(autoBid -> {
+          showAutoBidState(autoBid);
+        })
+        .onFailure(ex -> clearAutoBidState())
+        .start();
+  }
+
+  private void showAutoBidState(AutoBidResponse autoBid) {
+    if (autoBid == null) {
+      clearAutoBidState();
+      return;
+    }
+
+    autoBidStateLabel.setText(autoBid.active() ? "Active auto-bid" : "Inactive auto-bid");
+    autoBidMaxLabel.setText(String.format("$%.2f", autoBid.maxBid()));
+    autoBidMaxField.setText(String.format("%.2f", autoBid.maxBid()));
+    autoBidBtn.setText("Update Auto-Bid");
+    cancelAutoBidBtn.setVisible(true);
+    cancelAutoBidBtn.setManaged(true);
+    autoBidStateLabel.setVisible(true);
+    autoBidStateLabel.setManaged(true);
+    autoBidMaxLabel.setVisible(true);
+    autoBidMaxLabel.setManaged(true);
+  }
+
+  private void clearAutoBidState() {
+    autoBidStateLabel.setText("No auto-bid set");
+    autoBidMaxLabel.setText("-");
+    autoBidBtn.setText("Place Auto-Bid");
+    cancelAutoBidBtn.setVisible(false);
+    cancelAutoBidBtn.setManaged(false);
+    autoBidStateLabel.setVisible(true);
+    autoBidStateLabel.setManaged(true);
+    autoBidMaxLabel.setVisible(true);
+    autoBidMaxLabel.setManaged(true);
   }
 
   private void populateBidChart(List<BidResponse> bids) {
@@ -452,6 +509,29 @@ public class AuctionDetailController extends BaseController {
         .onFailure(ex -> {
           autoBidBtn.setDisable(false);
           showAutoBidMessage("Auto-bid failed: "
+              + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"), true);
+        })
+        .start();
+  }
+
+  @FXML
+  private void handleCancelAutoBid() {
+    cancelAutoBidBtn.setDisable(true);
+
+    AsyncTask.<Void>run(() -> {
+          api.cancelAutoBid(auctionId);
+          return null;
+        })
+        .onSuccess(ignored -> {
+          cancelAutoBidBtn.setDisable(false);
+          autoBidMaxField.clear();
+          showAutoBidMessage("Auto-bid canceled successfully.", false);
+          clearAutoBidState();
+          loadAuctionDetail();
+        })
+        .onFailure(ex -> {
+          cancelAutoBidBtn.setDisable(false);
+          showAutoBidMessage("Failed to cancel auto-bid: "
               + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"), true);
         })
         .start();
