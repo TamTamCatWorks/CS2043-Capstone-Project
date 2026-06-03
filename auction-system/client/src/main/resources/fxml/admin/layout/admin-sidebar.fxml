@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      spacing="10"
+      styleClass="admin-sidebar"
+      fx:controller="org.tamtamcatworks.auction.client.controller.admin.dashboard.AdminSidebarController">
+
+    <Button text="Dashboard"
+            onAction="#goToDashboard"/>
+
+    <Button text="Users"
+            onAction="#goToUsers"/>
+
+    <Button text="Auctions"
+            onAction="#goToAuctions"/>
+
+    <Button text="Logs"
+            onAction="#goToLogs"/>
+
+</VBox>

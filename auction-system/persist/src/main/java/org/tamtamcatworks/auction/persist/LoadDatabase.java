@@ -13,7 +13,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.BidTransaction;

@@ -52,7 +52,11 @@ public class LoginController extends BaseController {
                 setLoading(false);
                 if (user != null) {
                     SessionManager.setCurrentUser(user);
-                    Navigation.navigateTo("/fxml/auctions-list.fxml");
+                    if (user.isAdmin()) {
+                        Navigation.navigateTo("/fxml/admin/dashboard/admin-dashboard.fxml");
+                    } else {
+                        Navigation.navigateTo("/fxml/auctions-list.fxml");
+                    }
                 } else {
                     showError(messageLabel, "Invalid response from server.");
                 }

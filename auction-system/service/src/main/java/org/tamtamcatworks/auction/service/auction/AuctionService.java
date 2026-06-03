@@ -105,7 +105,7 @@ public class AuctionService {
         Auction saved = auctionRepository.save(auction);
         eventPublisher.publishEvent(new AuctionEvent(
             saved.getId(), saved.getTitle(),
-            saved.getSeller().getId(), saved.getStatus(), null));
+            saved.getSeller().getId(), null, saved.getCurrentPrice(), saved.getStatus(), null));
         return saved;
     }
 
@@ -123,11 +123,22 @@ public class AuctionService {
                 leadingBidder.getId(),
                 userMapper.toResponse(leadingBidder)
             ));
+
+            // Deposit the money into the seller's account
+            User seller = auction.getSeller();
+            seller.addBalance(currentPrice);
+            userRepository.save(seller);
+            eventPublisher.publishEvent(new UserStateEvent(
+                seller.getId(),
+                userMapper.toResponse(seller)
+            ));
         }
         Auction saved = auctionRepository.save(auction);
         eventPublisher.publishEvent(new AuctionEvent(
             saved.getId(), saved.getTitle(),
-            saved.getSeller().getId(), saved.getStatus(), null));
+            saved.getSeller().getId(),
+            saved.getLeadingBidder() != null ? saved.getLeadingBidder().getId() : null,
+            saved.getCurrentPrice(), saved.getStatus(), null));
         return saved;
     }
 
@@ -149,7 +160,9 @@ public class AuctionService {
         Auction saved = auctionRepository.save(auction);
         eventPublisher.publishEvent(new AuctionEvent(
             saved.getId(), saved.getTitle(),
-            saved.getSeller().getId(), saved.getStatus(), reason));
+            saved.getSeller().getId(),
+            saved.getLeadingBidder() != null ? saved.getLeadingBidder().getId() : null,
+            saved.getCurrentPrice(), saved.getStatus(), reason));
         return saved;
     }
 
@@ -246,5 +259,14 @@ public class AuctionService {
 
         Page<Auction> page = auctionRepository.searchPaged(normalizedKeyword, status, itemTypeClass, pageable);
         return auctionMapper.toPageResponse(page);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AuctionResponse> getAllAuctions() {
+
+        return auctionRepository.findAll()
+            .stream()
+            .map(auctionMapper::toResponse)
+            .toList();
     }
 }

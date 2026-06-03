@@ -56,6 +56,60 @@ public class NotificationBroadcastListener {
                 "/topic/auctions/" + event.auctionId() + "/status",
                 new AuctionStatusUpdate(event.auctionId(), event.newStatus().name(), event.reason())
         );
+
+        // Push personal notification to seller
+        String sellerMsg = switch (event.newStatus()) {
+            case ACTIVE    -> "Your auction \"" + event.auctionTitle() + "\" is now live!";
+            case CLOSED    -> "Your auction \"" + event.auctionTitle() + "\" has closed.";
+            case CANCELLED -> "Auction \"" + event.auctionTitle() + "\" was cancelled: " + event.reason();
+            default        -> null;
+        };
+
+        if (sellerMsg != null) {
+            messagingTemplate.convertAndSendToUser(
+                    event.sellerId(),
+                    "/queue/notifications",
+                    new NotificationResponse(
+                            UUID.randomUUID().toString(),
+                            "AUCTION_" + event.newStatus().name(),
+                            sellerMsg,
+                            false,
+                            LocalDateTime.now().toString()
+                    )
+            );
+        }
+
+        // Push personal notification to winner (leading bidder) upon closure
+        if (event.newStatus() == org.tamtamcatworks.auction.model.AuctionStatus.CLOSED && event.leadingBidderId() != null) {
+            messagingTemplate.convertAndSendToUser(
+                    event.leadingBidderId(),
+                    "/queue/notifications",
+                    new NotificationResponse(
+                            UUID.randomUUID().toString(),
+                            "AUCTION_CLOSED",
+                            String.format("Congratulations! You won the auction \"%s\" for $%.2f.",
+                                    event.auctionTitle(), event.currentPrice()),
+                            false,
+                            LocalDateTime.now().toString()
+                    )
+            );
+        }
+
+        // Push personal notification to leading bidder upon cancellation
+        if (event.newStatus() == org.tamtamcatworks.auction.model.AuctionStatus.CANCELLED && event.leadingBidderId() != null) {
+            messagingTemplate.convertAndSendToUser(
+                    event.leadingBidderId(),
+                    "/queue/notifications",
+                    new NotificationResponse(
+                            UUID.randomUUID().toString(),
+                            "AUCTION_CANCELLED",
+                            String.format("The auction \"%s\" was cancelled. Your bid of $%.2f has been refunded.",
+                                    event.auctionTitle(), event.currentPrice()),
+                            false,
+                            LocalDateTime.now().toString()
+                    )
+            );
+        }
     }
 
     // ── Inner payload records ──────────────────────────────────────────────────

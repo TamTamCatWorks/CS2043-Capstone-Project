@@ -326,6 +326,55 @@
     -fx-icon-color: #C2410C;
 }
 
+.bid-chart-panel {
+    -fx-background-color: linear-gradient(to bottom right, #FFFFFF, #FBF8F1);
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(228, 196, 149, 0.35);
+    -fx-border-radius: 14px;
+    -fx-padding: 14px;
+}
+
+.bid-trend-chart {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.bid-trend-chart .chart-plot-background {
+    -fx-background-color: #FCFAF7;
+    -fx-background-radius: 12px;
+}
+
+.bid-trend-chart .chart-content {
+    -fx-padding: 6px 10px 10px 4px;
+}
+
+.bid-trend-chart .axis {
+    -fx-tick-label-fill: #7C7467;
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 9pt;
+}
+
+.bid-trend-chart .axis-label {
+    -fx-text-fill: #5C5549;
+    -fx-font-weight: bold;
+}
+
+.bid-trend-chart .chart-series-line {
+    -fx-stroke: #8F7246;
+    -fx-stroke-width: 2.5px;
+}
+
+.bid-trend-chart .chart-line-symbol {
+    -fx-background-color: #8F7246, #FFFFFF;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 999;
+    -fx-padding: 4px;
+}
+
+.bid-trend-chart .chart-legend {
+    -fx-padding: 0;
+}
+
 .dashboard-card {
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 24px;
