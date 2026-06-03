@@ -147,7 +147,6 @@ class AutoBidServiceTest {
 
         BidEvent event = new BidEvent("auctionId", "Comic Sale", "sellerId", "manualId", null, 100.0);
 
-        // Spy the service to capture calls
         AutoBidService spyService = mock(AutoBidService.class);
         ReflectionTestUtils.setField(autoBidService, "self", spyService);
 
