@@ -108,7 +108,7 @@ public class AuctionController {
     public ResponseEntity<BidResponse> placeBid(@PathVariable String id,
                                                 @RequestBody BidRequest req,
                                                 HttpSession session) {
-        String bidderId = (String) session.getAttribute("userId");
+        String bidderId = requireUserId(session);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(bidService.placeBid(id, bidderId, req));
     }
