@@ -1,10 +1,13 @@
 package org.tamtamcatworks.auction.service.auction;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import org.tamtamcatworks.auction.model.BaseEntity;
 import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.AutoBid;
 import org.tamtamcatworks.auction.model.user.User;
@@ -45,6 +48,7 @@ public class AutoBidService {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
     private final BidService bidService;
+    private AutoBidService self;
 
     public AutoBidService(AutoBidRepository autoBidRepository,
                           AuctionRepository auctionRepository,
@@ -54,6 +58,11 @@ public class AutoBidService {
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.bidService = bidService;
+    }
+
+    @Autowired
+    public void setSelf(@Lazy AutoBidService self) {
+        this.self = self;
     }
 
     /**
@@ -154,6 +163,7 @@ public class AutoBidService {
 
         PriorityQueue<AutoBid> queue = new PriorityQueue<>(
                 Comparator.comparingDouble(AutoBid::getMaxBid).reversed()
+                        .thenComparing(BaseEntity::getCreationDate)
         );
 
         for (AutoBid ab : candidates) {
@@ -169,21 +179,33 @@ public class AutoBidService {
             return;
         }
 
-        double nextBid = auction.getCurrentPrice() + auction.getMinimumIncrement();
+        double nextBid = auction.getCurrentPrice() + auction.getMinimumIncrement() ;
 
         if (nextBid > best.getMaxBid()) {
-            best.deactivate();
-            autoBidRepository.save(best);
+            self.deactivateAutoBid(best.getId());
             return;
         }
 
+        self.executeAutoBid(event.auctionId(), best.getId(), best.getBidder().getId(), nextBid);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void executeAutoBid(String auctionId, String autoBidId,
+                               String bidderId, double amount) {
         try {
-            bidService.placeBid(event.auctionId(), best.getBidder().getId(),
-                    new BidRequest(nextBid, "AUTO"));
+            bidService.placeBid(auctionId, bidderId,
+                    new BidRequest(amount, "AUTO"));
         } catch (IllegalArgumentException | IllegalStateException e) {
-            best.deactivate();
-            autoBidRepository.save(best);
+            self.deactivateAutoBid(autoBidId);
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deactivateAutoBid(String autoBidId) {
+        autoBidRepository.findById(autoBidId).ifPresent(ab -> {
+            ab.deactivate();
+            autoBidRepository.save(ab);
+        });
     }
 
     private AutoBidResponse toResponse(AutoBid ab) {
