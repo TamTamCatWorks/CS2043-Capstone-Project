@@ -1,5 +1,6 @@
 package org.tamtamcatworks.auction.model.user;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,10 +26,10 @@ public class BuyerProfile extends BaseEntity {
     private double totalSpent;
 
     @ElementCollection
-    private List<String> biddingHistory;
+    private List<String> biddingHistory = new ArrayList<>();
 
     @ElementCollection
-    private List<String> watchlist;
+    private List<String> watchlist = new ArrayList<>();
 
     public BuyerProfile() {
         this.totalWins = 0;

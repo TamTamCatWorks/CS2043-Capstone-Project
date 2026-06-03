@@ -1,9 +1,21 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/tamtamcatworks
-    username: postgres
-    password: postgres
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
   jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: create-drop
-    show-sql: true
+      ddl-auto: create-drop    # creates schema on test start, drops on end
+    show-sql: true             # useful for debugging tests
+
+  h2:
+    console:
+      enabled: false           # no need for console in tests
+  
+  minio:
+    endpoint: http://localhost:9000
+    accessKey: dummy
+    secretKey: dummy
