@@ -25,14 +25,14 @@ public class AdminSidebarController
     public void goToAuctions(ActionEvent event) {
 
         Navigation.navigateTo(
-                "/fxml/admin/auctions/auctions-management.fxml"
+                "/fxml/admin/auctions/auctions-list.fxml"
         );
     }
 
     public void goToLogs(ActionEvent event) {
 
         Navigation.navigateTo(
-                "/fxml/admin/logs/admin-logs.fxml"
+                "/fxml/admin/logs/audit-logs.fxml"
         );
     }
 }

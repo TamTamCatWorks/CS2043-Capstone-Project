@@ -72,6 +72,11 @@
                                 <FontIcon iconLiteral="mdi2v-view-dashboard" iconSize="14"/>
                             </graphic>
                         </MenuItem>
+                        <MenuItem fx:id="adminPanelItem" text="Admin Panel" onAction="#handleOpenAdminPanel">
+                            <graphic>
+                                <FontIcon iconLiteral="mdi2s-shield-account" iconSize="14"/>
+                            </graphic>
+                        </MenuItem>
                         <SeparatorMenuItem/>
                         <MenuItem fx:id="notificationsHeaderItem" text="Notifications" onAction="#handleOpenNotificationsFromMenu"/>
                         <SeparatorMenuItem fx:id="notificationsSeparatorItem"/>

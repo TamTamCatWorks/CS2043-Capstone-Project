@@ -4,11 +4,12 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.client.RestClient;
 
 import org.tamtamcatworks.auction.client.ApiClient;
+import org.tamtamcatworks.auction.client.SessionManager;
 
 public abstract class BaseAdminService {
 
     protected final ApiClient apiClient =
-            new ApiClient();
+                        SessionManager.getApiClient();
 
     protected RestClient client() {
 

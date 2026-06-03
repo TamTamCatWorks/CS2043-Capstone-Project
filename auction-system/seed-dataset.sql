@@ -71,11 +71,11 @@ INSERT INTO "Users" (id, creation_date, username, email, password_hash, full_nam
 -- -----------------------------------------------------------------------------
 
 INSERT INTO admin_permissions (admin_id, permissions) VALUES 
-('adm-profile-0001', 'MANAGE_USERS'),
-('adm-profile-0001', 'MANAGE_ITEMS'),
-('adm-profile-0001', 'MANAGE_AUCTIONS'),
-('adm-profile-0001', 'VIEW_LOGS'),
-('adm-profile-0001', 'MANAGE_ADMINS');
+('adm-profile-0001', 'USER_MANAGE'),
+('adm-profile-0001', 'AUCTION_MANAGE'),
+('adm-profile-0001', 'REPORT_MODERATE'),
+('adm-profile-0001', 'AUDIT_VIEW'),
+('adm-profile-0001', 'FINANCE_VIEW');
 
 INSERT INTO admin_action_log (admin_id, action_log) VALUES 
 ('adm-profile-0001', '[2026-05-25 10:00:00] Admin account initialized.'),
