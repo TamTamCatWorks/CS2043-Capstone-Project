@@ -260,4 +260,13 @@ public class AuctionService {
         Page<Auction> page = auctionRepository.searchPaged(normalizedKeyword, status, itemTypeClass, pageable);
         return auctionMapper.toPageResponse(page);
     }
+
+    @Transactional(readOnly = true)
+    public List<AuctionResponse> getAllAuctions() {
+
+        return auctionRepository.findAll()
+            .stream()
+            .map(auctionMapper::toResponse)
+            .toList();
+    }
 }

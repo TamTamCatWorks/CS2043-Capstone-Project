@@ -17,8 +17,6 @@ import org.tamtamcatworks.auction.service.item.ItemService;
 import org.tamtamcatworks.auction.shared.request.ItemRequest;
 import org.tamtamcatworks.auction.shared.response.ItemResponse;
 
-import org.tamtamcatworks.auction.service.mapper.ItemMapper;
-
 @RestController
 @RequestMapping("/items")
 public class ItemController {

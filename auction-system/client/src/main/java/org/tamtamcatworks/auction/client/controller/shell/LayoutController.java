@@ -21,6 +21,7 @@ public class LayoutController {
     @FXML private MenuButton userMenuButton;
     @FXML private MenuItem userNameItem;
     @FXML private MenuItem userEmailItem;
+    @FXML private MenuItem adminPanelItem;
     @FXML private MenuItem notificationsHeaderItem;
     @FXML private SeparatorMenuItem notificationsSeparatorItem;
     @FXML private HBox headerSearchShell;
@@ -111,11 +112,17 @@ public class LayoutController {
     }
 
     private void updateUserMenu(UserResponse user) {
+        boolean isAdmin = user != null && user.isAdmin();
+
         if (user == null) {
             userMenuButton.setText("");
             userMenuButton.setAccessibleText("");
             userNameItem.setText("");
             userEmailItem.setText("");
+            if (adminPanelItem != null) {
+                adminPanelItem.setVisible(false);
+                adminPanelItem.setDisable(true);
+            }
             return;
         }
 
@@ -123,6 +130,11 @@ public class LayoutController {
         userMenuButton.setAccessibleText(user.fullName());
         userNameItem.setText(user.fullName());
         userEmailItem.setText(user.email());
+
+        if (adminPanelItem != null) {
+            adminPanelItem.setVisible(isAdmin);
+            adminPanelItem.setDisable(!isAdmin);
+        }
     }
 
     @FXML
@@ -142,5 +154,10 @@ public class LayoutController {
         // Request dashboard to open the Notifications view and navigate there
             NavigationState.setDashboardViewPath("/fxml/dashboard/notifications.fxml");
         Navigation.navigateTo("/fxml/dashboard.fxml");
+    }
+
+    @FXML
+    private void handleOpenAdminPanel() {
+        Navigation.navigateTo("/fxml/admin/dashboard/admin-dashboard.fxml");
     }
 }

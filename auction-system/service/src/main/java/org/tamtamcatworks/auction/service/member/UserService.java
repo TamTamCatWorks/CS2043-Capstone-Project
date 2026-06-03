@@ -9,10 +9,13 @@ import org.tamtamcatworks.auction.model.user.AdminProfile;
 import org.tamtamcatworks.auction.model.user.BuyerProfile;
 import org.tamtamcatworks.auction.model.user.SellerProfile;
 import org.tamtamcatworks.auction.model.user.User;
+import org.tamtamcatworks.auction.persist.repository.AuctionRepository;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
 import org.tamtamcatworks.auction.service.event.UserStateEvent;
 import org.tamtamcatworks.auction.service.mapper.UserMapper;
 import org.tamtamcatworks.auction.shared.request.RegisterRequest;
+import org.tamtamcatworks.auction.shared.response.AdminAuditLogResponse;
+import org.tamtamcatworks.auction.shared.response.AdminDashboardResponse;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
 import java.util.List;
@@ -25,15 +28,18 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final AuctionRepository auctionRepository;
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        UserMapper userMapper,
-                       ApplicationEventPublisher eventPublisher) {
+                       ApplicationEventPublisher eventPublisher,
+                       AuctionRepository auctionRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.eventPublisher = eventPublisher;
+        this.auctionRepository = auctionRepository;
     }
 
     @Transactional
@@ -92,6 +98,34 @@ public class UserService {
         return userMapper.toResponse(user);
     }
 
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsers() {
+
+        return userRepository.findAll()
+                .stream()
+                .map(userMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional public void suspendUser(String userId) {
+
+        User user = findById(userId);
+
+        user.setActive(false);
+
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void activateUser(String userId) {
+
+        User user = findById(userId);
+
+        user.setActive(true);
+
+        userRepository.save(user);
+    }
+
     @Transactional
     public UserResponse topUp(@NonNull String id, double amount) {
         User user = findById(id);
@@ -133,5 +167,57 @@ public class UserService {
             throw new IllegalArgumentException("User is not an administrator.");
         }
         return user.getAdminProfile().getActionLog();
+    }
+
+    @Transactional(readOnly = true)
+    public AdminDashboardResponse getDashboardStats() {
+
+        long totalUsers = userRepository.count();
+
+        long totalAdmins =userRepository.findAll()
+                    .stream()
+                    .filter(user -> user.getAdminProfile() != null)
+                    .count();
+
+        long totalAuctions = auctionRepository.count();
+
+        return new AdminDashboardResponse(
+            totalUsers,
+            totalAdmins,
+            totalAuctions
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getAllAdminLogs() {
+
+        return userRepository.findAll()
+            .stream()
+            .filter(user -> user.getAdminProfile() != null)
+            .flatMap(user -> user.getAdminProfile()
+                                 .getActionLog()
+                                 .stream())
+                                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminAuditLogResponse> getAuditLogs() {
+
+        return userRepository.findAll()
+            .stream()
+            .filter(user -> user.getAdminProfile() != null)
+            .flatMap(user -> user.getAdminProfile()
+                                 .getActionLog()
+                                 .stream()
+                                 .map(log -> new AdminAuditLogResponse(
+                                        java.util.UUID.randomUUID().toString(),
+                                        user.getUsername(),
+                                        log,
+                                        "-",
+                                        java.time.LocalDateTime.now()
+                                    )
+                                )
+            )
+        .toList();
     }
 }
