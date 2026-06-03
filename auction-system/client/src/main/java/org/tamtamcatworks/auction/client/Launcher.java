@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -71,10 +72,10 @@ public class Launcher extends Application {
     private void loadApplicationProperties() {
         try {
             Properties properties = new Properties();
-            properties.load(new InputStreamReader(
-                Objects.requireNonNull(getClass().getResourceAsStream(APP_PROPERTIES_PATH)),
-                StandardCharsets.UTF_8
-            ));
+            try (InputStream inputStream = Objects.requireNonNull(getClass().getResourceAsStream(APP_PROPERTIES_PATH));
+                 InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+                properties.load(reader);
+            }
             properties.forEach((key, value) -> System.setProperty(
                 String.valueOf(key),
                 String.valueOf(value)
