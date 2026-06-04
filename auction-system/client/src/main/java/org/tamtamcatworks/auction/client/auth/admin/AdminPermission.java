@@ -2,13 +2,13 @@ package org.tamtamcatworks.auction.client.auth.admin;
 
 public enum AdminPermission {
 
-    USER_MANAGE,
+    MANAGE_USERS,
 
-    AUCTION_MANAGE,
+    MANAGE_ITEMS,
 
-    REPORT_MODERATE,
+    MANAGE_AUCTIONS,
 
-    AUDIT_VIEW,
+    VIEW_LOGS,
 
-    FINANCE_VIEW
+    MANAGE_ADMINS
 }

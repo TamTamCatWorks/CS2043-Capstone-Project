@@ -1,20 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+
 <VBox xmlns:fx="http://javafx.com/fxml"
       spacing="10"
       styleClass="admin-sidebar"
       fx:controller="org.tamtamcatworks.auction.client.controller.admin.dashboard.AdminSidebarController">
 
-    <Button text="Dashboard"
+    <Button fx:id="dashboardButton"
+            text="Dashboard"
             onAction="#goToDashboard"/>
 
-    <Button text="Users"
+    <Button fx:id="usersButton"
+            text="Users"
             onAction="#goToUsers"/>
 
-    <Button text="Auctions"
+    <Button fx:id="auctionsButton"
+            text="Auctions"
             onAction="#goToAuctions"/>
 
-    <Button text="Logs"
+    <Button text="Notifications"
+            onAction="#goToNotifications"/>
+
+    <Button fx:id="logsButton"
+            text="Audit Logs"
             onAction="#goToLogs"/>
 
 </VBox>

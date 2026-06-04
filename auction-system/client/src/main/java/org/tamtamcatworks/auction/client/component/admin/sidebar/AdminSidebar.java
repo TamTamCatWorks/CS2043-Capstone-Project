@@ -27,7 +27,7 @@ public class AdminSidebar
                 new Button("Audit Logs");
 
         Button notificationsButton =
-                new Button("Notification");
+                new Button("Notifications");
 
         Button dashboardButton =
                 new Button("Dashboard");
@@ -82,7 +82,7 @@ public class AdminSidebar
 
                 Navigation.navigateTo(
 
-                        "/fxml/admin/reports/reports-list.fxml"
+                        "/fxml/admin/notification/admin-notifications.fxml"
                 )
         );
 
@@ -98,28 +98,21 @@ public class AdminSidebar
 
                 usersButton,
 
-                AdminPermission.USER_MANAGE
+                AdminPermission.MANAGE_USERS
         );
 
         AdminFeatureGate.requirePermission(
 
                 auctionsButton,
 
-                AdminPermission.AUCTION_MANAGE
-        );
-
-        AdminFeatureGate.requirePermission(
-
-                notificationsButton,
-
-                AdminPermission.AUDIT_VIEW
+                AdminPermission.MANAGE_AUCTIONS
         );
 
         AdminFeatureGate.requirePermission(
 
                 logsButton,
 
-                AdminPermission.AUDIT_VIEW
+                AdminPermission.VIEW_LOGS
         );
 
         getChildren().addAll(

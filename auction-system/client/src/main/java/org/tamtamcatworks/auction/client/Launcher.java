@@ -46,7 +46,7 @@ public class Launcher extends Application {
             org.tamtamcatworks.auction.client.controller.admin.dashboard.AdminDashboardController.class,
             org.tamtamcatworks.auction.client.controller.admin.users.UsersManagementController.class,
             org.tamtamcatworks.auction.client.controller.admin.auctions.AuctionsManagementController.class,
-            org.tamtamcatworks.auction.client.controller.admin.reports.ReportsManagementController.class,
+            org.tamtamcatworks.auction.client.controller.admin.notification.AdminNotificationsController.class,
             org.tamtamcatworks.auction.client.controller.admin.logs.AuditLogsController.class
         );
 
@@ -56,8 +56,11 @@ public class Launcher extends Application {
         stage.setTitle(System.getProperty("app.name", "Auction System"));
         stage.getIcons().add(new Image(APP_ICON_PATH));
         stage.setOnCloseRequest(t -> Platform.exit());
-        stage.setMaxWidth(1280);
-        stage.setMaxHeight(900);
+        Platform.runLater(() -> {
+            stage.show();
+            stage.setMaximized(true);
+            stage.requestFocus();
+        });
 
         // Load initial view — login screen using layout routing
         Navigation.navigateTo(

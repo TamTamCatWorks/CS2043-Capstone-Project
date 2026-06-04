@@ -52,7 +52,7 @@ public class UsersManagementController extends BaseController {
     @FXML
     public void initialize() {
 
-        if (!AdminAuthorizationService.hasPermission(AdminPermission.USER_MANAGE)) {
+        if (!AdminAuthorizationService.hasPermission(AdminPermission.MANAGE_USERS)) {
 
             throw new RuntimeException(
                 "Access denied"

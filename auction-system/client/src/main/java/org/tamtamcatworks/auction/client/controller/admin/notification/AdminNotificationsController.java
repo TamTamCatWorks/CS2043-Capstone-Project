@@ -12,7 +12,7 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.VBox;
 
 @Route(
-    fxml = "/fxml/admin/notifications/admin-notifications.fxml",
+        fxml = "/fxml/admin/notification/admin-notifications.fxml",
     layout = "/fxml/admin/layout/admin-layout.fxml"
 )
 public class AdminNotificationsController

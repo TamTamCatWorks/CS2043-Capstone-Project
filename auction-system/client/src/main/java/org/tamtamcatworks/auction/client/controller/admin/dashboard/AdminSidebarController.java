@@ -1,18 +1,63 @@
 package org.tamtamcatworks.auction.client.controller.admin.dashboard;
 
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 
 import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.client.Navigation;
+import org.tamtamcatworks.auction.client.auth.admin.AdminFeatureGate;
+import org.tamtamcatworks.auction.client.auth.admin.AdminPermission;
 
 public class AdminSidebarController
         extends BaseController {
+
+    @FXML
+    private Button usersButton;
+
+    @FXML
+    private Button auctionsButton;
+
+    @FXML
+    private Button logsButton;
+
+    @FXML
+    public void initialize() {
+
+    AdminFeatureGate.requirePermission(
+
+        usersButton,
+
+        AdminPermission.MANAGE_USERS
+    );
+
+    AdminFeatureGate.requirePermission(
+
+        auctionsButton,
+
+        AdminPermission.MANAGE_AUCTIONS
+    );
+
+    AdminFeatureGate.requirePermission(
+
+        logsButton,
+
+        AdminPermission.VIEW_LOGS
+    );
+    }
 
     public void goToDashboard(ActionEvent event) {
 
         Navigation.navigateTo(
                 "/fxml/admin/dashboard/admin-dashboard.fxml"
         );
+    }
+
+    public void goToNotifications(ActionEvent event) {
+
+    Navigation.navigateTo(
+        "/fxml/admin/notification/admin-notifications.fxml"
+    );
     }
 
     public void goToUsers(ActionEvent event) {

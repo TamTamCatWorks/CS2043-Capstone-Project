@@ -54,7 +54,7 @@ public class ReportsManagementController
     @FXML
     public void initialize() {
 
-        if (!AdminAuthorizationService.hasPermission(AdminPermission.USER_MANAGE)) {
+        if (!AdminAuthorizationService.hasPermission(AdminPermission.MANAGE_ADMINS)) {
 
                 throw new RuntimeException(
                 "Access denied"
