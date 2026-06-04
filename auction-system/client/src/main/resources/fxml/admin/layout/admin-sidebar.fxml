@@ -20,9 +20,6 @@
             text="Auctions"
             onAction="#goToAuctions"/>
 
-    <Button text="Notifications"
-            onAction="#goToNotifications"/>
-
     <Button fx:id="logsButton"
             text="Audit Logs"
             onAction="#goToLogs"/>
