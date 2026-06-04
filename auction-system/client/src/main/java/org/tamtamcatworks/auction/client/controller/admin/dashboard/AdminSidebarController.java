@@ -22,28 +22,25 @@ public class AdminSidebarController
     private Button logsButton;
 
     @FXML
+    private Button viewAsUserButton;
+
+    @FXML
     public void initialize() {
 
-    AdminFeatureGate.requirePermission(
+        AdminFeatureGate.requirePermission(
+                usersButton,
+                AdminPermission.MANAGE_USERS
+        );
 
-        usersButton,
+        AdminFeatureGate.requirePermission(
+                auctionsButton,
+                AdminPermission.MANAGE_AUCTIONS
+        );
 
-        AdminPermission.MANAGE_USERS
-    );
-
-    AdminFeatureGate.requirePermission(
-
-        auctionsButton,
-
-        AdminPermission.MANAGE_AUCTIONS
-    );
-
-    AdminFeatureGate.requirePermission(
-
-        logsButton,
-
-        AdminPermission.VIEW_LOGS
-    );
+        AdminFeatureGate.requirePermission(
+                logsButton,
+                AdminPermission.VIEW_LOGS
+        );
     }
 
     public void goToDashboard(ActionEvent event) {
@@ -55,9 +52,9 @@ public class AdminSidebarController
 
     public void goToNotifications(ActionEvent event) {
 
-    Navigation.navigateTo(
-        "/fxml/admin/notification/admin-notifications.fxml"
-    );
+        Navigation.navigateTo(
+                "/fxml/admin/notification/admin-notifications.fxml"
+        );
     }
 
     public void goToUsers(ActionEvent event) {
@@ -78,6 +75,13 @@ public class AdminSidebarController
 
         Navigation.navigateTo(
                 "/fxml/admin/logs/audit-logs.fxml"
+        );
+    }
+
+    public void goToUserView(ActionEvent event) {
+
+        Navigation.navigateTo(
+                "/fxml/auctions-list.fxml"
         );
     }
 }

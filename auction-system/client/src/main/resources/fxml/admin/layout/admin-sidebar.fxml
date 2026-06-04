@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
 
 <VBox xmlns:fx="http://javafx.com/fxml"
       spacing="10"
@@ -23,5 +25,17 @@
     <Button fx:id="logsButton"
             text="Audit Logs"
             onAction="#goToLogs"/>
+
+    <!-- Pushes everything below to the bottom -->
+    <Pane VBox.vgrow="ALWAYS"/>
+
+    <!-- Visual divider -->
+    <Separator/>
+
+    <!-- Switch to user view -->
+    <Button fx:id="viewAsUserButton"
+            text="View as User"
+            onAction="#goToUserView"
+            maxWidth="Infinity"/>
 
 </VBox>

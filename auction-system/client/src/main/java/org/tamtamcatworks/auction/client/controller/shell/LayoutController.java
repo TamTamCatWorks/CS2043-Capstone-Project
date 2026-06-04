@@ -279,6 +279,6 @@ public class LayoutController {
         "/fxml/admin/dashboard/admin-dashboard.fxml"
     );
 
-    Navigation.navigateTo("/fxml/dashboard.fxml");
+    Navigation.navigateTo("/fxml/admin/dashboard/admin-dashboard.fxml");
   }
 }
