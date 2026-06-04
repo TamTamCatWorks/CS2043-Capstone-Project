@@ -779,6 +779,19 @@ The `AuctionDetailController` subscribes to both price and status topics on view
 
 ## Further Functionalities
 
+### Admin Panel
+
+Describe the full admin module, covering:
+
+- Architecture: the admin panel uses its own separate layout shell (admin-layout.fxml + AdminSidebarController), completely independent from the user-facing dashboard-layout.fxml. Navigation between the two shells is handled by Navigation.navigateTo() which performs a full scene-root swap when the required layout changes.
+- Permission model: AdminPermission enum + AdminFeatureGate + AdminAuthorizationService — sidebar buttons are shown/hidden at the node level based on the logged-in user's permission set. AdminPermissionGuard.requireAdmin() enforces hard stops at controller initialization.
+- Dashboard: AdminDashboardController displays live stats (total users, admins, auctions) pulled from GET /admin/dashboard.
+- User management(UsersManagementController): view all users, suspend/activate accounts via PATCH /admin/users/{id}/suspend and /activate.
+- Auction management(AuctionsManagementController): view all auctions, open/close any auction via PATCH /admin/auctions/{id}/open and /close. Admins can also open/close directly from the user-facing auction detail page.
+- Audit logs(AuditLogsController): tabular view of admin action history from GET /admin/audit-logs, loaded asynchronously via AsyncExecutor.
+- Reports(ReportsManagementController): report management with MANAGE_ADMINS permission gate.
+- "View as User" mode: admins can switch to the normal user shell without logging out (and return via "Admin Panel" in the user menu), allowing them to browse and interact with auctions as a regular participant.
+
 ### Anti-Sniping
 
 Sniping — placing a bid in the last seconds of an auction to prevent counter-bids — is countered by an **automatic time extension** mechanism.
