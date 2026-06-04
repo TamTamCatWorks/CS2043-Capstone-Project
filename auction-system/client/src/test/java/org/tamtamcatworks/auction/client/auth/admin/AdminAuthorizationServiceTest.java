@@ -30,7 +30,7 @@ class AdminAuthorizationServiceTest {
     @Test
     void noUserHasNoAdminAccess() {
 
-        assertFalse(AdminAuthorizationService.hasPermission(AdminPermission.USER_MANAGE));
+        assertFalse(AdminAuthorizationService.hasPermission(AdminPermission.MANAGE_USERS));
         assertFalse(AdminAuthorizationService.hasRole(AdminRole.SUPER_ADMIN));
         assertEquals(Set.of(), AdminAuthorizationService.getPermissions());
     }
@@ -52,7 +52,7 @@ class AdminAuthorizationServiceTest {
                 )
         );
 
-        assertTrue(AdminAuthorizationService.hasPermission(AdminPermission.AUCTION_MANAGE));
+        assertTrue(AdminAuthorizationService.hasPermission(AdminPermission.MANAGE_AUCTIONS));
                 assertTrue(AdminAuthorizationService.hasRole(AdminRole.MODERATOR));
                 assertEquals(Set.of("AUDIT_VIEW", "MODERATOR"), AdminAuthorizationService.getPermissions());
     }
@@ -70,12 +70,12 @@ class AdminAuthorizationServiceTest {
                         0.0,
                         true,
                         false,
-                        List.of("AUCTION_MANAGE", "SUPPORT_ADMIN")
+                        List.of("MANAGE_AUCTIONS", "SUPPORT_ADMIN")
                 )
         );
 
-        assertTrue(AdminAuthorizationService.hasPermission(AdminPermission.AUCTION_MANAGE));
-        assertFalse(AdminAuthorizationService.hasPermission(AdminPermission.USER_MANAGE));
+        assertTrue(AdminAuthorizationService.hasPermission(AdminPermission.MANAGE_AUCTIONS));
+        assertFalse(AdminAuthorizationService.hasPermission(AdminPermission.MANAGE_USERS));
         assertTrue(AdminAuthorizationService.hasRole(AdminRole.SUPPORT_ADMIN));
         assertFalse(AdminAuthorizationService.hasRole(AdminRole.FINANCE_ADMIN));
     }

@@ -51,7 +51,7 @@ public class AuditLogsController
     @FXML
     public void initialize() {
 
-        if (!AdminAuthorizationService.hasPermission(AdminPermission.USER_MANAGE)) {
+        if (!AdminAuthorizationService.hasPermission(AdminPermission.VIEW_LOGS)) {
 
                 throw new RuntimeException(
                 "Access denied"

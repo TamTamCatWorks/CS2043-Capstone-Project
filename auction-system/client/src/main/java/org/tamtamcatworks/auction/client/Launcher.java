@@ -45,7 +45,7 @@ public class Launcher extends Application {
             org.tamtamcatworks.auction.client.controller.admin.dashboard.AdminDashboardController.class,
             org.tamtamcatworks.auction.client.controller.admin.users.UsersManagementController.class,
             org.tamtamcatworks.auction.client.controller.admin.auctions.AuctionsManagementController.class,
-            org.tamtamcatworks.auction.client.controller.admin.reports.ReportsManagementController.class,
+            org.tamtamcatworks.auction.client.controller.admin.notification.AdminNotificationsController.class,
             org.tamtamcatworks.auction.client.controller.admin.logs.AuditLogsController.class
         );
 
