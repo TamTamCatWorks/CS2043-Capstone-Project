@@ -27,16 +27,21 @@ import java.util.PriorityQueue;
 /**
  * Dịch vụ đấu giá tự động (Auto-Bidding).
  *
- * <p>THUẬT TOÁN:
+ * <p>THUẬT TOÁN (single-jump proxy resolution):
  * <ol>
  *   <li>Sau khi một bid được chấp nhận và commit ({@code BidEvent}), service lắng nghe event.</li>
  *   <li>Lấy tất cả auto-bid còn hiệu lực của phiên đó, ngoại trừ người đang dẫn đầu.</li>
  *   <li>Đưa vào {@link PriorityQueue} sắp xếp giảm dần theo {@code maxBid}
  *       — người sẵn sàng trả cao nhất được ưu tiên cao nhất.</li>
- *   <li>Người đứng đầu queue tự động đặt giá {@code currentPrice + increment}
- *       nếu vẫn còn trong ngưỡng {@code maxBid}.</li>
- *   <li>Bid tự động kích hoạt {@code BidEvent} mới → vòng lặp tiếp tục
- *       đến khi không còn ai có thể đấu.</li>
+ *   <li>Tính giá thắng trong một lần duy nhất (proxy/Vickrey-style):
+ *     <ul>
+ *       <li>Chỉ có một auto-bidder: đặt {@code currentPrice + minimumIncrement}.</li>
+ *       <li>Hai auto-bidder cạnh tranh: giá thắng =
+ *           {@code min(best.maxBid, second.maxBid + minimumIncrement)}.</li>
+ *       <li>best.maxBid &lt; currentPrice + minimumIncrement: deactivate và dừng.</li>
+ *     </ul>
+ *   </li>
+ *   <li>Chỉ đặt một bid duy nhất — không có cascade nhiều transaction.</li>
  * </ol>
  *
  * <p>AUTO-BID POLICY: mỗi user chỉ có một auto-bid trên một phiên (upsert).
@@ -81,6 +86,17 @@ public class AutoBidService {
         User bidder = userRepository.findById(bidderId)
             .orElseThrow(() -> new NoSuchElementException("Bidder not found."));
 
+        // ── Eligibility guards (mirror BidService.placeBid order) ────────────
+        if (!bidder.isActive()) {
+            throw new IllegalStateException("Suspended users cannot register auto-bids.");
+        }
+        if (!auction.getSeller().isActive()) {
+            throw new IllegalStateException("This auction belongs to a suspended seller.");
+        }
+        if (bidder.getBalance() < request.maxBid()) {
+            throw new IllegalArgumentException("Insufficient balance to cover declared maxBid.");
+        }
+        // ── Domain-specific guards ────────────────────────────────────────────
         if (!auction.isAcceptingBids()) {
             throw new IllegalStateException("Auction is not accepting bids.");
         }
@@ -141,11 +157,20 @@ public class AutoBidService {
     }
 
     /**
-     * Lắng nghe BidEvent sau khi transaction commit, sau đó kích hoạt auto-bid
-     * cho người cạnh tranh tốt nhất (cao nhất trong PriorityQueue).
+     * Lắng nghe BidEvent sau khi transaction commit và giải quyết auto-bid
+     * theo kiểu proxy/Vickrey trong một lần duy nhất (single-jump resolution).
      *
      * <p>Dùng {@code AFTER_COMMIT} để đảm bảo đọc đúng giá hiện tại
      * từ transaction vừa commit trước đó.
+     *
+     * <p>Logic tính giá thắng:
+     * <ul>
+     *   <li><b>Case 3</b> – best.maxBid &lt; currentPrice + increment: deactivate, dừng.</li>
+     *   <li><b>Case 1</b> – chỉ một auto-bidder (không có second): đặt
+     *       {@code currentPrice + minimumIncrement}.</li>
+     *   <li><b>Case 2</b> – hai auto-bidder cạnh tranh: đặt
+     *       {@code min(best.maxBid, second.maxBid + minimumIncrement)}.</li>
+     * </ul>
      *
      * @param event thông tin bid vừa được chấp nhận
      */
@@ -174,24 +199,47 @@ public class AutoBidService {
         if (queue.isEmpty()) return;
 
         AutoBid best = queue.poll();
+        double minimumNext = auction.getCurrentPrice() + auction.getMinimumIncrement();
 
-        if (best.getBidder().getId().equals(currentLeaderId)) {
-            return;
-        }
-
-        double nextBid = auction.getCurrentPrice() + auction.getMinimumIncrement() ;
-
-        if (nextBid > best.getMaxBid()) {
+        // Case 3: best cannot even meet the minimum next bid — deactivate and stop.
+        if (best.getMaxBid() < minimumNext) {
             self.deactivateAutoBid(best.getId());
             return;
         }
 
-        self.executeAutoBid(event.auctionId(), best.getId(), best.getBidder().getId(), nextBid);
+        // Compute the single winning price in one pass (proxy/Vickrey-style).
+        double winningPrice;
+        AutoBid second = queue.peek();
+        if (second == null) {
+            // Case 1: sole auto-bidder — pay the minimum needed to take the lead.
+            winningPrice = minimumNext;
+        } else {
+            // Case 2: two auto-bidders competing — winner pays just enough to beat runner-up.
+            winningPrice = Math.min(best.getMaxBid(), second.getMaxBid() + auction.getMinimumIncrement());
+        }
+
+        self.executeAutoBid(event.auctionId(), best.getId(), best.getBidder().getId(), winningPrice);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void executeAutoBid(String auctionId, String autoBidId,
                                String bidderId, double amount) {
+        // Re-validate eligibility in case bidder/seller status or balance
+        // changed between registration and execution time.
+        User bidder = userRepository.findById(bidderId).orElse(null);
+        if (bidder == null || !bidder.isActive()) {
+            self.deactivateAutoBid(autoBidId);
+            return;
+        }
+        Auction auction = auctionRepository.findById(auctionId).orElse(null);
+        if (auction == null || !auction.getSeller().isActive()) {
+            self.deactivateAutoBid(autoBidId);
+            return;
+        }
+        if (bidder.getBalance() < amount) {
+            self.deactivateAutoBid(autoBidId);
+            return;
+        }
         try {
             bidService.placeBid(auctionId, bidderId,
                     new BidRequest(amount, "AUTO"));
