@@ -206,6 +206,9 @@ public class AutoBidService {
      * <p>Logic tính giá thắng:
      * <ul>
      *   <li><b>Case 3</b> – best.maxBid &lt; currentPrice + increment: deactivate, dừng.</li>
+     *   <li><b>N-way tie</b> – N bidders share the same maxBid: earliest registrant wins
+     *       at {@code currentPrice + minimumIncrement}; all tied peers are deactivated
+     *       immediately in the same invocation — no cascade.</li>
      *   <li><b>Case 1</b> – chỉ một auto-bidder (không có second): đặt
      *       {@code currentPrice + minimumIncrement}.</li>
      *   <li><b>Case 2</b> – hai auto-bidder cạnh tranh: đặt
@@ -247,14 +250,25 @@ public class AutoBidService {
             return;
         }
 
+        // Drain N-way ties in one pass. The queue ordering (maxBid DESC, then
+        // creationDate ASC) already guarantees best is the earliest registrant
+        // among all peers at the same ceiling. Every other tied member is
+        // deactivated immediately so the group collapses into a single outcome
+        // here — no cascade across tied bidders across multiple invocations.
+        while (!queue.isEmpty()
+                && Double.compare(queue.peek().getMaxBid(), best.getMaxBid()) == 0) {
+            self.deactivateAutoBid(queue.poll().getId());
+        }
+
         // Compute the single winning price in one pass (proxy/Vickrey-style).
         double winningPrice;
-        AutoBid second = queue.peek();
+        AutoBid second = queue.peek(); // first non-tied competitor, if any
         if (second == null) {
-            // Case 1: sole auto-bidder — pay the minimum needed to take the lead.
+            // Case 1 (includes N-way tie with no outside competitor):
+            // pay the minimum needed to take the lead.
             winningPrice = minimumNext;
         } else {
-            // Case 2: two auto-bidders competing — winner pays just enough to beat runner-up.
+            // Case 2: winner pays just enough to beat the (non-tied) runner-up.
             winningPrice = Math.min(best.getMaxBid(), second.getMaxBid() + auction.getMinimumIncrement());
         }
 

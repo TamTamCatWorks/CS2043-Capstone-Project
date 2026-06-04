@@ -167,9 +167,11 @@ class AutoBidServiceTest {
 
         assertEquals("ab1Id", autoBidIdCaptor.getValue()); // ab1 had the earlier creationDate
         assertEquals("bidder1Id", bidderIdCaptor.getValue());
-        // Case 2 (two competing auto-bidders):
-        // winningPrice = min(best.maxBid, second.maxBid + increment) = min(150, 150+10) = 150
-        assertEquals(150.0, amountCaptor.getValue());
+        // Two-way tie: tied group resolved in one pass.
+        // ab1 wins at minimumNext (100 + 10 = 110), NOT the shared ceiling (150).
+        // ab2 (the other tied member) is deactivated in the same invocation.
+        assertEquals(110.0, amountCaptor.getValue());
+        verify(spyService).deactivateAutoBid("ab2Id");
     }
 
     @Test
@@ -303,6 +305,90 @@ class AutoBidServiceTest {
 
         verify(spyService, times(1)).deactivateAutoBid("ab1Id");
         verify(spyService, never()).executeAutoBid(any(), any(), any(), any(Double.class));
+    }
+
+    @Test
+    void testOnBidPlacedNWayTie_AllPeersDeactivated_EarliestWinsAtMinimumNext() {
+        // Three-way tie: ab1 (200, earliest), ab2 (200, mid), ab3 (200, latest).
+        // Expected: ab1 wins at currentPrice + increment = 110 (NOT the shared ceiling 200).
+        // ab2 and ab3 are deactivated in the same invocation — no cascade.
+        AutoBid ab1 = new AutoBid(auction, bidder1, 200.0);
+        ReflectionTestUtils.setField(ab1, "id", "ab1Id");
+        ReflectionTestUtils.setField(ab1, "creationDate", LocalDateTime.now().minusMinutes(20));
+
+        AutoBid ab2 = new AutoBid(auction, bidder2, 200.0);
+        ReflectionTestUtils.setField(ab2, "id", "ab2Id");
+        ReflectionTestUtils.setField(ab2, "creationDate", LocalDateTime.now().minusMinutes(10));
+
+        User bidder3 = new User("bidder3", "bidder3@example.com", "pw", "Bob Bidder 3", 1000.0);
+        ReflectionTestUtils.setField(bidder3, "id", "bidder3Id");
+        AutoBid ab3 = new AutoBid(auction, bidder3, 200.0);
+        ReflectionTestUtils.setField(ab3, "id", "ab3Id");
+        ReflectionTestUtils.setField(ab3, "creationDate", LocalDateTime.now().minusMinutes(5));
+
+        User manualBidder = new User("manual", "m@example.com", "pw", "Manual", 100.0);
+        ReflectionTestUtils.setField(manualBidder, "id", "manualId");
+        ReflectionTestUtils.setField(auction, "leadingBidder", manualBidder);
+        ReflectionTestUtils.setField(auction, "currentPrice", 100.0);
+
+        when(auctionRepository.findById("auctionId")).thenReturn(Optional.of(auction));
+        when(autoBidRepository.findByAuctionAndActiveTrue(auction)).thenReturn(Arrays.asList(ab1, ab2, ab3));
+
+        AutoBidService spyService = mock(AutoBidService.class);
+        ReflectionTestUtils.setField(autoBidService, "self", spyService);
+
+        autoBidService.onBidPlaced(new BidEvent("auctionId", "Comic Sale", "sellerId", "manualId", null, 100.0));
+
+        // ab1 (earliest) wins at minimumNext = 110.
+        ArgumentCaptor<Double> amountCaptor = ArgumentCaptor.forClass(Double.class);
+        verify(spyService).executeAutoBid(eq("auctionId"), eq("ab1Id"), eq("bidder1Id"), amountCaptor.capture());
+        assertEquals(110.0, amountCaptor.getValue());
+
+        // ab2 and ab3 are deactivated immediately in the same pass.
+        verify(spyService, times(1)).deactivateAutoBid("ab2Id");
+        verify(spyService, times(1)).deactivateAutoBid("ab3Id");
+    }
+
+    @Test
+    void testOnBidPlacedNWayTie_WithOutsider_WinnerPriceFromOutsider() {
+        // Two tied at the top (ab1, ab2 both 200) plus a non-tied outsider (ab3 at 150).
+        // ab2 is deactivated as a tied peer; ab3 becomes the effective "second".
+        // winningPrice = min(200, 150 + 10) = 160 — set by the outsider, not the tied peer.
+        AutoBid ab1 = new AutoBid(auction, bidder1, 200.0); // tied best, earlier
+        ReflectionTestUtils.setField(ab1, "id", "ab1Id");
+        ReflectionTestUtils.setField(ab1, "creationDate", LocalDateTime.now().minusMinutes(20));
+
+        AutoBid ab2 = new AutoBid(auction, bidder2, 200.0); // tied peer — deactivated
+        ReflectionTestUtils.setField(ab2, "id", "ab2Id");
+        ReflectionTestUtils.setField(ab2, "creationDate", LocalDateTime.now().minusMinutes(10));
+
+        User bidder3 = new User("bidder3", "bidder3@example.com", "pw", "Bob Bidder 3", 1000.0);
+        ReflectionTestUtils.setField(bidder3, "id", "bidder3Id");
+        AutoBid ab3 = new AutoBid(auction, bidder3, 150.0); // non-tied outsider (second)
+        ReflectionTestUtils.setField(ab3, "id", "ab3Id");
+        ReflectionTestUtils.setField(ab3, "creationDate", LocalDateTime.now().minusMinutes(5));
+
+        User manualBidder = new User("manual", "m@example.com", "pw", "Manual", 100.0);
+        ReflectionTestUtils.setField(manualBidder, "id", "manualId");
+        ReflectionTestUtils.setField(auction, "leadingBidder", manualBidder);
+        ReflectionTestUtils.setField(auction, "currentPrice", 100.0);
+
+        when(auctionRepository.findById("auctionId")).thenReturn(Optional.of(auction));
+        when(autoBidRepository.findByAuctionAndActiveTrue(auction)).thenReturn(Arrays.asList(ab1, ab2, ab3));
+
+        AutoBidService spyService = mock(AutoBidService.class);
+        ReflectionTestUtils.setField(autoBidService, "self", spyService);
+
+        autoBidService.onBidPlaced(new BidEvent("auctionId", "Comic Sale", "sellerId", "manualId", null, 100.0));
+
+        // ab1 wins; price is set by the outsider (ab3), not the tied peer (ab2).
+        ArgumentCaptor<Double> amountCaptor = ArgumentCaptor.forClass(Double.class);
+        verify(spyService).executeAutoBid(eq("auctionId"), eq("ab1Id"), eq("bidder1Id"), amountCaptor.capture());
+        assertEquals(160.0, amountCaptor.getValue());
+
+        // ab2 (tied peer) is deactivated; ab3 (outsider) is untouched.
+        verify(spyService, times(1)).deactivateAutoBid("ab2Id");
+        verify(spyService, never()).deactivateAutoBid("ab3Id");
     }
 
     @Test
