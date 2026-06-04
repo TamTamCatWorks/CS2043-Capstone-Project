@@ -64,7 +64,8 @@ public class WebSecurityConfig {
                 "/notifications/*/read",
                 "/notifications/read-all",
                 "/ws/**",
-                "/admin/**"
+                "/admin/**",
+                "/auctions/*/auto-bid"
             ))
 
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))

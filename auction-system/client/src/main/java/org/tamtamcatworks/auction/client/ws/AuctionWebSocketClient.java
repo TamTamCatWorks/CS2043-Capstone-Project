@@ -149,8 +149,9 @@ public class AuctionWebSocketClient {
     }
 
     /**
-     * Subscribes to real-time updates for the currently logged-in user.
+     * Subscribes to real-time state updates for a specific user.
      *
+     * @param userId the ID of the user whose state changes to listen to
      * @param onUserState callback when a fresh user snapshot arrives
      * @return the subscription handle, or null if not connected
      */

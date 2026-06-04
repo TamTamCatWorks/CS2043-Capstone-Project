@@ -17,8 +17,8 @@ public class Notification extends BaseEntity {
     @Column(nullable = false)
     private String message;
 
-    @Column(nullable = false)
-    private boolean read = false;
+    @Column(name = "is_read", nullable = false)
+    private boolean isRead = false;
 
     protected Notification() {}
 
@@ -28,10 +28,10 @@ public class Notification extends BaseEntity {
         this.message = message;
     }
 
-    public void markRead() { this.read = true; }
+    public void markRead() { this.isRead = true; }
 
     public String getUserId()          { return userId; }
     public NotificationType getType()  { return type; }
     public String getMessage()         { return message; }
-    public boolean isRead()            { return read; }
+    public boolean isRead()            { return isRead; }
 }

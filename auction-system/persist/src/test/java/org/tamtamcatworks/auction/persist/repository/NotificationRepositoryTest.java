@@ -35,14 +35,14 @@ class NotificationRepositoryTest {
     }
 
     @Test
-    void testFindByUserIdAndReadFalseOrderByCreationDateDesc() {
-        List<Notification> unread = notificationRepository.findByUserIdAndReadFalseOrderByCreationDateDesc(userId);
+    void testFindByUserIdAndIsReadFalseOrderByCreationDateDesc() {
+        List<Notification> unread = notificationRepository.findByUserIdAndIsReadFalseOrderByCreationDateDesc(userId);
         assertEquals(2, unread.size());
 
         n1.markRead();
         notificationRepository.save(n1);
 
-        unread = notificationRepository.findByUserIdAndReadFalseOrderByCreationDateDesc(userId);
+        unread = notificationRepository.findByUserIdAndIsReadFalseOrderByCreationDateDesc(userId);
         assertEquals(1, unread.size());
         assertEquals("You have been outbid.", unread.get(0).getMessage());
     }
@@ -53,7 +53,7 @@ class NotificationRepositoryTest {
         
         // DataJpaTest runs with an EntityManager cache, so we should clear it or verify 
         // that querying unread notifications yields zero unread notifications.
-        List<Notification> unread = notificationRepository.findByUserIdAndReadFalseOrderByCreationDateDesc(userId);
+        List<Notification> unread = notificationRepository.findByUserIdAndIsReadFalseOrderByCreationDateDesc(userId);
         assertTrue(unread.isEmpty());
     }
 }
