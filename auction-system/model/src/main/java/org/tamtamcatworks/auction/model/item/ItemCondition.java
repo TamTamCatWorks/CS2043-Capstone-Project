@@ -1,29 +1,28 @@
 package org.tamtamcatworks.auction.model.item;
 
-
 public enum ItemCondition {
-    NEW("Mới"),
+  NEW("Mới"),
 
-    LIKE_NEW("Như mới"),
+  LIKE_NEW("Như mới"),
 
-    GOOD("Tốt"),
+  GOOD("Tốt"),
 
-    FAIR("Khá"),
+  FAIR("Khá"),
 
-    POOR("Kém");
+  POOR("Kém");
 
+  private final String displayName;
 
-    private final String displayName;
+  ItemCondition(String displayName) {
+    this.displayName = displayName;
+  }
 
-    ItemCondition(String displayName) {
-        this.displayName = displayName;
-    }
+  public String getDisplayName() {
+    return displayName;
+  }
 
-    public String getDisplayName() {
-        return displayName;
-    }
-    @Override
-    public String toString() {
-        return displayName;
-    }
+  @Override
+  public String toString() {
+    return displayName;
+  }
 }

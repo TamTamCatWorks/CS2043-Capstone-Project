@@ -5,11 +5,18 @@ on:
     branches:
       - main
       - api
+      - client
   pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        module: [api, client]
+        java-version: ['21']
 
     steps:
       - name: Checkout repository
@@ -17,21 +24,33 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up JDK 21
+      - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: ${{ matrix.java-version }}
           cache: maven
 
-      - name: Build, test, and check style
+      - name: Build, test, and check style for module
         working-directory: auction-system
-        run: mvn -B -V clean verify
+        run: mvn -B -V -pl ${{ matrix.module }} -am clean verify
 
       - name: Verify API fat jar
+        if: ${{ matrix.module == 'api' }}
         working-directory: auction-system
+        shell: bash
         run: |
-          JAR=$(find api/target -name "api-*.jar" -not -name "*sources*" | head -1)
-          test -n "$JAR"
+          set -e
+          JAR=""
+          for f in api/target/api-*.jar; do
+            case "$f" in
+              *-sources.jar) continue ;;
+              *) JAR="$f"; break ;;
+            esac
+          done
+          if [ -z "$JAR" ]; then
+            echo "No API jar found" >&2
+            exit 1
+          fi
           jar tf "$JAR" | grep -q 'BOOT-INF/classes/'
           jar tf "$JAR" | grep -q 'BOOT-INF/lib/'

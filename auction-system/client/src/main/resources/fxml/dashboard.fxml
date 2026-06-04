@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<HBox spacing="24.0" alignment="TOP_CENTER"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.tamtamcatworks.auction.client.controller.shell.DashboardController">
+    <padding>
+        <Insets top="10.0" right="10.0" bottom="30.0" left="10.0"/>
+    </padding>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         LEFT COLUMN — Profile Card
+         ═══════════════════════════════════════════════════════════════ -->
+    <VBox spacing="0.0" styleClass="profile-card" alignment="TOP_CENTER"
+          prefWidth="280.0" minWidth="260.0" maxWidth="300.0">
+
+        <!-- Avatar Header Strip (gradient background) -->
+        <StackPane styleClass="profile-header-strip" prefHeight="90.0" alignment="BOTTOM_CENTER">
+            <!-- Initials Avatar Circle -->
+            <StackPane styleClass="profile-avatar" prefWidth="72.0" prefHeight="72.0"
+                       maxWidth="72.0" maxHeight="72.0" translateY="36.0">
+                <Label fx:id="avatarInitialsLabel" text="U" styleClass="profile-avatar-text"/>
+            </StackPane>
+        </StackPane>
+
+        <!-- Spacer for avatar overflow -->
+        <Region prefHeight="44.0"/>
+
+        <!-- Name / Username / Email -->
+        <VBox alignment="CENTER" spacing="4.0">
+            <padding>
+                <Insets left="20.0" right="20.0"/>
+            </padding>
+            <Label fx:id="fullNameLabel" text="Full Name" styleClass="profile-name"/>
+            <Label fx:id="usernameLabel" text="@username" styleClass="profile-handle"/>
+            <HBox alignment="CENTER" spacing="6.0">
+                <FontIcon iconLiteral="mdi2e-email-outline" iconSize="14" styleClass="profile-meta-icon"/>
+                <Label fx:id="emailLabel" text="user@example.com" styleClass="profile-meta-text"/>
+            </HBox>
+        </VBox>
+
+        <Region prefHeight="16.0"/>
+
+        <!-- Wallet Summary — Prominent Available Card -->
+        <VBox alignment="CENTER_LEFT" spacing="8.0" maxWidth="260.0">
+            <padding>
+                <Insets top="12.0" right="12.0" bottom="12.0" left="12.0"/>
+            </padding>
+            <VBox styleClass="available-card" alignment="CENTER_LEFT" spacing="8.0" prefWidth="240.0">
+                <Label text="Available balance" styleClass="available-caption"/>
+                <HBox alignment="CENTER_LEFT">
+                    <Label fx:id="availableBalanceLabel" text="0.00" styleClass="available-value"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="totalBalanceLabel" text="Total: 0.00" styleClass="available-total"/>
+                </HBox>
+
+                <ProgressBar fx:id="balanceProgressBar" prefWidth="220.0" progress="0.0" />
+
+                <HBox alignment="CENTER_LEFT">
+                    <Label fx:id="activePercentLabel" text="Active Funds (0%)" styleClass="available-small"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="holdBalanceLabel" text="On Hold: 0.00 (0%)" styleClass="available-small"/>
+                </HBox>
+            </VBox>
+        </VBox>
+
+        <Region prefHeight="16.0"/>
+
+        <!-- Stats Strip -->
+        <HBox alignment="CENTER" spacing="0.0" styleClass="profile-stats-strip">
+            <VBox alignment="CENTER" spacing="2.0" HBox.hgrow="ALWAYS">
+                <padding><Insets top="12.0" bottom="12.0"/></padding>
+                <Label fx:id="auctionCountLabel" text="0" styleClass="profile-stat-value"/>
+                <Label text="Auctions" styleClass="profile-stat-caption"/>
+            </VBox>
+            <Separator orientation="VERTICAL" styleClass="profile-stat-divider"/>
+            <VBox alignment="CENTER" spacing="2.0" HBox.hgrow="ALWAYS">
+                <padding><Insets top="12.0" bottom="12.0"/></padding>
+                <Label fx:id="bidCountLabel" text="0" styleClass="profile-stat-value"/>
+                <Label text="Bids" styleClass="profile-stat-caption"/>
+            </VBox>
+            <Separator orientation="VERTICAL" styleClass="profile-stat-divider"/>
+            <VBox alignment="CENTER" spacing="2.0" HBox.hgrow="ALWAYS">
+                <padding><Insets top="12.0" bottom="12.0"/></padding>
+                <Label fx:id="wonCountLabel" text="0" styleClass="profile-stat-value"/>
+                <Label text="Won" styleClass="profile-stat-caption"/>
+            </VBox>
+        </HBox>
+
+        <Region prefHeight="16.0"/>
+
+        <!-- Left column quick menu -->
+        <VBox spacing="0.0" alignment="CENTER_LEFT" fillWidth="true" styleClass="profile-left-menu">
+            <padding>
+                <Insets left="18.0" right="18.0" bottom="12.0"/>
+            </padding>
+            <Button fx:id="menuHomeButton" text="Home" onAction="#handleMenuHome"
+                    maxWidth="1.7976931348623157E308" prefWidth="240.0" styleClass="profile-left-menu-item"/>
+            <Button fx:id="menuNotificationsButton" text="Notifications" onAction="#handleMenuNotifications"
+                    maxWidth="1.7976931348623157E308" prefWidth="240.0" styleClass="profile-left-menu-item"/>
+            <Button fx:id="menuTopUpButton" text="Top Up" onAction="#handleMenuTopUp"
+                    maxWidth="1.7976931348623157E308" prefWidth="240.0" styleClass="profile-left-menu-item"/>
+        </VBox>
+
+        <Region VBox.vgrow="ALWAYS" prefHeight="1.0"/>
+
+        <!-- Member Since -->
+        <HBox alignment="CENTER" spacing="6.0">
+            <padding><Insets bottom="20.0"/></padding>
+            <FontIcon iconLiteral="mdi2c-calendar-outline" iconSize="14" styleClass="profile-meta-icon"/>
+            <Label fx:id="memberSinceLabel" text="Member since 2026" styleClass="profile-meta-text"/>
+        </HBox>
+    </VBox>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         RIGHT COLUMN — Activity Tabs
+         ═══════════════════════════════════════════════════════════════ -->
+    <VBox spacing="0.0" HBox.hgrow="ALWAYS" styleClass="profile-activity-card">
+        <StackPane fx:id="rightContentArea" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS"/>
+    </VBox>
+</HBox>

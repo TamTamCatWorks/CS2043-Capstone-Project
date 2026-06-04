@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox spacing="0"
+      fx:id="rootContainer"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.tamtamcatworks.auction.client.controller.auction.SearchResultsController">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FILTER / SORT BAR  (topmost; header search is the global entry)
+         ═══════════════════════════════════════════════════════════════ -->
+    <VBox styleClass="filter-bar-block" spacing="8">
+        <padding><Insets top="20" right="24" bottom="12" left="24"/></padding>
+
+        <!-- Filter controls row -->
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <Label text="Status:" styleClass="form-label"/>
+            <ComboBox fx:id="statusFilter" prefWidth="130" styleClass="filter-combo"/>
+
+            <Label text="Category:" styleClass="form-label"/>
+            <ComboBox fx:id="categoryFilter" prefWidth="150" styleClass="filter-combo"/>
+
+            <Label text="Sort by:" styleClass="form-label"/>
+            <ComboBox fx:id="sortCombo" prefWidth="190" styleClass="filter-combo"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Active filter chips — shown inline with filter controls -->
+            <HBox fx:id="activeFilterChips" spacing="6" alignment="CENTER_LEFT"/>
+            <Hyperlink fx:id="clearAllFilters" text="Clear all" visible="false"
+                       managed="false" styleClass="see-all-link"/>
+
+            <!-- Grid / List view toggle -->
+            <ToggleButton fx:id="gridViewToggle" styleClass="view-toggle-btn" selected="true">
+                <graphic><FontIcon iconLiteral="mdi2v-view-grid" iconSize="16"/></graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="listViewToggle" styleClass="view-toggle-btn">
+                <graphic><FontIcon iconLiteral="mdi2v-view-list" iconSize="16"/></graphic>
+            </ToggleButton>
+        </HBox>
+
+        <!-- Context subtitle + result count -->
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <Label fx:id="subtitleLabel" text="" styleClass="section-subtitle"
+                   HBox.hgrow="ALWAYS"/>
+            <Label fx:id="resultCountLabel" text="" styleClass="text-muted"/>
+        </HBox>
+    </VBox>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         LOADING STATE
+         ═══════════════════════════════════════════════════════════════ -->
+    <StackPane fx:id="loadingPane" visible="false" managed="false" prefHeight="200">
+        <VBox alignment="CENTER" spacing="12">
+            <ProgressIndicator maxWidth="36" maxHeight="36" styleClass="progress-spinner"/>
+            <Label text="Searching auctions…" styleClass="text-muted"/>
+        </VBox>
+    </StackPane>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         GLOBAL ERROR LABEL
+         ═══════════════════════════════════════════════════════════════ -->
+    <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false"
+           styleClass="error-label">
+        <VBox.margin><Insets left="24" right="24"/></VBox.margin>
+    </Label>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         MAIN SCROLLABLE REGION
+         ═══════════════════════════════════════════════════════════════ -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-background: transparent;">
+        <VBox>
+
+            <!-- Empty state -->
+            <StackPane fx:id="emptyPane" visible="false" managed="false" prefHeight="300">
+                <VBox alignment="CENTER" spacing="12">
+                    <FontIcon iconLiteral="mdi2m-magnify-close" iconSize="56"
+                              styleClass="detail-icon"/>
+                    <Label fx:id="emptyTitleLabel" text="No results found"
+                           styleClass="empty-state"/>
+                    <Label fx:id="emptySubLabel"
+                           text="Try adjusting your search or filters"
+                           styleClass="text-muted"/>
+                    <Button fx:id="clearFiltersButton" text="Clear all filters"
+                            styleClass="btn-secondary" mnemonicParsing="false"/>
+                </VBox>
+            </StackPane>
+
+            <!-- Dual view area -->
+            <StackPane fx:id="resultsArea" VBox.vgrow="ALWAYS">
+                <padding><Insets top="4" right="24" bottom="20" left="24"/></padding>
+
+                <!-- Grid view (default) -->
+                <FlowPane fx:id="auctionsContainer" hgap="20" vgap="20"
+                          alignment="TOP_LEFT">
+                    <padding><Insets top="4" right="4" bottom="20" left="4"/></padding>
+                </FlowPane>
+
+                <!-- List view -->
+                <VBox fx:id="auctionsListContainer" spacing="12"
+                      visible="false" managed="false">
+                    <padding><Insets top="4" right="4" bottom="20" left="4"/></padding>
+                </VBox>
+            </StackPane>
+
+            <!-- ═══════════════════════════════════════════════════════
+                 PAGINATION BAR
+                 ═══════════════════════════════════════════════════════ -->
+            <HBox alignment="CENTER" spacing="8" styleClass="pagination-bar">
+                <padding><Insets top="12" right="24" bottom="16" left="24"/></padding>
+
+                <Button fx:id="firstPageButton" text="«" styleClass="btn-ghost"
+                        mnemonicParsing="false"/>
+                <Button fx:id="prevPageButton" text="‹" styleClass="btn-secondary"
+                        mnemonicParsing="false"/>
+
+                <HBox fx:id="pageNumbersContainer" spacing="4" alignment="CENTER"/>
+
+                <Button fx:id="nextPageButton" text="›" styleClass="btn-secondary"
+                        mnemonicParsing="false"/>
+                <Button fx:id="lastPageButton" text="»" styleClass="btn-ghost"
+                        mnemonicParsing="false"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Label text="Per page:" styleClass="form-label"/>
+                <ComboBox fx:id="pageSizeCombo" prefWidth="80"
+                          styleClass="filter-combo"/>
+            </HBox>
+        </VBox>
+    </ScrollPane>
+</VBox>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane
+    xmlns:fx="http://javafx.com/fxml"
+    stylesheets="
+        @../../../assets/css/admin/admin-theme.css,
+        @../../../assets/css/admin/admin-table.css,
+        @../../../assets/css/admin/admin-dashboard.css">
+
+    <left>
+        <fx:include source="admin-sidebar.fxml"/>
+    </left>
+
+    <center>
+        <StackPane fx:id="mainContentArea"/>
+    </center>
+
+</BorderPane>

@@ -1,0 +1,25 @@
+.stat-card {
+
+    -fx-min-width: 220;
+
+    -fx-min-height: 120;
+}
+
+.stat-card-title {
+
+    -fx-font-size: 16px;
+
+    -fx-text-fill: #6b7280;
+}
+
+.stat-card-value {
+
+    -fx-font-size: 32px;
+
+    -fx-font-weight: bold;
+}
+
+.analytics-chart {
+
+    -fx-padding: 20;
+}

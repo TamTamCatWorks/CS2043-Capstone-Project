@@ -10,6 +10,4 @@ public record ItemRequest(
     String condition,
     String sellerId,
     String imageUrl,
-    Map<String, Object> details
-) {
-}
+    Map<String, Object> details) {}

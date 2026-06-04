@@ -8,7 +8,7 @@
   </parent>
   <groupId>org.tamtamcatworks.auction</groupId>
   <artifactId>auction-system</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.1.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>auction-system</name>
   <!-- FIXME change it to the project's website -->
@@ -19,15 +19,14 @@
     <jacoco.version>0.8.12</jacoco.version>
     <checkstyle.version>3.6.0</checkstyle.version>
     <mapstruct.version>1.6.3</mapstruct.version>
+    <minio.version>8.5.10</minio.version>
   </properties>
-
   <scm>
     <connection>scm:git:https://github.com/TamTamCatWorks/CS2043-Capstone-Project.git</connection>
     <developerConnection>scm:git:git@github.com:TamTamCatWorks/CS2043-Capstone-Project.git</developerConnection>
     <url>https://github.com/TamTamCatWorks/CS2043-Capstone-Project</url>
     <tag>HEAD</tag>
   </scm>
-
   <dependencyManagement>
     <!-- auto tracking for child modules -->
     <dependencies>
@@ -56,6 +55,22 @@
         <artifactId>shared</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.tamtamcatworks.auction</groupId>
+        <artifactId>client</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.minio</groupId>
+        <artifactId>minio</artifactId>
+        <version>${minio.version}</version>
+      </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>4.11.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
@@ -96,6 +111,7 @@
           <configuration>
             <source>${java.version}</source>
             <target>${java.version}</target>
+            <release>${java.version}</release>
             <annotationProcessorPaths>
               <path>
                 <groupId>org.mapstruct</groupId>
@@ -146,26 +162,24 @@
         </plugin>
       </plugins>
     </pluginManagement>
-
     <plugins>
-    <!-- mapstruct -->
+      <!-- mapstruct -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
       </plugin>
       <plugin>
-    <!-- release plugin -->
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-release-plugin</artifactId>
-      <version>3.0.1</version>
-      <configuration>
-        <tagNameFormat>v@{project.version}</tagNameFormat>
-        <scmCommentPrefix>[release]</scmCommentPrefix>
-        <prepareGoals>clean verify</prepareGoals>
-        <autoVersionSubmodules>true</autoVersionSubmodules> 
-      </configuration>
+        <!-- release plugin -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>3.0.1</version>
+        <configuration>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <scmCommentPrefix>[release]</scmCommentPrefix>
+          <prepareGoals>clean verify</prepareGoals>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+        </configuration>
       </plugin>
-
       <!-- maven checkstyle -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -188,7 +202,6 @@
           </execution>
         </executions>
       </plugin>
-
       <!-- jacoco -->
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -210,7 +223,46 @@
           </execution>
         </executions>
       </plugin>
-
+      <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>2.43.0</version> <!-- Use the latest stable version -->
+          <configuration>
+              <java>
+                  <!-- Define the files to include/exclude -->
+                  <includes>
+                      <include>src/main/java/**/*.java</include>
+                      <include>src/test/java/**/*.java</include>
+                  </includes>
+                  
+                  <!-- Clean up imports -->
+                  <removeUnusedImports />
+                  <importOrder /> 
+                  
+                  <!-- Apply a specific code formatter style -->
+                  <googleJavaFormat>
+                      <version>1.17.0</version>
+                      <style>GOOGLE</style>
+                  </googleJavaFormat>
+                  
+                  <!-- Optional: If you use a custom Eclipse formatter configuration file -->
+                  <!--
+                  <eclipse>
+                      <file>${maven.multiModuleProjectDirectory}/config/eclipse-formatter.xml</file>
+                  </eclipse>
+                  -->
+              </java>
+          </configuration>
+          <executions>
+              <execution>
+                  <!-- Validates formatting during the compile phase -->
+                  <goals>
+                      <goal>check</goal>
+                  </goals>
+                  <phase>compile</phase>
+              </execution>
+          </executions>
+      </plugin>
     </plugins>
   </build>
   <modules>
@@ -219,5 +271,6 @@
     <module>persist</module>
     <module>service</module>
     <module>api</module>
+    <module>client</module>
   </modules>
 </project>

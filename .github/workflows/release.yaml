@@ -23,11 +23,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build release JAR
-        working-directory: auction-system    
-        run: mvn clean package -DskipTests
+      - name: Build release JARs for API and client
+        working-directory: auction-system
+        run: mvn clean package
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: auction-system/api/target/api-*.jar     
+          files: auction-system/api/target/api-*.jar,auction-system/client/target/*client*.jar

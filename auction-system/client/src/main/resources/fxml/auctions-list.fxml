@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox spacing="0"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.tamtamcatworks.auction.client.controller.auction.AuctionsListController">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         MAIN SCROLL REGION — shelf sections
+         ═══════════════════════════════════════════════════════════════ -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-background: transparent;">
+        <VBox fx:id="shelvesContainer" spacing="28">
+            <padding><Insets top="8" right="24" bottom="32" left="24"/></padding>
+
+          <!-- ═══════════════════════════════════════════════════════════════
+              TOP BAR — title + subtitle only.
+              Search lives exclusively in the global header.
+              ═══════════════════════════════════════════════════════════════ -->
+          <VBox styleClass="browse-top-bar" spacing="4">
+             <padding><Insets top="20" right="0" bottom="16" left="10"/></padding>
+             <Label text="Browse Auctions" styleClass="section-title"/>
+             <Label text="Spend wisely (or not, who are we to judge)" styleClass="section-subtitle"/>
+             <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false"
+                   styleClass="error-label"/>
+          </VBox>
+
+            <!-- ── 1. FEATURED AUCTIONS ── -->
+            <VBox spacing="4" styleClass="shelf-section">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <VBox HBox.hgrow="ALWAYS" spacing="2">
+                        <Label text="Featured Auctions" styleClass="shelf-title"/>
+                    </VBox>
+                    <Hyperlink text="See all →" styleClass="see-all-link"
+                               onAction="#onSeeAllFeatured"/>
+                </HBox>
+                <StackPane>
+                    <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER"
+                                prefHeight="240" styleClass="shelf-scroll">
+                        <HBox fx:id="featuredRow" spacing="16" alignment="CENTER_LEFT">
+                            <padding><Insets topRightBottomLeft="8"/></padding>
+                        </HBox>
+                    </ScrollPane>
+                    <StackPane fx:id="featuredOverlay">
+                        <VBox alignment="CENTER" spacing="8">
+                            <ProgressIndicator maxWidth="32" maxHeight="32"
+                                               styleClass="progress-spinner"/>
+                        </VBox>
+                    </StackPane>
+                </StackPane>
+            </VBox>
+
+            <!-- ── 2. ENDING SOON ── -->
+            <VBox spacing="4" styleClass="shelf-section">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <VBox HBox.hgrow="ALWAYS" spacing="2">
+                        <Label text="Ending Soon" styleClass="shelf-title"/>
+                    </VBox>
+                    <Hyperlink text="See all →" styleClass="see-all-link"
+                               onAction="#onSeeAllEndingSoon"/>
+                </HBox>
+                <StackPane>
+                    <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER"
+                                prefHeight="240" styleClass="shelf-scroll">
+                        <HBox fx:id="endingSoonRow" spacing="16" alignment="CENTER_LEFT">
+                            <padding><Insets topRightBottomLeft="8"/></padding>
+                        </HBox>
+                    </ScrollPane>
+                    <StackPane fx:id="endingSoonOverlay">
+                        <VBox alignment="CENTER" spacing="8">
+                            <ProgressIndicator maxWidth="32" maxHeight="32"
+                                               styleClass="progress-spinner"/>
+                        </VBox>
+                    </StackPane>
+                </StackPane>
+            </VBox>
+
+            <!-- ── 3. NEW ARRIVALS ── -->
+            <VBox spacing="4" styleClass="shelf-section">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <VBox HBox.hgrow="ALWAYS" spacing="2">
+                        <Label text="New Arrivals" styleClass="shelf-title"/>
+                    </VBox>
+                    <Hyperlink text="See all →" styleClass="see-all-link"
+                               onAction="#onSeeAllNew"/>
+                </HBox>
+                <StackPane>
+                    <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER"
+                                prefHeight="240" styleClass="shelf-scroll">
+                        <HBox fx:id="newArrivalsRow" spacing="16" alignment="CENTER_LEFT">
+                            <padding><Insets topRightBottomLeft="8"/></padding>
+                        </HBox>
+                    </ScrollPane>
+                    <StackPane fx:id="newArrivalsOverlay">
+                        <VBox alignment="CENTER" spacing="8">
+                            <ProgressIndicator maxWidth="32" maxHeight="32"
+                                               styleClass="progress-spinner"/>
+                        </VBox>
+                    </StackPane>
+                </StackPane>
+            </VBox>
+
+            <!-- ── 4. MOST BIDS ── -->
+            <VBox spacing="4" styleClass="shelf-section">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <VBox HBox.hgrow="ALWAYS" spacing="2">
+                        <Label text="Most Bids" styleClass="shelf-title"/>
+                    </VBox>
+                    <Hyperlink text="See all →" styleClass="see-all-link"
+                               onAction="#onSeeAllPopular"/>
+                </HBox>
+                <StackPane>
+                    <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER"
+                                prefHeight="240" styleClass="shelf-scroll">
+                        <HBox fx:id="popularRow" spacing="16" alignment="CENTER_LEFT">
+                            <padding><Insets topRightBottomLeft="8"/></padding>
+                        </HBox>
+                    </ScrollPane>
+                    <StackPane fx:id="popularOverlay">
+                        <VBox alignment="CENTER" spacing="8">
+                            <ProgressIndicator maxWidth="32" maxHeight="32"
+                                               styleClass="progress-spinner"/>
+                        </VBox>
+                    </StackPane>
+                </StackPane>
+            </VBox>
+
+            <!-- ── 5. ART ── -->
+            <VBox spacing="4" styleClass="shelf-section">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <VBox HBox.hgrow="ALWAYS" spacing="2">
+                        <Label text="Art" styleClass="shelf-title"/>
+                        <Label text="Paintings, sculptures, prints, and collectibles"
+                               styleClass="shelf-subtitle"/>
+                    </VBox>
+                    <Hyperlink text="See all →" styleClass="see-all-link"
+                               onAction="#onSeeAllArt"/>
+                </HBox>
+                <StackPane>
+                    <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER"
+                                prefHeight="240" styleClass="shelf-scroll">
+                        <HBox fx:id="artRow" spacing="16" alignment="CENTER_LEFT">
+                            <padding><Insets topRightBottomLeft="8"/></padding>
+                        </HBox>
+                    </ScrollPane>
+                    <StackPane fx:id="artOverlay">
+                        <VBox alignment="CENTER" spacing="8">
+                            <ProgressIndicator maxWidth="32" maxHeight="32"
+                                               styleClass="progress-spinner"/>
+                        </VBox>
+                    </StackPane>
+                </StackPane>
+            </VBox>
+
+            <!-- ── 6. ELECTRONICS ── -->
+            <VBox spacing="4" styleClass="shelf-section">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <VBox HBox.hgrow="ALWAYS" spacing="2">
+                        <Label text="Electronics" styleClass="shelf-title"/>
+                        <Label text="Gadgets, components, and tech accessories"
+                               styleClass="shelf-subtitle"/>
+                    </VBox>
+                    <Hyperlink text="See all →" styleClass="see-all-link"
+                               onAction="#onSeeAllElectronics"/>
+                </HBox>
+                <StackPane>
+                    <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER"
+                                prefHeight="240" styleClass="shelf-scroll">
+                        <HBox fx:id="electronicsRow" spacing="16" alignment="CENTER_LEFT">
+                            <padding><Insets topRightBottomLeft="8"/></padding>
+                        </HBox>
+                    </ScrollPane>
+                    <StackPane fx:id="electronicsOverlay">
+                        <VBox alignment="CENTER" spacing="8">
+                            <ProgressIndicator maxWidth="32" maxHeight="32"
+                                               styleClass="progress-spinner"/>
+                        </VBox>
+                    </StackPane>
+                </StackPane>
+            </VBox>
+
+            <!-- ── 7. VEHICLES ── -->
+            <VBox spacing="4" styleClass="shelf-section">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <VBox HBox.hgrow="ALWAYS" spacing="2">
+                        <Label text="Vehicles" styleClass="shelf-title"/>
+                        <Label text="Cars, motorcycles, parts, and more"
+                               styleClass="shelf-subtitle"/>
+                    </VBox>
+                    <Hyperlink text="See all →" styleClass="see-all-link"
+                               onAction="#onSeeAllVehicles"/>
+                </HBox>
+                <StackPane>
+                    <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER"
+                                prefHeight="240" styleClass="shelf-scroll">
+                        <HBox fx:id="vehiclesRow" spacing="16" alignment="CENTER_LEFT">
+                            <padding><Insets topRightBottomLeft="8"/></padding>
+                        </HBox>
+                    </ScrollPane>
+                    <StackPane fx:id="vehiclesOverlay">
+                        <VBox alignment="CENTER" spacing="8">
+                            <ProgressIndicator maxWidth="32" maxHeight="32"
+                                               styleClass="progress-spinner"/>
+                        </VBox>
+                    </StackPane>
+                </StackPane>
+            </VBox>
+
+            <!-- ── 8. OTHER ── -->
+            <VBox spacing="4" styleClass="shelf-section">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <VBox HBox.hgrow="ALWAYS" spacing="2">
+                        <Label text="Other" styleClass="shelf-title"/>
+                        <Label text="Everything else worth bidding on"
+                               styleClass="shelf-subtitle"/>
+                    </VBox>
+                    <Hyperlink text="See all →" styleClass="see-all-link"
+                               onAction="#onSeeAllOther"/>
+                </HBox>
+                <StackPane>
+                    <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER"
+                                prefHeight="240" styleClass="shelf-scroll">
+                        <HBox fx:id="otherRow" spacing="16" alignment="CENTER_LEFT">
+                            <padding><Insets topRightBottomLeft="8"/></padding>
+                        </HBox>
+                    </ScrollPane>
+                    <StackPane fx:id="otherOverlay">
+                        <VBox alignment="CENTER" spacing="8">
+                            <ProgressIndicator maxWidth="32" maxHeight="32"
+                                               styleClass="progress-spinner"/>
+                        </VBox>
+                    </StackPane>
+                </StackPane>
+            </VBox>
+
+        </VBox>
+    </ScrollPane>
+</VBox>

@@ -8,6 +8,4 @@ public record ItemResponse(
     String condition,
     String sellerId,
     String description,
-    String imageUrl
-) {
-}
+    String imageUrl) {}

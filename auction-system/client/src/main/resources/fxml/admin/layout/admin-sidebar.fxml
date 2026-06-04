@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      spacing="10"
+      styleClass="admin-sidebar"
+      fx:controller="org.tamtamcatworks.auction.client.controller.admin.dashboard.AdminSidebarController">
+
+    <Button fx:id="dashboardButton"
+            text="Dashboard"
+            onAction="#goToDashboard"/>
+
+    <Button fx:id="usersButton"
+            text="Users"
+            onAction="#goToUsers"/>
+
+    <Button fx:id="auctionsButton"
+            text="Auctions"
+            onAction="#goToAuctions"/>
+
+    <Button fx:id="logsButton"
+            text="Audit Logs"
+            onAction="#goToLogs"/>
+
+    <!-- Pushes everything below to the bottom -->
+    <Pane VBox.vgrow="ALWAYS"/>
+
+    <!-- Visual divider -->
+    <Separator/>
+
+    <!-- Switch to user view -->
+    <Button fx:id="viewAsUserButton"
+            text="View as User"
+            onAction="#goToUserView"
+            maxWidth="Infinity"/>
+
+</VBox>
