@@ -50,21 +50,21 @@ INSERT INTO seller_profile (id, creation_date, rating, rating_count, total_reven
 -- 2. SEED USERS (Table: "Users" with capital U)
 -- -----------------------------------------------------------------------------
 
-INSERT INTO "users" (id, creation_date, username, email, password_hash, full_name, balance, hold_balance, admin_profile_id, buyer_profile_id, seller_profile_id) VALUES
+INSERT INTO "users" (id, creation_date, username, email, password_hash, full_name, balance, hold_balance, admin_profile_id, buyer_profile_id, seller_profile_id, active) VALUES
 -- System Admin (pw: 'admin123')
-('usr-admin-0001', CURRENT_TIMESTAMP, 'admin', 'admin@example.com', '$2a$12$Eqt0Zjc4FJDzLkBOTI9jROHNma2eMdS0VUnrlxyRGrtudDnYtoT2a', 'System Administrator', 0.0, 0.0, 'adm-profile-0001', NULL, NULL),
+('usr-admin-0001', CURRENT_TIMESTAMP, 'admin', 'admin@example.com', '$2a$12$Eqt0Zjc4FJDzLkBOTI9jROHNma2eMdS0VUnrlxyRGrtudDnYtoT2a', 'System Administrator', 0.0, 0.0, 'adm-profile-0001', NULL, NULL, TRUE),
 
 -- Test Bidder (pw: 'hashed123')
-('usr-bidder-0001', CURRENT_TIMESTAMP, 'testbidder', 'test1@example.com', '$2a$10$Xo1Zk3nE3XpA/5eSjK07uO/N5rG5/t/vE7E2bXFv8tU3t/H3Ryu', 'Test Bidder', 48750.0, 1250.0, NULL, 'buy-profile-0001', NULL),
+('usr-bidder-0001', CURRENT_TIMESTAMP, 'testbidder', 'test1@example.com', '$2a$10$Xo1Zk3nE3XpA/5eSjK07uO/N5rG5/t/vE7E2bXFv8tU3t/H3Ryu', 'Test Bidder', 48750.0, 1250.0, NULL, 'buy-profile-0001', NULL, TRUE),
 
 -- Test Seller (pw: 'hashed123')
-('usr-seller-0001', CURRENT_TIMESTAMP, 'testseller', 'test2@example.com', '$2a$10$Xo1Zk3nE3XpA/5eSjK07uO/N5rG5/t/vE7E2bXFv8tU3t/H3Ryu', 'Test Seller', 1000.0, 0.0, NULL, 'buy-profile-0002', 'sel-profile-0001'),
+('usr-seller-0001', CURRENT_TIMESTAMP, 'testseller', 'test2@example.com', '$2a$10$Xo1Zk3nE3XpA/5eSjK07uO/N5rG5/t/vE7E2bXFv8tU3t/H3Ryu', 'Test Seller', 1000.0, 0.0, NULL, 'buy-profile-0002', 'sel-profile-0001', TRUE),
 
 -- Buyer 1 (pw: 'buyer123')
-('usr-buyer-0001', CURRENT_TIMESTAMP, 'buyer1', 'buyer1@example.com', '$2a$12$x4O7ScKKqXFcpQY49mHbPuZiQPg1c6qArzHtXR5cMp66b/2MZOq9e', 'Jane Doe', 19000.0, 1000.0, NULL, 'buy-profile-0003', NULL),
+('usr-buyer-0001', CURRENT_TIMESTAMP, 'buyer1', 'buyer1@example.com', '$2a$12$x4O7ScKKqXFcpQY49mHbPuZiQPg1c6qArzHtXR5cMp66b/2MZOq9e', 'Jane Doe', 19000.0, 1000.0, NULL, 'buy-profile-0003', NULL, TRUE),
 
 -- Seller 1 (pw: 'seller123')
-('usr-seller-0002', CURRENT_TIMESTAMP, 'seller1', 'seller1@example.com', '$2a$10$Xo1Zk3nE3XpA/5eSjK07uO/N5rG5/t/vE7E2bXFv8tU3t/H3Ryu', 'John Smith', 2500.0, 0.0, NULL, 'buy-profile-0004', 'sel-profile-0002');
+('usr-seller-0002', CURRENT_TIMESTAMP, 'seller1', 'seller1@example.com', '$2a$10$Xo1Zk3nE3XpA/5eSjK07uO/N5rG5/t/vE7E2bXFv8tU3t/H3Ryu', 'John Smith', 2500.0, 0.0, NULL, 'buy-profile-0004', 'sel-profile-0002', TRUE);
 
 -- -----------------------------------------------------------------------------
 -- 3. SEED ADMIN PERMISSIONS & LOGS
