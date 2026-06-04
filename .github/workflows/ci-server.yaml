@@ -14,6 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
         module: [api, client]
         java-version: ['21']
 
@@ -37,8 +38,19 @@ jobs:
       - name: Verify API fat jar
         if: ${{ matrix.module == 'api' }}
         working-directory: auction-system
+        shell: bash
         run: |
-          JAR=$(find api/target -name "api-*.jar" -not -name "*sources*" | head -1)
-          test -n "$JAR"
+          set -e
+          JAR=""
+          for f in api/target/api-*.jar; do
+            case "$f" in
+              *-sources.jar) continue ;;
+              *) JAR="$f"; break ;;
+            esac
+          done
+          if [ -z "$JAR" ]; then
+            echo "No API jar found" >&2
+            exit 1
+          fi
           jar tf "$JAR" | grep -q 'BOOT-INF/classes/'
           jar tf "$JAR" | grep -q 'BOOT-INF/lib/'
