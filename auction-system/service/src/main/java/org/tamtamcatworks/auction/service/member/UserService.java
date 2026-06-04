@@ -12,6 +12,7 @@ import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.persist.repository.AuctionRepository;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
 import org.tamtamcatworks.auction.service.event.UserStateEvent;
+import org.tamtamcatworks.auction.service.event.UserSuspendedEvent;
 import org.tamtamcatworks.auction.service.mapper.UserMapper;
 import org.tamtamcatworks.auction.shared.request.RegisterRequest;
 import org.tamtamcatworks.auction.shared.response.AdminAuditLogResponse;
@@ -129,6 +130,9 @@ public class UserService {
         user.setActive(false);
 
         userRepository.save(user);
+
+        // Notify WebSocket handler to force-close any live sessions for this user
+        eventPublisher.publishEvent(new UserSuspendedEvent(userId));
     }
 
     @Transactional

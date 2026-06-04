@@ -81,6 +81,8 @@ public class AutoBidService {
         User bidder = userRepository.findById(bidderId)
             .orElseThrow(() -> new NoSuchElementException("Bidder not found."));
 
+        // suspension enforced by SuspendedUserFilter
+
         if (!auction.isAcceptingBids()) {
             throw new IllegalStateException("Auction is not accepting bids.");
         }

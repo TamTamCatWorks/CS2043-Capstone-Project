@@ -56,13 +56,7 @@ public class BidService {
         User bidder = userRepository.findById(bidderId)
             .orElseThrow(() -> new NoSuchElementException("Bidder not found."));
 
-        if (!bidder.isActive()) {
-            throw new IllegalStateException("Suspended users cannot place bids.");
-        }
-
-        if (!auction.getSeller().isActive()) {
-            throw new IllegalStateException("This auction belongs to a suspended seller.");
-        }
+        // suspension enforced by SuspendedUserFilter
 
         if (!auction.isAcceptingBids())
             throw new IllegalStateException("Auction is not accepting bids.");

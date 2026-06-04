@@ -275,6 +275,10 @@ public class LayoutController {
 
   @FXML
   private void handleOpenAdminPanel() {
-    Navigation.navigateTo("/fxml/admin/dashboard/admin-dashboard.fxml");
+    NavigationState.setDashboardViewPath(
+        "/fxml/admin/dashboard/admin-dashboard.fxml"
+    );
+
+    Navigation.navigateTo("/fxml/dashboard.fxml");
   }
 }

@@ -68,10 +68,7 @@ public class AuctionService {
         User seller = userRepository.findById(sellerId)
             .orElseThrow(() -> new NoSuchElementException("User not found"));
 
-        if (!seller.isActive()) {
-            throw new IllegalStateException("Suspended users cannot create auctions.");
-        }
-        
+        // suspension enforced by SuspendedUserFilter
         return auctionRepository.save(auctionMapper.toEntity(req, seller, item));
     }
 
@@ -81,10 +78,7 @@ public class AuctionService {
         User seller = userRepository.findById(sellerId)
             .orElseThrow(() -> new NoSuchElementException("User not found"));
 
-        if (!seller.isActive()) {
-            throw new IllegalStateException("Suspended users cannot create auctions.");
-        }
-
+        // suspension enforced by SuspendedUserFilter
         Item item = itemService.findById(itemId);
         return auctionRepository.save(new Auction(title, seller, item, startingPrice, startTime, endTime));
     }
@@ -111,11 +105,7 @@ public class AuctionService {
         Auction auction = auctionRepository.findById(auctionId)
             .orElseThrow(() -> new NoSuchElementException("Auction not found"));
 
-        if (!auction.getSeller().isActive()) {
-
-            throw new IllegalStateException("Suspended users cannot open auctions.");
-        }
-
+        // suspension enforced by SuspendedUserFilter
         auction.open();
         Auction saved = auctionRepository.save(auction);
         eventPublisher.publishEvent(new AuctionEvent(

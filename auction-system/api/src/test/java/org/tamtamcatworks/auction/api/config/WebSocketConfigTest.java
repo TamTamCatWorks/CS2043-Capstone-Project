@@ -8,6 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.StompWebSocketEndpointRegistration;
 
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,7 +27,11 @@ import static org.mockito.Mockito.when;
  */
 class WebSocketConfigTest {
 
-    private final WebSocketConfig config = new WebSocketConfig();
+    private final WebSocketSessionRegistry registry =
+        mock(WebSocketSessionRegistry.class);
+
+    private final WebSocketConfig config =
+        new WebSocketConfig(registry);
 
     // ── configureMessageBroker ────────────────────────────────────────────────
 
@@ -65,6 +70,7 @@ class WebSocketConfigTest {
     }
 
     // ── registerStompEndpoints ────────────────────────────────────────────────
+
 
     @Test
     void registerStompEndpointsRegistersWsEndpoint() {
