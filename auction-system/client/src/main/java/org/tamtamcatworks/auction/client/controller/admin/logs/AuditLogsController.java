@@ -5,8 +5,6 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.VBox;
 
 import org.tamtamcatworks.auction.client.Route;
-import org.tamtamcatworks.auction.client.auth.admin.AdminAuthorizationService;
-import org.tamtamcatworks.auction.client.auth.admin.AdminPermission;
 import org.tamtamcatworks.auction.client.component.admin.table.PaginatedTableView;
 import org.tamtamcatworks.auction.client.component.admin.table.TableColumnFactory;
 import org.tamtamcatworks.auction.client.component.admin.table.TableToolbar;
@@ -14,6 +12,7 @@ import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.client.service.admin.AdminAuditLogService;
 import org.tamtamcatworks.auction.shared.response.AdminAuditLogResponse;
 import org.tamtamcatworks.auction.client.component.admin.feedback.LoadingOverlay;
+import org.tamtamcatworks.auction.client.util.admin.AdminPermissionGuard;
 import org.tamtamcatworks.auction.client.util.admin.AsyncExecutor;
 
 import org.tamtamcatworks.auction.client.component.admin.feedback.Toast;
@@ -51,12 +50,7 @@ public class AuditLogsController
     @FXML
     public void initialize() {
 
-        if (!AdminAuthorizationService.hasPermission(AdminPermission.VIEW_LOGS)) {
-
-                throw new RuntimeException(
-                "Access denied"
-                );
-        }
+        AdminPermissionGuard.requireAdmin();
 
         buildToolbar();
 

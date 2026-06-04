@@ -30,6 +30,9 @@ public class PaginatedTableView<T>
                 pagination
         );
 
+        pagination.setVisible(false);
+        pagination.setManaged(false);
+
         setSpacing(10);
     }
 
