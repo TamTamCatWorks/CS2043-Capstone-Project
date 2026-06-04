@@ -28,21 +28,27 @@ import java.util.PriorityQueue;
 /**
  * Dịch vụ đấu giá tự động (Auto-Bidding).
  *
- * <p>THUẬT TOÁN (single-jump proxy resolution):
+ * <p>THUẬT TOÁN (single-pass proxy resolution for N users):
  * <ol>
  *   <li>Sau khi một bid được chấp nhận và commit ({@code BidEvent}), service lắng nghe event.</li>
- *   <li>Lấy tất cả auto-bid còn hiệu lực của phiên đó, ngoại trừ người đang dẫn đầu.</li>
- *   <li>Đưa vào {@link PriorityQueue} sắp xếp giảm dần theo {@code maxBid}
- *       — người sẵn sàng trả cao nhất được ưu tiên cao nhất.</li>
- *   <li>Tính giá thắng trong một lần duy nhất (proxy/Vickrey-style):
+ *   <li>Thêm <b>tất cả</b> auto-bid còn hiệu lực — kể cả người đang dẫn đầu — vào
+ *       {@link PriorityQueue} sắp xếp giảm dần theo {@code maxBid},
+ *       tiebreaker: {@code creationDate ASC} (đăng ký sớm hơn được ưu tiên).</li>
+ *   <li>Poll {@code best} = rank 1.</li>
+ *   <li><b>Case 3</b>: nếu {@code best.maxBid < currentPrice + increment} →
+ *       deactivate và dừng.</li>
+ *   <li><b>Tie drain</b>: deactivate tất cả peer cùng {@code maxBid} với best trong
+ *       một lần duy nhất — không cascade.</li>
+ *   <li>Tính {@code winningPrice}:
  *     <ul>
- *       <li>Chỉ có một auto-bidder: đặt {@code currentPrice + minimumIncrement}.</li>
- *       <li>Hai auto-bidder cạnh tranh: giá thắng =
- *           {@code min(best.maxBid, second.maxBid + minimumIncrement)}.</li>
- *       <li>best.maxBid &lt; currentPrice + minimumIncrement: deactivate và dừng.</li>
+ *       <li>Không có second → {@code currentPrice + increment} (Case 1).</li>
+ *       <li>Có second → {@code min(best.maxBid, second.maxBid + increment)} (Case 2).</li>
  *     </ul>
  *   </li>
- *   <li>Chỉ đặt một bid duy nhất — không có cascade nhiều transaction.</li>
+ *   <li><b>Cascade termination</b>: nếu {@code best} đã là người dẫn đầu hiện tại
+ *       → họ đang giữ vị trí đúng giá, không cần đặt bid mới → return.
+ *       Điều này đảm bảo cascade kết thúc sau tối đa 2 lần gọi.</li>
+ *   <li>Ngược lại → {@link #executeAutoBid} cho best tại {@code winningPrice}.</li>
  * </ol>
  *
  * <p>AUTO-BID POLICY: mỗi user chỉ có một auto-bid trên một phiên (upsert).
@@ -198,7 +204,7 @@ public class AutoBidService {
 
     /**
      * Lắng nghe BidEvent sau khi transaction commit và giải quyết auto-bid
-     * theo kiểu proxy/Vickrey trong một lần duy nhất (single-jump resolution).
+     * theo kiểu proxy/Vickrey trong một lần duy nhất (single-pass resolution for N users).
      *
      * <p>Dùng {@code AFTER_COMMIT} để đảm bảo đọc đúng giá hiện tại
      * từ transaction vừa commit trước đó.
@@ -213,6 +219,8 @@ public class AutoBidService {
      *       {@code currentPrice + minimumIncrement}.</li>
      *   <li><b>Case 2</b> – hai auto-bidder cạnh tranh: đặt
      *       {@code min(best.maxBid, second.maxBid + minimumIncrement)}.</li>
+     *   <li><b>Cascade termination</b> – nếu best đã là người dẫn đầu: return ngay,
+     *       không đặt bid mới. Đảm bảo cascade kết thúc sau tối đa 2 lần gọi.</li>
      * </ul>
      *
      * @param event thông tin bid vừa được chấp nhận
@@ -229,40 +237,54 @@ public class AutoBidService {
 
         List<AutoBid> candidates = autoBidRepository.findByAuctionAndActiveTrue(auction);
 
-        PriorityQueue<AutoBid> queue = new PriorityQueue<>(
+        PriorityQueue<AutoBid> challengersQueue = new PriorityQueue<>(
                 Comparator.comparingDouble(AutoBid::getMaxBid).reversed()
                         .thenComparing(BaseEntity::getCreationDate)
         );
 
         for (AutoBid ab : candidates) {
-            if (!ab.getBidder().getId().equals(currentLeaderId)) {
-                queue.offer(ab);
+            boolean isLeader = ab.getBidder().getId().equals(currentLeaderId);
+            if (!isLeader) {
+                challengersQueue.offer(ab);
             }
         }
-        if (queue.isEmpty()) return;
 
-        AutoBid best = queue.poll();
+        if (challengersQueue.isEmpty()) return;
+
         double minimumNext = auction.getCurrentPrice() + auction.getMinimumIncrement();
+        AutoBid bestChallenger = challengersQueue.peek();
 
-        // Case 3: best cannot even meet the minimum next bid — deactivate and stop.
-        if (best.getMaxBid() < minimumNext) {
-            self.deactivateAutoBid(best.getId());
+        // Case 3: best challenger cannot even meet the minimum next bid — deactivate and stop.
+        if (bestChallenger.getMaxBid() < minimumNext) {
+            self.deactivateAutoBid(bestChallenger.getId());
             return;
         }
+
+        // Now that we know at least one challenger can compete, compile the full queue
+        // (including the current leader) to evaluate the win conditions.
+        PriorityQueue<AutoBid> fullQueue = new PriorityQueue<>(
+                Comparator.comparingDouble(AutoBid::getMaxBid).reversed()
+                        .thenComparing(BaseEntity::getCreationDate)
+        );
+        for (AutoBid ab : candidates) {
+            fullQueue.offer(ab);
+        }
+
+        AutoBid best = fullQueue.poll();
 
         // Drain N-way ties in one pass. The queue ordering (maxBid DESC, then
         // creationDate ASC) already guarantees best is the earliest registrant
         // among all peers at the same ceiling. Every other tied member is
         // deactivated immediately so the group collapses into a single outcome
         // here — no cascade across tied bidders across multiple invocations.
-        while (!queue.isEmpty()
-                && Double.compare(queue.peek().getMaxBid(), best.getMaxBid()) == 0) {
-            self.deactivateAutoBid(queue.poll().getId());
+        while (!fullQueue.isEmpty()
+                && Double.compare(fullQueue.peek().getMaxBid(), best.getMaxBid()) == 0) {
+            self.deactivateAutoBid(fullQueue.poll().getId());
         }
 
         // Compute the single winning price in one pass (proxy/Vickrey-style).
         double winningPrice;
-        AutoBid second = queue.peek(); // first non-tied competitor, if any
+        AutoBid second = fullQueue.peek(); // first non-tied competitor, if any
         if (second == null) {
             // Case 1 (includes N-way tie with no outside competitor):
             // pay the minimum needed to take the lead.
@@ -270,6 +292,13 @@ public class AutoBidService {
         } else {
             // Case 2: winner pays just enough to beat the (non-tied) runner-up.
             winningPrice = Math.min(best.getMaxBid(), second.getMaxBid() + auction.getMinimumIncrement());
+        }
+
+        // Cascade-termination guard: if the computed winner is already the current
+        // leader, they hold the position at the correct price — no new bid is needed.
+        // This is what makes the cascade stop after at most 2 passes.
+        if (best.getBidder().getId().equals(currentLeaderId)) {
+            return;
         }
 
         self.executeAutoBid(event.auctionId(), best.getId(), best.getBidder().getId(), winningPrice);

@@ -667,4 +667,213 @@ class AutoBidServiceTest {
         verify(spyService, never()).executeAutoBid(any(), any(), any(), any(Double.class));
         verify(eventPublisher, never()).publishEvent(any());
     }
+
+    // ── New cascade-termination tests (A–E) ─────────────────────────────────
+
+    @Test
+    void testOnBidPlaced_TestA_WinnerNotLeader_SinglePassResolution() {
+        // Test A: two auto-bidders, winner is NOT the current leader.
+        // ab1.maxBid=60000 (bidder1, current leader via manual bid),
+        // ab2.maxBid=70000 (bidder2, challenger).
+        // currentPrice=51000, increment=1000.
+        // Expected: executeAutoBid called once for bidder2 at
+        //   winningPrice = min(70000, 60000+1000) = 61000.
+        ReflectionTestUtils.setField(auction, "minimumIncrement", 1000.0);
+        ReflectionTestUtils.setField(auction, "currentPrice", 51000.0);
+        ReflectionTestUtils.setField(auction, "leadingBidder", bidder1);
+
+        AutoBid ab1 = new AutoBid(auction, bidder1, 60000.0);
+        ReflectionTestUtils.setField(ab1, "id", "ab1Id");
+        ReflectionTestUtils.setField(ab1, "creationDate", LocalDateTime.now().minusMinutes(10));
+
+        AutoBid ab2 = new AutoBid(auction, bidder2, 70000.0);
+        ReflectionTestUtils.setField(ab2, "id", "ab2Id");
+        ReflectionTestUtils.setField(ab2, "creationDate", LocalDateTime.now().minusMinutes(5));
+
+        when(auctionRepository.findById("auctionId")).thenReturn(Optional.of(auction));
+        when(autoBidRepository.findByAuctionAndActiveTrue(auction)).thenReturn(Arrays.asList(ab1, ab2));
+
+        AutoBidService spyService = mock(AutoBidService.class);
+        ReflectionTestUtils.setField(autoBidService, "self", spyService);
+
+        autoBidService.onBidPlaced(new BidEvent("auctionId", "Comic Sale", "sellerId", "bidder1Id", null, 51000.0));
+
+        ArgumentCaptor<String> autoBidIdCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> bidderIdCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Double> amountCaptor = ArgumentCaptor.forClass(Double.class);
+
+        verify(spyService, times(1)).executeAutoBid(
+                eq("auctionId"), autoBidIdCaptor.capture(), bidderIdCaptor.capture(), amountCaptor.capture());
+        assertEquals("ab2Id", autoBidIdCaptor.getValue());
+        assertEquals("bidder2Id", bidderIdCaptor.getValue());
+        assertEquals(61000.0, amountCaptor.getValue());
+        verify(spyService, never()).deactivateAutoBid(any());
+    }
+
+    @Test
+    void testOnBidPlaced_TestB_WinnerIsLeader_CascadeTerminates() {
+        // Test B: second pass — winner is already the current leader.
+        // Same field as A but now leadingBidder=bidder2, currentPrice=61000.
+        // Expected: best=ab2 (70000) == leader → return immediately.
+        // The challenger ab1 (60000) is outbid (< minimumNext 62000) and deactivated.
+        ReflectionTestUtils.setField(auction, "minimumIncrement", 1000.0);
+        ReflectionTestUtils.setField(auction, "currentPrice", 50000.0);
+        ReflectionTestUtils.setField(auction, "leadingBidder", bidder2);
+
+        AutoBid ab1 = new AutoBid(auction, bidder1, 60000.0);
+        ReflectionTestUtils.setField(ab1, "id", "ab1Id");
+        ReflectionTestUtils.setField(ab1, "creationDate", LocalDateTime.now().minusMinutes(10));
+
+        AutoBid ab2 = new AutoBid(auction, bidder2, 70000.0);
+        ReflectionTestUtils.setField(ab2, "id", "ab2Id");
+        ReflectionTestUtils.setField(ab2, "creationDate", LocalDateTime.now().minusMinutes(5));
+
+        ReflectionTestUtils.setField(auction, "currentPrice", 61000.0);
+
+        when(auctionRepository.findById("auctionId")).thenReturn(Optional.of(auction));
+        when(autoBidRepository.findByAuctionAndActiveTrue(auction)).thenReturn(Arrays.asList(ab1, ab2));
+
+        AutoBidService spyService = mock(AutoBidService.class);
+        ReflectionTestUtils.setField(autoBidService, "self", spyService);
+
+        autoBidService.onBidPlaced(new BidEvent("auctionId", "Comic Sale", "sellerId", "bidder2Id", null, 61000.0));
+
+        verify(spyService, never()).executeAutoBid(any(), any(), any(), any(Double.class));
+        verify(spyService, times(1)).deactivateAutoBid("ab1Id");
+        verify(spyService, never()).deactivateAutoBid("ab2Id");
+    }
+
+    @Test
+    void testOnBidPlaced_TestC_ThreeAutoBidders_SinglePassResolution() {
+        // Test C: three auto-bidders, manual leader (no AutoBid).
+        // ab1.maxBid=60000, ab2.maxBid=70000, ab3.maxBid=80000.
+        // currentPrice=51000, increment=1000, leadingBidder=manualBidder.
+        // Expected: executeAutoBid called once for bidder3 at
+        //   winningPrice = min(80000, 70000+1000) = 71000.
+        // ab1 and ab2 are NOT deactivated (still viable).
+        User bidder3 = new User("bidder3", "bidder3@example.com", "pw", "Bob Bidder 3", 1000.0);
+        ReflectionTestUtils.setField(bidder3, "id", "bidder3Id");
+
+        User manualBidder = new User("manual", "m@example.com", "pw", "Manual", 100.0);
+        ReflectionTestUtils.setField(manualBidder, "id", "manualId");
+
+        ReflectionTestUtils.setField(auction, "minimumIncrement", 1000.0);
+        ReflectionTestUtils.setField(auction, "currentPrice", 51000.0);
+        ReflectionTestUtils.setField(auction, "leadingBidder", manualBidder);
+
+        AutoBid ab1 = new AutoBid(auction, bidder1, 60000.0);
+        ReflectionTestUtils.setField(ab1, "id", "ab1Id");
+        ReflectionTestUtils.setField(ab1, "creationDate", LocalDateTime.now().minusMinutes(20));
+
+        AutoBid ab2 = new AutoBid(auction, bidder2, 70000.0);
+        ReflectionTestUtils.setField(ab2, "id", "ab2Id");
+        ReflectionTestUtils.setField(ab2, "creationDate", LocalDateTime.now().minusMinutes(10));
+
+        AutoBid ab3 = new AutoBid(auction, bidder3, 80000.0);
+        ReflectionTestUtils.setField(ab3, "id", "ab3Id");
+        ReflectionTestUtils.setField(ab3, "creationDate", LocalDateTime.now().minusMinutes(5));
+
+        when(auctionRepository.findById("auctionId")).thenReturn(Optional.of(auction));
+        when(autoBidRepository.findByAuctionAndActiveTrue(auction)).thenReturn(Arrays.asList(ab1, ab2, ab3));
+
+        AutoBidService spyService = mock(AutoBidService.class);
+        ReflectionTestUtils.setField(autoBidService, "self", spyService);
+
+        autoBidService.onBidPlaced(new BidEvent("auctionId", "Comic Sale", "sellerId", "manualId", null, 51000.0));
+
+        ArgumentCaptor<String> autoBidIdCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> bidderIdCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Double> amountCaptor = ArgumentCaptor.forClass(Double.class);
+
+        verify(spyService, times(1)).executeAutoBid(
+                eq("auctionId"), autoBidIdCaptor.capture(), bidderIdCaptor.capture(), amountCaptor.capture());
+        assertEquals("ab3Id", autoBidIdCaptor.getValue());
+        assertEquals("bidder3Id", bidderIdCaptor.getValue());
+        assertEquals(71000.0, amountCaptor.getValue());
+
+        // ab1 and ab2 are NOT deactivated — still viable for future rounds.
+        verify(spyService, never()).deactivateAutoBid("ab1Id");
+        verify(spyService, never()).deactivateAutoBid("ab2Id");
+    }
+
+    @Test
+    void testOnBidPlaced_TestD_ThreeAutoBidders_SecondPass_WinnerLeads_CascadeStops() {
+        // Test D: second pass after Test C — bidder3 is now leader at 71000.
+        // Expected: best=ab3, winner == leader → return. No bid.
+        // The best challenger ab2 (70000) is below minimumNext (72000) so it is deactivated.
+        User bidder3 = new User("bidder3", "bidder3@example.com", "pw", "Bob Bidder 3", 1000.0);
+        ReflectionTestUtils.setField(bidder3, "id", "bidder3Id");
+
+        ReflectionTestUtils.setField(auction, "minimumIncrement", 1000.0);
+        ReflectionTestUtils.setField(auction, "currentPrice", 50000.0);
+        ReflectionTestUtils.setField(auction, "leadingBidder", bidder3);
+
+        AutoBid ab1 = new AutoBid(auction, bidder1, 60000.0);
+        ReflectionTestUtils.setField(ab1, "id", "ab1Id");
+        ReflectionTestUtils.setField(ab1, "creationDate", LocalDateTime.now().minusMinutes(20));
+
+        AutoBid ab2 = new AutoBid(auction, bidder2, 70000.0);
+        ReflectionTestUtils.setField(ab2, "id", "ab2Id");
+        ReflectionTestUtils.setField(ab2, "creationDate", LocalDateTime.now().minusMinutes(10));
+
+        AutoBid ab3 = new AutoBid(auction, bidder3, 80000.0);
+        ReflectionTestUtils.setField(ab3, "id", "ab3Id");
+        ReflectionTestUtils.setField(ab3, "creationDate", LocalDateTime.now().minusMinutes(5));
+
+        ReflectionTestUtils.setField(auction, "currentPrice", 71000.0);
+
+        when(auctionRepository.findById("auctionId")).thenReturn(Optional.of(auction));
+        when(autoBidRepository.findByAuctionAndActiveTrue(auction)).thenReturn(Arrays.asList(ab1, ab2, ab3));
+
+        AutoBidService spyService = mock(AutoBidService.class);
+        ReflectionTestUtils.setField(autoBidService, "self", spyService);
+
+        autoBidService.onBidPlaced(new BidEvent("auctionId", "Comic Sale", "sellerId", "bidder3Id", null, 71000.0));
+
+        verify(spyService, never()).executeAutoBid(any(), any(), any(), any(Double.class));
+        verify(spyService, times(1)).deactivateAutoBid("ab2Id");
+        verify(spyService, never()).deactivateAutoBid("ab1Id");
+        verify(spyService, never()).deactivateAutoBid("ab3Id");
+    }
+
+    @Test
+    void testOnBidPlaced_TestE_LeaderHasAutoBid_ChallengerBeats() {
+        // Test E: leader has an AutoBid but a challenger beats them.
+        // ab1.maxBid=90000 (bidder1, current leader),
+        // ab2.maxBid=100000 (bidder2, challenger).
+        // currentPrice=71000, increment=1000.
+        // Expected: best=ab2, second=ab1,
+        //   winningPrice = min(100000, 90000+1000) = 91000.
+        // executeAutoBid called for bidder2 at 91000.
+        ReflectionTestUtils.setField(auction, "minimumIncrement", 1000.0);
+        ReflectionTestUtils.setField(auction, "currentPrice", 71000.0);
+        ReflectionTestUtils.setField(auction, "leadingBidder", bidder1);
+
+        AutoBid ab1 = new AutoBid(auction, bidder1, 90000.0);
+        ReflectionTestUtils.setField(ab1, "id", "ab1Id");
+        ReflectionTestUtils.setField(ab1, "creationDate", LocalDateTime.now().minusMinutes(10));
+
+        AutoBid ab2 = new AutoBid(auction, bidder2, 100000.0);
+        ReflectionTestUtils.setField(ab2, "id", "ab2Id");
+        ReflectionTestUtils.setField(ab2, "creationDate", LocalDateTime.now().minusMinutes(5));
+
+        when(auctionRepository.findById("auctionId")).thenReturn(Optional.of(auction));
+        when(autoBidRepository.findByAuctionAndActiveTrue(auction)).thenReturn(Arrays.asList(ab1, ab2));
+
+        AutoBidService spyService = mock(AutoBidService.class);
+        ReflectionTestUtils.setField(autoBidService, "self", spyService);
+
+        autoBidService.onBidPlaced(new BidEvent("auctionId", "Comic Sale", "sellerId", "bidder1Id", null, 71000.0));
+
+        ArgumentCaptor<String> autoBidIdCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> bidderIdCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Double> amountCaptor = ArgumentCaptor.forClass(Double.class);
+
+        verify(spyService, times(1)).executeAutoBid(
+                eq("auctionId"), autoBidIdCaptor.capture(), bidderIdCaptor.capture(), amountCaptor.capture());
+        assertEquals("ab2Id", autoBidIdCaptor.getValue());
+        assertEquals("bidder2Id", bidderIdCaptor.getValue());
+        assertEquals(91000.0, amountCaptor.getValue());
+        verify(spyService, never()).deactivateAutoBid(any());
+    }
 }
