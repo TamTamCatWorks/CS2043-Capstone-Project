@@ -26,13 +26,11 @@ import org.tamtamcatworks.auction.service.event.BidEvent;
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
 
-  @Mock
-  private NotificationRepository repo;
+  @Mock private NotificationRepository repo;
 
   private NotificationService service;
 
-  @Captor
-  private ArgumentCaptor<Notification> notificationCaptor;
+  @Captor private ArgumentCaptor<Notification> notificationCaptor;
 
   @BeforeEach
   void setUp() {
@@ -41,25 +39,28 @@ class NotificationServiceTest {
 
   @Test
   void testOnBidPlaced() {
-    BidEvent event = new BidEvent("auc123", "Comic Sale", "seller123", "bidder123", "prev123", 150.0);
-    
+    BidEvent event =
+        new BidEvent("auc123", "Comic Sale", "seller123", "bidder123", "prev123", 150.0);
+
     service.onBidPlaced(event);
 
     // Should save two notifications: one to seller, one to previous leader
     verify(repo, times(2)).save(notificationCaptor.capture());
-    
+
     List<Notification> captured = notificationCaptor.getAllValues();
     assertEquals("seller123", captured.get(0).getUserId());
     assertEquals(NotificationType.BID_PLACED, captured.get(0).getType());
-    
+
     assertEquals("prev123", captured.get(1).getUserId());
     assertEquals(NotificationType.OUTBID, captured.get(1).getType());
   }
 
   @Test
   void testOnAuctionStatusChangedActive() {
-    AuctionEvent event = new AuctionEvent("auc123", "Comic Sale", "seller123", null, 100.0, AuctionStatus.ACTIVE, null);
-    
+    AuctionEvent event =
+        new AuctionEvent(
+            "auc123", "Comic Sale", "seller123", null, 100.0, AuctionStatus.ACTIVE, null);
+
     service.onAuctionStatusChanged(event);
 
     verify(repo, times(1)).save(notificationCaptor.capture());
@@ -71,17 +72,19 @@ class NotificationServiceTest {
 
   @Test
   void testOnAuctionStatusChangedClosed() {
-    AuctionEvent event = new AuctionEvent("auc123", "Comic Sale", "seller123", "winner123", 500.0, AuctionStatus.CLOSED, null);
-    
+    AuctionEvent event =
+        new AuctionEvent(
+            "auc123", "Comic Sale", "seller123", "winner123", 500.0, AuctionStatus.CLOSED, null);
+
     service.onAuctionStatusChanged(event);
 
     // Saves two notifications: one to seller, one to winner
     verify(repo, times(2)).save(notificationCaptor.capture());
     List<Notification> captured = notificationCaptor.getAllValues();
-    
+
     assertEquals("seller123", captured.get(0).getUserId());
     assertEquals(NotificationType.AUCTION_CLOSED, captured.get(0).getType());
-    
+
     assertEquals("winner123", captured.get(1).getUserId());
     assertEquals(NotificationType.AUCTION_CLOSED, captured.get(1).getType());
     assertTrue(captured.get(1).getMessage().contains("won"));
@@ -94,7 +97,7 @@ class NotificationServiceTest {
     when(repo.findById("notif123")).thenReturn(Optional.of(notification));
 
     service.markOneRead("notif123");
-    
+
     assertTrue(notification.isRead());
     verify(repo, times(1)).save(notification);
   }

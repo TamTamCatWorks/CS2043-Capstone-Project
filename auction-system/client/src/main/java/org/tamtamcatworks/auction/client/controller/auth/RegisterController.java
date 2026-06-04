@@ -14,79 +14,77 @@ import org.tamtamcatworks.auction.shared.response.UserResponse;
 @Route(fxml = "/fxml/register.fxml", layout = Route.AUTH_LAYOUT)
 public class RegisterController extends BaseController {
 
-    @FXML
-    private TextField usernameField;
+  @FXML private TextField usernameField;
 
-    @FXML
-    private TextField emailField;
+  @FXML private TextField emailField;
 
-    @FXML
-    private TextField fullNameField;
+  @FXML private TextField fullNameField;
 
-    @FXML
-    private PasswordField passwordField;
+  @FXML private PasswordField passwordField;
 
-    @FXML
-    private Button registerButton;
+  @FXML private Button registerButton;
 
-    @FXML
-    private Label messageLabel;
+  @FXML private Label messageLabel;
 
-    @FXML
-    private ProgressIndicator progressIndicator;
+  @FXML private ProgressIndicator progressIndicator;
 
-    @FXML
-    public void initialize() {
-        progressIndicator.setVisible(false);
-        messageLabel.setText("");
+  @FXML
+  public void initialize() {
+    progressIndicator.setVisible(false);
+    messageLabel.setText("");
+  }
+
+  @FXML
+  private void handleRegister() {
+    String username = usernameField.getText().trim();
+    String email = emailField.getText().trim();
+    String fullName = fullNameField.getText().trim();
+    String password = passwordField.getText();
+
+    if (username.isEmpty() || email.isEmpty() || fullName.isEmpty() || password.isEmpty()) {
+      showError(messageLabel, "All fields are required.");
+      return;
     }
 
-    @FXML
-    private void handleRegister() {
-        String username = usernameField.getText().trim();
-        String email = emailField.getText().trim();
-        String fullName = fullNameField.getText().trim();
-        String password = passwordField.getText();
+    setLoading(true);
+    messageLabel.setText("");
 
-        if (username.isEmpty() || email.isEmpty() || fullName.isEmpty() || password.isEmpty()) {
-            showError(messageLabel, "All fields are required.");
-            return;
-        }
-
-        setLoading(true);
-        messageLabel.setText("");
-
-        AsyncTask.<UserResponse>run(() ->
-                api.register(new RegisterRequest(username, email, password, fullName)))
-            .onSuccess(user -> {
-                setLoading(false);
-                if (user != null) {
-                    showSuccess(messageLabel, "Registration successful! Redirecting to login...");
-                    PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
-                    delay.setOnFinished(event -> Navigation.navigateTo("/fxml/login.fxml"));
-                    delay.play();
-                } else {
-                    showError(messageLabel, "Invalid response from server.");
-                }
+    AsyncTask.<UserResponse>run(
+            () -> api.register(new RegisterRequest(username, email, password, fullName)))
+        .onSuccess(
+            user -> {
+              setLoading(false);
+              if (user != null) {
+                showSuccess(messageLabel, "Registration successful! Redirecting to login...");
+                PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
+                delay.setOnFinished(event -> Navigation.navigateTo("/fxml/login.fxml"));
+                delay.play();
+              } else {
+                showError(messageLabel, "Invalid response from server.");
+              }
             })
-            .onFailure(ex -> {
-                setLoading(false);
-                showError(messageLabel, "Registration failed: " + (ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
+        .onFailure(
+            ex -> {
+              setLoading(false);
+              showError(
+                  messageLabel,
+                  "Registration failed: "
+                      + (ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
             })
-            .start();
-    }
+        .start();
+  }
 
-    @FXML
-    private void handleGoToLogin() {
-        Navigation.navigateTo("/fxml/login.fxml");
-    }
+  @FXML
+  private void handleGoToLogin() {
+    Navigation.navigateTo("/fxml/login.fxml");
+  }
 
-    private void setLoading(boolean loading) {
-        usernameField.setDisable(loading);
-        emailField.setDisable(loading);
-        fullNameField.setDisable(loading);
-        passwordField.setDisable(loading);
-        registerButton.setDisable(loading);
-        progressIndicator.setVisible(loading);
-    }
+  private void setLoading(boolean loading) {
+    usernameField.setDisable(loading);
+    emailField.setDisable(loading);
+    fullNameField.setDisable(loading);
+    passwordField.setDisable(loading);
+    registerButton.setDisable(loading);
+    progressIndicator.setVisible(loading);
+  }
 }

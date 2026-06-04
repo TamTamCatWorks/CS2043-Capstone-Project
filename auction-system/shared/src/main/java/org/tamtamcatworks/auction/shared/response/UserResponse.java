@@ -9,6 +9,4 @@ public record UserResponse(
     double holdBalance,
     boolean isActive,
     boolean isAdmin,
-    java.util.List<String> permissions
-) {
-}
+    java.util.List<String> permissions) {}

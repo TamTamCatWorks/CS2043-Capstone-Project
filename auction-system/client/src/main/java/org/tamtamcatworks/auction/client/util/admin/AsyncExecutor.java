@@ -5,54 +5,42 @@ import javafx.concurrent.Task;
 
 public final class AsyncExecutor {
 
-    private AsyncExecutor() {}
+  private AsyncExecutor() {}
 
-    public static void execute(
+  public static void execute(Runnable backgroundTask, Runnable onSuccess, Runnable onError) {
 
-            Runnable backgroundTask,
+    Task<Void> task =
+        new Task<>() {
 
-            Runnable onSuccess,
+          @Override
+          protected Void call() {
 
-            Runnable onError
-    ) {
+            backgroundTask.run();
 
-        Task<Void> task =
-                new Task<>() {
+            return null;
+          }
+        };
 
-                    @Override
-                    protected Void call() {
+    task.setOnSucceeded(
+        event -> {
+          if (onSuccess != null) {
 
-                        backgroundTask.run();
-
-                        return null;
-                    }
-                };
-
-        task.setOnSucceeded(event -> {
-
-            if (onSuccess != null) {
-
-                Platform.runLater(
-                        onSuccess
-                );
-            }
+            Platform.runLater(onSuccess);
+          }
         });
 
-        task.setOnFailed(event -> {
+    task.setOnFailed(
+        event -> {
+          if (onError != null) {
 
-            if (onError != null) {
-
-                Platform.runLater(
-                        onError
-                );
-            }
+            Platform.runLater(onError);
+          }
         });
 
-        Thread thread =
-                new Thread(task);
+    Thread thread = new Thread(task);
 
-        thread.setDaemon(true);
+    thread.setDaemon(true);
 
-        thread.start();
-    }
+    thread.start();
+  }
 }

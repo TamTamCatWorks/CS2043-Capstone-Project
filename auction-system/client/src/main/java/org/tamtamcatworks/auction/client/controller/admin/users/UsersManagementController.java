@@ -2,337 +2,209 @@ package org.tamtamcatworks.auction.client.controller.admin.users;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.layout.VBox;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.layout.HBox;
-
-import org.tamtamcatworks.auction.client.component.admin.feedback.Toast;
-import org.tamtamcatworks.auction.client.component.admin.feedback.ToastType;
-import org.tamtamcatworks.auction.client.component.admin.feedback.ErrorDialog;
+import javafx.scene.layout.VBox;
+import org.tamtamcatworks.auction.client.Route;
+import org.tamtamcatworks.auction.client.auth.admin.AdminAuthorizationService;
+import org.tamtamcatworks.auction.client.auth.admin.AdminPermission;
 import org.tamtamcatworks.auction.client.component.admin.action.AdminActionButton;
 import org.tamtamcatworks.auction.client.component.admin.action.ConfirmDialog;
-import org.tamtamcatworks.auction.client.Route;
+import org.tamtamcatworks.auction.client.component.admin.feedback.ErrorDialog;
+import org.tamtamcatworks.auction.client.component.admin.feedback.LoadingOverlay;
+import org.tamtamcatworks.auction.client.component.admin.feedback.Toast;
+import org.tamtamcatworks.auction.client.component.admin.feedback.ToastType;
 import org.tamtamcatworks.auction.client.component.admin.table.PaginatedTableView;
 import org.tamtamcatworks.auction.client.component.admin.table.TableColumnFactory;
 import org.tamtamcatworks.auction.client.component.admin.table.TableToolbar;
 import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.client.service.admin.AdminUserService;
-import org.tamtamcatworks.auction.shared.response.UserResponse;
-import org.tamtamcatworks.auction.client.auth.admin.AdminAuthorizationService;
-import org.tamtamcatworks.auction.client.auth.admin.AdminPermission;
-import org.tamtamcatworks.auction.client.component.admin.feedback.LoadingOverlay;
 import org.tamtamcatworks.auction.client.util.admin.AsyncExecutor;
+import org.tamtamcatworks.auction.shared.response.UserResponse;
 
-@Route(
-    fxml = "/fxml/admin/users/users-list.fxml",
-    layout = "/fxml/admin/layout/admin-layout.fxml"
-)
+@Route(fxml = "/fxml/admin/users/users-list.fxml", layout = "/fxml/admin/layout/admin-layout.fxml")
 public class UsersManagementController extends BaseController {
 
-    @FXML
-    private VBox toolbarContainer;
+  @FXML private VBox toolbarContainer;
 
-    @FXML
-    private VBox tableContainer;
+  @FXML private VBox tableContainer;
 
-    private final AdminUserService adminUserService =
-            new AdminUserService();
+  private final AdminUserService adminUserService = new AdminUserService();
 
-    private final TableToolbar toolbar =
-            new TableToolbar();
+  private final TableToolbar toolbar = new TableToolbar();
 
-    private final PaginatedTableView<UserResponse>
-            paginatedTable =
-            new PaginatedTableView<>();
-    private final LoadingOverlay
-            loadingOverlay =
-            new LoadingOverlay();
+  private final PaginatedTableView<UserResponse> paginatedTable = new PaginatedTableView<>();
+  private final LoadingOverlay loadingOverlay = new LoadingOverlay();
 
-    @FXML
-    public void initialize() {
+  @FXML
+  public void initialize() {
 
-        if (!AdminAuthorizationService.hasPermission(AdminPermission.MANAGE_USERS)) {
+    if (!AdminAuthorizationService.hasPermission(AdminPermission.MANAGE_USERS)) {
 
-            throw new RuntimeException(
-                "Access denied"
-            );
-        }
-
-        buildToolbar();
-
-        buildTable();
-
-        loadUsers();
+      throw new RuntimeException("Access denied");
     }
 
-    private void buildToolbar() {
+    buildToolbar();
 
-        toolbarContainer.getChildren().add(
-                toolbar
-        );
+    buildTable();
 
-        toolbar.getRefreshButton()
-                .setOnAction(event -> loadUsers());
+    loadUsers();
+  }
 
-        toolbar.getSearchField()
-                .textProperty()
-                .addListener((obs, oldValue, newValue) -> {
+  private void buildToolbar() {
 
-                    searchUsers(newValue);
-                });
-    }
+    toolbarContainer.getChildren().add(toolbar);
 
-    private void buildTable() {
+    toolbar.getRefreshButton().setOnAction(event -> loadUsers());
 
-        var table = paginatedTable.getTableView();
+    toolbar
+        .getSearchField()
+        .textProperty()
+        .addListener(
+            (obs, oldValue, newValue) -> {
+              searchUsers(newValue);
+            });
+  }
 
-        table.getColumns().addAll(
+  private void buildTable() {
 
-                TableColumnFactory.createStringColumn(
-                        "Username",
-                        UserResponse::username
-                ),
+    var table = paginatedTable.getTableView();
 
-                TableColumnFactory.createStringColumn(
-                        "Email",
-                        UserResponse::email
-                ),
+    table
+        .getColumns()
+        .addAll(
+            TableColumnFactory.createStringColumn("Username", UserResponse::username),
+            TableColumnFactory.createStringColumn("Email", UserResponse::email),
+            TableColumnFactory.createStringColumn("Full Name", UserResponse::fullName),
+            TableColumnFactory.createStringColumn(
+                "Status", user -> user.isActive() ? "ACTIVE" : "SUSPENDED"),
+            buildActionsColumn());
 
-                TableColumnFactory.createStringColumn(
-                        "Full Name",
-                        UserResponse::fullName
-                ),
+    tableContainer.getChildren().addAll(paginatedTable, loadingOverlay);
+  }
 
-                TableColumnFactory.createStringColumn(
+  private void loadUsers() {
 
-                        "Status",
-                        user -> user.isActive()? "ACTIVE": "SUSPENDED"
-                ),
+    loadingOverlay.show();
 
-                buildActionsColumn()
-        );
+    AsyncExecutor.execute(
+        () -> {
+          var users = adminUserService.getUsers();
 
-        tableContainer.getChildren().addAll(
-                paginatedTable,
-                loadingOverlay
-        );
-    }
+          javafx.application.Platform.runLater(
+              () ->
+                  paginatedTable.getTableView().setItems(FXCollections.observableArrayList(users)));
+        },
+        () -> {
+          loadingOverlay.hide();
 
-    private void loadUsers() {
+          Toast.show("Users loaded", ToastType.INFO);
+        },
+        () -> {
+          loadingOverlay.hide();
 
-        loadingOverlay.show();
+          ErrorDialog.show("Failed to load users");
+        });
+  }
 
-        AsyncExecutor.execute(
+  private void searchUsers(String keyword) {
 
-                () -> {
+    var users = adminUserService.getUsers();
 
-                    var users =
-                            adminUserService
-                                    .getUsers();
+    var filtered =
+        users.stream()
+            .filter(user -> user.username().toLowerCase().contains(keyword.toLowerCase()))
+            .toList();
 
-                    javafx.application.Platform.runLater(() ->
+    paginatedTable.getTableView().setItems(FXCollections.observableArrayList(filtered));
+  }
 
-                            paginatedTable
-                                    .getTableView()
-                                    .setItems(
+  private TableColumn<UserResponse, Void> buildActionsColumn() {
 
-                                            FXCollections
-                                                    .observableArrayList(
-                                                            users
-                                                    )
-                                    )
-                    );
-                },
+    TableColumn<UserResponse, Void> actionsColumn = new TableColumn<>("Actions");
 
-                () -> {
+    actionsColumn.setCellFactory(
+        column ->
+            new TableCell<>() {
 
-                    loadingOverlay.hide();
+              private final AdminActionButton suspendButton = new AdminActionButton("Suspend");
 
-                    Toast.show(
+              private final AdminActionButton activateButton = new AdminActionButton("Activate");
 
-                            "Users loaded",
+              private final HBox actionsBox = new HBox(10, suspendButton, activateButton);
 
-                            ToastType.INFO
-                    );
-                },
+              {
+                suspendButton.setOnAction(
+                    event -> {
+                      UserResponse user = getTableView().getItems().get(getIndex());
 
-                () -> {
+                      boolean confirmed =
+                          ConfirmDialog.show(
+                              "Suspend User", "Suspend user: " + user.username() + " ?");
 
-                    loadingOverlay.hide();
+                      if (confirmed) {
 
-                    ErrorDialog.show(
+                        try {
 
-                            "Failed to load users"
-                    );
-                }
-        );
-    }
+                          adminUserService.suspendUser(user.id());
+                          loadUsers();
 
-    private void searchUsers(
-            String keyword
-    ) {
+                          Toast.show("User suspended successfully", ToastType.SUCCESS);
 
-        var users =
-                adminUserService.getUsers();
+                        } catch (Exception ex) {
 
-        var filtered =
-                users.stream()
-
-                        .filter(user ->
-
-                                user.username()
-                                        .toLowerCase()
-                                        .contains(
-                                                keyword.toLowerCase()
-                                        )
-                        )
-
-                        .toList();
-
-        paginatedTable.getTableView().setItems(
-
-                FXCollections.observableArrayList(
-                        filtered
-                )
-        );
-    }
-
-    private TableColumn<UserResponse, Void> buildActionsColumn() {
-
-        TableColumn<UserResponse, Void>
-                actionsColumn =
-                new TableColumn<>("Actions");
-
-        actionsColumn.setCellFactory(column ->
-
-                new TableCell<>() {
-
-                    private final AdminActionButton suspendButton = new AdminActionButton("Suspend");
-
-                    private final AdminActionButton
-                        activateButton = new AdminActionButton("Activate");
-
-                    private final HBox actionsBox =
-                        new HBox(10,suspendButton,activateButton);
-
-                    {
-
-                        suspendButton.setOnAction(event -> {
-
-                            UserResponse user =
-                                    getTableView()
-                                            .getItems()
-                                            .get(getIndex());
-
-                            boolean confirmed =
-                                    ConfirmDialog.show(
-
-                                            "Suspend User",
-
-                                            "Suspend user: "
-                                                    + user.username()
-                                                    + " ?"
-                                    );
-
-                            if (confirmed) {
-
-                                try {
-
-                                    adminUserService
-                                        .suspendUser(
-                                            user.id()
-                                        );
-                                    loadUsers();
-
-                                    Toast.show(
-
-                                "User suspended successfully",
-
-                                            ToastType.SUCCESS
-                                    );
-
-                                } catch (Exception ex) {
-
-                                    ErrorDialog.show(
-
-                                        ex.getMessage()
-                                    );
-                                }
-                            }
-                        });
-
-                        activateButton.setOnAction(event -> {
-
-                            UserResponse user =
-                                    getTableView()
-                                            .getItems()
-                                            .get(getIndex());
-
-                            boolean confirmed =
-                                    ConfirmDialog.show(
-
-                                            "Activate User",
-
-                                            "Activate user: "
-                                                    + user.username()
-                                                    + " ?"
-                                    );
-
-                            if (confirmed) {
-
-                                try {
-
-                                    adminUserService
-                                        .activateUser(
-                                            user.id()
-                                        );
-                                    loadUsers();
-                                    Toast.show(
-
-                                    "User activated successfully",
-
-                                            ToastType.SUCCESS
-                                    );
-
-                                } catch (Exception ex) {
-
-                                    ErrorDialog.show(
-
-                                        ex.getMessage()
-                                    );
-                                }
-                            }
-                        });
-                    }
-
-                    @Override
-                    protected void updateItem(
-                            Void item,
-                            boolean empty
-                    ) {
-
-                        super.updateItem(item, empty);
-
-                        if (empty) {
-                            setGraphic(null);
-                            return;
-                        } 
-                        
-                        UserResponse user = getTableView().getItems()
-                                                          .get(getIndex());
-                        
-                        if (user.isActive()) {
-                            actionsBox.getChildren().setAll(suspendButton);
-                        } else {
-                            actionsBox.getChildren().setAll(activateButton);
+                          ErrorDialog.show(ex.getMessage());
                         }
+                      }
+                    });
 
-                        setGraphic(actionsBox);
-                    }
+                activateButton.setOnAction(
+                    event -> {
+                      UserResponse user = getTableView().getItems().get(getIndex());
+
+                      boolean confirmed =
+                          ConfirmDialog.show(
+                              "Activate User", "Activate user: " + user.username() + " ?");
+
+                      if (confirmed) {
+
+                        try {
+
+                          adminUserService.activateUser(user.id());
+                          loadUsers();
+                          Toast.show("User activated successfully", ToastType.SUCCESS);
+
+                        } catch (Exception ex) {
+
+                          ErrorDialog.show(ex.getMessage());
+                        }
+                      }
+                    });
+              }
+
+              @Override
+              protected void updateItem(Void item, boolean empty) {
+
+                super.updateItem(item, empty);
+
+                if (empty) {
+                  setGraphic(null);
+                  return;
                 }
-            );
 
-        return actionsColumn;
-    }
+                UserResponse user = getTableView().getItems().get(getIndex());
+
+                if (user.isActive()) {
+                  actionsBox.getChildren().setAll(suspendButton);
+                } else {
+                  actionsBox.getChildren().setAll(activateButton);
+                }
+
+                setGraphic(actionsBox);
+              }
+            });
+
+    return actionsColumn;
+  }
 }

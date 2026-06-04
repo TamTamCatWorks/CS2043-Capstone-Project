@@ -13,9 +13,7 @@ import org.tamtamcatworks.auction.model.item.ItemCondition;
 import org.tamtamcatworks.auction.model.item.Other;
 import org.tamtamcatworks.auction.model.user.User;
 
-/**
- * Unit tests for Auction entity and BidTransaction value object.
- */
+/** Unit tests for Auction entity and BidTransaction value object. */
 public class AuctionTest {
 
   private User createTestUser(String username) {
@@ -48,16 +46,19 @@ public class AuctionTest {
     assertTrue(auction.getBidHistory().isEmpty());
 
     // Invalid starting price
-    assertThrows(IllegalArgumentException.class, () ->
-        new Auction("Title", seller, item, 0.0, start, end));
-    assertThrows(IllegalArgumentException.class, () ->
-        new Auction("Title", seller, item, -10.0, start, end));
+    assertThrows(
+        IllegalArgumentException.class, () -> new Auction("Title", seller, item, 0.0, start, end));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Auction("Title", seller, item, -10.0, start, end));
 
     // Invalid end time (same or before start time)
-    assertThrows(IllegalArgumentException.class, () ->
-        new Auction("Title", seller, item, 50.0, start, start));
-    assertThrows(IllegalArgumentException.class, () ->
-        new Auction("Title", seller, item, 50.0, start, start.minusSeconds(1)));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Auction("Title", seller, item, 50.0, start, start));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Auction("Title", seller, item, 50.0, start, start.minusSeconds(1)));
   }
 
   @Test
@@ -170,21 +171,25 @@ public class AuctionTest {
     Auction auction = new Auction("Auction Title", seller, item, 100.0, start, end);
     User bidder = createTestUser("bidder");
 
-    BidTransaction bidManual = new BidTransaction(auction, bidder, 1500.0, BidTransaction.BidType.MANUAL);
+    BidTransaction bidManual =
+        new BidTransaction(auction, bidder, 1500.0, BidTransaction.BidType.MANUAL);
     assertEquals(auction, bidManual.getAuction());
     assertEquals(bidder, bidManual.getBidder());
     assertEquals(1500.0, bidManual.getAmount());
     assertEquals(BidTransaction.BidType.MANUAL, bidManual.getBidType());
     assertFalse(bidManual.isAutoBid());
 
-    BidTransaction bidAuto = new BidTransaction(auction, bidder, 2000.0, BidTransaction.BidType.AUTO);
+    BidTransaction bidAuto =
+        new BidTransaction(auction, bidder, 2000.0, BidTransaction.BidType.AUTO);
     assertTrue(bidAuto.isAutoBid());
 
     // Validation: amount <= 0
-    assertThrows(IllegalArgumentException.class, () ->
-        new BidTransaction(auction, bidder, 0.0, BidTransaction.BidType.MANUAL));
-    assertThrows(IllegalArgumentException.class, () ->
-        new BidTransaction(auction, bidder, -100.0, BidTransaction.BidType.MANUAL));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new BidTransaction(auction, bidder, 0.0, BidTransaction.BidType.MANUAL));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new BidTransaction(auction, bidder, -100.0, BidTransaction.BidType.MANUAL));
 
     // Test toString
     assertNotNull(bidManual.toString());

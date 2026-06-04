@@ -14,8 +14,7 @@ public final class NavigationState {
   private static String pendingSearchQuery = null;
   private static String pendingSearchCategory = null;
 
-  private NavigationState() {
-  }
+  private NavigationState() {}
 
   public static void setDashboardTabIndex(int idx) {
     dashboardTabIndex = idx;

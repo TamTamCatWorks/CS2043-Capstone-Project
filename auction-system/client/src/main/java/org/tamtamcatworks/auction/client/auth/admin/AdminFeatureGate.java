@@ -4,23 +4,14 @@ import javafx.scene.Node;
 
 public final class AdminFeatureGate {
 
-    private AdminFeatureGate() {}
+  private AdminFeatureGate() {}
 
-    public static void requirePermission(
+  public static void requirePermission(Node node, AdminPermission permission) {
 
-            Node node,
+    boolean allowed = AdminAuthorizationService.hasPermission(permission);
 
-            AdminPermission permission
-    ) {
+    node.setVisible(allowed);
 
-        boolean allowed =
-                AdminAuthorizationService
-                        .hasPermission(
-                                permission
-                        );
-
-        node.setVisible(allowed);
-
-        node.setManaged(allowed);
-    }
+    node.setManaged(allowed);
+  }
 }

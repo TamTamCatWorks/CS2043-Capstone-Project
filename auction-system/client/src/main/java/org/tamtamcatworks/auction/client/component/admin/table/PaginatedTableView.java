@@ -4,55 +4,43 @@ import javafx.scene.control.Pagination;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-public class PaginatedTableView<T>
-        extends VBox {
+public class PaginatedTableView<T> extends VBox {
 
-    private final AdminTableView<T> tableView =
-            new AdminTableView<>();
+  private final AdminTableView<T> tableView = new AdminTableView<>();
 
-    private final Pagination pagination =
-            new Pagination();
+  private final Pagination pagination = new Pagination();
 
-    private final TableLoadingOverlay loadingOverlay =
-            new TableLoadingOverlay();
+  private final TableLoadingOverlay loadingOverlay = new TableLoadingOverlay();
 
-    public PaginatedTableView() {
+  public PaginatedTableView() {
 
-        VBox.setVgrow(
-                tableView,
-                Priority.ALWAYS
-        );
+    VBox.setVgrow(tableView, Priority.ALWAYS);
 
-        getChildren().addAll(
+    getChildren().addAll(loadingOverlay, tableView, pagination);
 
-                loadingOverlay,
-                tableView,
-                pagination
-        );
+    pagination.setVisible(false);
+    pagination.setManaged(false);
 
-        pagination.setVisible(false);
-        pagination.setManaged(false);
+    setSpacing(10);
+  }
 
-        setSpacing(10);
-    }
+  public AdminTableView<T> getTableView() {
 
-    public AdminTableView<T> getTableView() {
+    return tableView;
+  }
 
-        return tableView;
-    }
+  public Pagination getPagination() {
 
-    public Pagination getPagination() {
+    return pagination;
+  }
 
-        return pagination;
-    }
+  public void showLoading() {
 
-    public void showLoading() {
+    loadingOverlay.setVisible(true);
+  }
 
-        loadingOverlay.setVisible(true);
-    }
+  public void hideLoading() {
 
-    public void hideLoading() {
-
-        loadingOverlay.setVisible(false);
-    }
+    loadingOverlay.setVisible(false);
+  }
 }

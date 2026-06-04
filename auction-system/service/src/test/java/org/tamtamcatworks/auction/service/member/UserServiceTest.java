@@ -27,26 +27,22 @@ import org.tamtamcatworks.auction.shared.response.UserResponse;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-  @Mock
-  private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-  @Mock
-  private PasswordEncoder passwordEncoder;
+  @Mock private PasswordEncoder passwordEncoder;
 
-  @Mock
-  private UserMapper userMapper;
+  @Mock private UserMapper userMapper;
 
-  @Mock
-  private AuctionService auctionService;
+  @Mock private AuctionService auctionService;
 
-  @Mock
-  private ApplicationEventPublisher eventPublisher;
+  @Mock private ApplicationEventPublisher eventPublisher;
 
   private UserService userService;
 
   @BeforeEach
   void setUp() {
-    userService = new UserService(userRepository, passwordEncoder, userMapper, eventPublisher, null, null);
+    userService =
+        new UserService(userRepository, passwordEncoder, userMapper, eventPublisher, null, null);
   }
 
   @Test
@@ -66,18 +62,18 @@ class UserServiceTest {
   @Test
   void testRegisterDuplicateEmailThrowsException() {
     when(userRepository.existsByEmail("test@example.com")).thenReturn(true);
-    assertThrows(IllegalArgumentException.class, () -> 
-        userService.register("tester", "test@example.com", "password", "Test User")
-    );
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> userService.register("tester", "test@example.com", "password", "Test User"));
   }
 
   @Test
   void testRegisterDuplicateUsernameThrowsException() {
     when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
     when(userRepository.existsByUsername("tester")).thenReturn(true);
-    assertThrows(IllegalArgumentException.class, () -> 
-        userService.register("tester", "test@example.com", "password", "Test User")
-    );
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> userService.register("tester", "test@example.com", "password", "Test User"));
   }
 
   @Test
@@ -96,9 +92,9 @@ class UserServiceTest {
     when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
     when(passwordEncoder.matches("wrongpassword", "hashedPass")).thenReturn(false);
 
-    assertThrows(IllegalArgumentException.class, () -> 
-        userService.login("test@example.com", "wrongpassword")
-    );
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> userService.login("test@example.com", "wrongpassword"));
   }
 
   @Test
@@ -106,13 +102,16 @@ class UserServiceTest {
     User user = new User("tester", "test@example.com", "hashedPass", "Test User", 10.0);
     when(userRepository.findById("id123")).thenReturn(Optional.of(user));
     when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
-    
-    UserResponse mockResponse = new UserResponse("id123", "tester", "test@example.com", "Test User", 110.0, 0.0, true, false, List.of());
+
+    UserResponse mockResponse =
+        new UserResponse(
+            "id123", "tester", "test@example.com", "Test User", 110.0, 0.0, true, false, List.of());
     when(userMapper.toResponse(any(User.class))).thenReturn(mockResponse);
 
     UserResponse response = userService.topUp("id123", 100.0);
     assertEquals(110.0, response.balance());
-    verify(eventPublisher, times(1)).publishEvent(any(org.tamtamcatworks.auction.service.event.UserStateEvent.class));
+    verify(eventPublisher, times(1))
+        .publishEvent(any(org.tamtamcatworks.auction.service.event.UserStateEvent.class));
   }
 
   @Test
@@ -124,7 +123,7 @@ class UserServiceTest {
     userService.promoteToAdmin("id123", List.of("MANAGE_USERS"));
     assertNotNull(user.getAdminProfile());
     assertTrue(user.getAdminProfile().getPermissions().contains("MANAGE_USERS"));
-    
+
     List<String> logs = userService.getAdminActionLogs("id123");
     assertEquals(1, logs.size());
     assertTrue(logs.get(0).contains("Promoted to admin"));

@@ -4,10 +4,9 @@ import org.tamtamcatworks.auction.client.ApiClient;
 
 public class AdminApiClient {
 
-    private final ApiClient api =
-            new ApiClient();
+  private final ApiClient api = new ApiClient();
 
-    public ApiClient api() {
-        return api;
-    }
+  public ApiClient api() {
+    return api;
+  }
 }

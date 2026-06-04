@@ -1,66 +1,50 @@
 package org.tamtamcatworks.auction.client.auth.admin;
 
 import java.util.Set;
-
 import org.tamtamcatworks.auction.client.SessionManager;
 
 public final class AdminAuthorizationService {
 
-    private AdminAuthorizationService() {}
+  private AdminAuthorizationService() {}
 
-    public static boolean hasPermission(
-            AdminPermission permission
-    ) {
+  public static boolean hasPermission(AdminPermission permission) {
 
-        var user =
-                SessionManager.getCurrentUser();
+    var user = SessionManager.getCurrentUser();
 
-        if (user == null) {
+    if (user == null) {
 
-            return false;
-        }
-
-        if (user.isAdmin()) {
-
-            return true;
-        }
-
-        return user.permissions()
-                .contains(
-                        permission.name()
-                );
+      return false;
     }
 
-    public static boolean hasRole(
-            AdminRole role
-    ) {
+    if (user.isAdmin()) {
 
-        var user =
-                SessionManager.getCurrentUser();
-
-        if (user == null) {
-
-            return false;
-        }
-
-        return user.permissions()
-                .contains(
-                        role.name()
-                );
+      return true;
     }
 
-    public static Set<String> getPermissions() {
+    return user.permissions().contains(permission.name());
+  }
 
-        var user =
-                SessionManager.getCurrentUser();
+  public static boolean hasRole(AdminRole role) {
 
-        if (user == null) {
+    var user = SessionManager.getCurrentUser();
 
-            return Set.of();
-        }
+    if (user == null) {
 
-        return Set.copyOf(
-                user.permissions()
-        );
+      return false;
     }
+
+    return user.permissions().contains(role.name());
+  }
+
+  public static Set<String> getPermissions() {
+
+    var user = SessionManager.getCurrentUser();
+
+    if (user == null) {
+
+      return Set.of();
+    }
+
+    return Set.copyOf(user.permissions());
+  }
 }

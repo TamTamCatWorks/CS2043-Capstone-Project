@@ -4,50 +4,31 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-public class DashboardStatCard
-        extends VBox {
+public class DashboardStatCard extends VBox {
 
-    private final Label valueLabel =
-            new Label();
+  private final Label valueLabel = new Label();
 
-    public DashboardStatCard(
+  public DashboardStatCard(String title, String value) {
 
-            String title,
+    Label titleLabel = new Label(title);
 
-            String value
-    ) {
+    valueLabel.setText(value);
 
-        Label titleLabel =
-                new Label(title);
+    titleLabel.getStyleClass().add("dashboard-card-title");
 
-        valueLabel.setText(value);
+    valueLabel.getStyleClass().add("dashboard-card-value");
 
-        titleLabel.getStyleClass()
-                .add("dashboard-card-title");
+    setSpacing(10);
 
-        valueLabel.getStyleClass()
-                .add("dashboard-card-value");
+    setAlignment(Pos.CENTER_LEFT);
 
-        setSpacing(10);
+    getStyleClass().add("dashboard-stat-card");
 
-        setAlignment(Pos.CENTER_LEFT);
+    getChildren().addAll(titleLabel, valueLabel);
+  }
 
-        getStyleClass().add(
-                "dashboard-stat-card"
-        );
+  public void setValue(String value) {
 
-        getChildren().addAll(
-
-                titleLabel,
-
-                valueLabel
-        );
-    }
-
-    public void setValue(
-            String value
-    ) {
-
-        valueLabel.setText(value);
-    }
+    valueLabel.setText(value);
+  }
 }

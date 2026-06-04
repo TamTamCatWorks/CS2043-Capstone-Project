@@ -81,7 +81,8 @@ public final class AuctionCardFactory {
     titleLabel.setMaxHeight(scale(30));
     titleLabel.setMinHeight(scale(30));
 
-    Label sellerLabel = new Label("by " + (auction.sellerName() != null ? auction.sellerName() : "Unknown"));
+    Label sellerLabel =
+        new Label("by " + (auction.sellerName() != null ? auction.sellerName() : "Unknown"));
     sellerLabel.getStyleClass().add("asset-card-seller");
 
     HBox priceStatusRow = new HBox(8);
@@ -106,10 +107,11 @@ public final class AuctionCardFactory {
 
     card.getChildren().addAll(imgWrapper, details);
 
-    card.setOnMouseClicked(e -> {
-      Navigation.setContextData(auction.id());
-      Navigation.navigateTo("/fxml/auction-detail.fxml");
-    });
+    card.setOnMouseClicked(
+        e -> {
+          Navigation.setContextData(auction.id());
+          Navigation.navigateTo("/fxml/auction-detail.fxml");
+        });
 
     return card;
   }

@@ -6,13 +6,13 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
 import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.auth.admin.AdminAuthorizationService;
 import org.tamtamcatworks.auction.client.auth.admin.AdminPermission;
 import org.tamtamcatworks.auction.client.component.admin.action.AdminActionButton;
 import org.tamtamcatworks.auction.client.component.admin.action.ConfirmDialog;
 import org.tamtamcatworks.auction.client.component.admin.feedback.ErrorDialog;
+import org.tamtamcatworks.auction.client.component.admin.feedback.LoadingOverlay;
 import org.tamtamcatworks.auction.client.component.admin.feedback.Toast;
 import org.tamtamcatworks.auction.client.component.admin.feedback.ToastType;
 import org.tamtamcatworks.auction.client.component.admin.table.PaginatedTableView;
@@ -20,286 +20,162 @@ import org.tamtamcatworks.auction.client.component.admin.table.TableColumnFactor
 import org.tamtamcatworks.auction.client.component.admin.table.TableToolbar;
 import org.tamtamcatworks.auction.client.controller.BaseController;
 import org.tamtamcatworks.auction.client.service.admin.AdminReportService;
-import org.tamtamcatworks.auction.shared.response.AdminReportResponse;
-import org.tamtamcatworks.auction.client.component.admin.feedback.LoadingOverlay;
 import org.tamtamcatworks.auction.client.util.admin.AsyncExecutor;
+import org.tamtamcatworks.auction.shared.response.AdminReportResponse;
 
 @Route(
     fxml = "/fxml/admin/reports/reports-list.fxml",
-    layout = "/fxml/admin/layout/admin-layout.fxml"
-)
-public class ReportsManagementController
-        extends BaseController {
+    layout = "/fxml/admin/layout/admin-layout.fxml")
+public class ReportsManagementController extends BaseController {
 
-    @FXML
-    private VBox toolbarContainer;
+  @FXML private VBox toolbarContainer;
 
-    @FXML
-        private VBox tableContainer;
+  @FXML private VBox tableContainer;
 
-        private final TableToolbar toolbar =
-            new TableToolbar();
+  private final TableToolbar toolbar = new TableToolbar();
 
-        private final PaginatedTableView<AdminReportResponse>
-            paginatedTable =
-            new PaginatedTableView<>();
+  private final PaginatedTableView<AdminReportResponse> paginatedTable = new PaginatedTableView<>();
 
-        private final AdminReportService
-            adminReportService =
-            new AdminReportService();
-        private final LoadingOverlay
-                loadingOverlay =
-                new LoadingOverlay();
+  private final AdminReportService adminReportService = new AdminReportService();
+  private final LoadingOverlay loadingOverlay = new LoadingOverlay();
 
-    @FXML
-    public void initialize() {
+  @FXML
+  public void initialize() {
 
-        if (!AdminAuthorizationService.hasPermission(AdminPermission.MANAGE_ADMINS)) {
+    if (!AdminAuthorizationService.hasPermission(AdminPermission.MANAGE_ADMINS)) {
 
-                throw new RuntimeException(
-                "Access denied"
-                );
-        }
-
-        buildToolbar();
-
-        buildTable();
-
-        loadReports();
+      throw new RuntimeException("Access denied");
     }
 
-    private void buildToolbar() {
+    buildToolbar();
 
-        toolbarContainer.getChildren().add(
-                toolbar
-        );
+    buildTable();
 
-        toolbar.getRefreshButton()
-                .setOnAction(event -> loadReports());
-    }
+    loadReports();
+  }
 
-    private void buildTable() {
+  private void buildToolbar() {
 
-        var table =
-                paginatedTable.getTableView();
+    toolbarContainer.getChildren().add(toolbar);
 
-        table.getColumns().addAll(
+    toolbar.getRefreshButton().setOnAction(event -> loadReports());
+  }
 
-                TableColumnFactory.createStringColumn(
-                        "Type",
-                        AdminReportResponse::targetType
-                ),
+  private void buildTable() {
 
-                TableColumnFactory.createStringColumn(
-                        "Target",
-                        AdminReportResponse::targetName
-                ),
+    var table = paginatedTable.getTableView();
 
-                TableColumnFactory.createStringColumn(
-                        "Reason",
-                        AdminReportResponse::reason
-                ),
+    table
+        .getColumns()
+        .addAll(
+            TableColumnFactory.createStringColumn("Type", AdminReportResponse::targetType),
+            TableColumnFactory.createStringColumn("Target", AdminReportResponse::targetName),
+            TableColumnFactory.createStringColumn("Reason", AdminReportResponse::reason),
+            TableColumnFactory.createStringColumn("Status", AdminReportResponse::status),
+            buildActionsColumn());
 
-                TableColumnFactory.createStringColumn(
-                        "Status",
-                        AdminReportResponse::status
-                ),
+    tableContainer.getChildren().addAll(paginatedTable, loadingOverlay);
+  }
 
-                buildActionsColumn()
-        );
+  private TableColumn<AdminReportResponse, Void> buildActionsColumn() {
 
-        tableContainer.getChildren().addAll(
-                paginatedTable,
-                loadingOverlay
-        );
-    }
+    TableColumn<AdminReportResponse, Void> column = new TableColumn<>("Actions");
 
-    private TableColumn<AdminReportResponse, Void>
-    buildActionsColumn() {
+    column.setCellFactory(
+        col ->
+            new TableCell<>() {
 
-        TableColumn<AdminReportResponse, Void>
-                column =
-                new TableColumn<>("Actions");
+              private final AdminActionButton resolveButton = new AdminActionButton("Resolve");
 
-        column.setCellFactory(col ->
+              private final AdminActionButton rejectButton = new AdminActionButton("Reject");
 
-                new TableCell<>() {
+              private final HBox actions = new HBox(10, resolveButton, rejectButton);
 
-                    private final AdminActionButton
-                            resolveButton =
-                            new AdminActionButton(
-                                    "Resolve"
-                            );
+              {
+                resolveButton.setOnAction(
+                    event -> {
+                      var report = getTableView().getItems().get(getIndex());
 
-                    private final AdminActionButton
-                            rejectButton =
-                            new AdminActionButton(
-                                    "Reject"
-                            );
+                      boolean confirmed =
+                          ConfirmDialog.show("Resolve Report", "Resolve this report?");
 
-                    private final HBox actions =
-                            new HBox(
-                                    10,
-                                    resolveButton,
-                                    rejectButton
-                            );
+                      if (confirmed) {
 
-                    {
+                        try {
 
-                        resolveButton.setOnAction(event -> {
+                          adminReportService.resolveReport(report.id());
 
-                            var report =
-                                    getTableView()
-                                            .getItems()
-                                            .get(getIndex());
+                          Toast.show("Report resolved successfully", ToastType.SUCCESS);
 
-                            boolean confirmed =
-                                    ConfirmDialog.show(
+                          loadReports();
 
-                                            "Resolve Report",
+                        } catch (Exception ex) {
 
-                                            "Resolve this report?"
-                                    );
+                          ErrorDialog.show(ex.getMessage());
+                        }
+                      }
+                    });
 
-                            if (confirmed) {
+                rejectButton.setOnAction(
+                    event -> {
+                      var report = getTableView().getItems().get(getIndex());
 
-                                try {
+                      boolean confirmed =
+                          ConfirmDialog.show("Reject Report", "Reject this report?");
 
-                                    adminReportService
-                                        .resolveReport(
-                                            report.id()
-                                        );
+                      if (confirmed) {
 
-                                    Toast.show(
+                        try {
 
-                                        "Report resolved successfully",
+                          adminReportService.rejectReport(report.id());
 
-                                        ToastType.SUCCESS
-                                    );
+                          Toast.show("Report rejected successfully", ToastType.SUCCESS);
 
-                                    loadReports();
+                          loadReports();
 
-                                } catch (Exception ex) {
+                        } catch (Exception ex) {
 
-                                    ErrorDialog.show(
+                          ErrorDialog.show(ex.getMessage());
+                        }
+                      }
+                    });
+              }
 
-                                        ex.getMessage()
-                                    );
-                                }
-                            }
-                        });
+              @Override
+              protected void updateItem(Void item, boolean empty) {
 
-                        rejectButton.setOnAction(event -> {
+                super.updateItem(item, empty);
 
-                            var report =
-                                    getTableView()
-                                            .getItems()
-                                            .get(getIndex());
-
-                            boolean confirmed =
-                                    ConfirmDialog.show(
-
-                                            "Reject Report",
-
-                                            "Reject this report?"
-                                    );
-
-                            if (confirmed) {
-
-                                try {
-
-                                    adminReportService
-                                        .rejectReport(
-                                            report.id()
-                                        );
-
-                                    Toast.show(
-
-                                        "Report rejected successfully",
-
-                                                ToastType.SUCCESS
-                                    );
-
-                                    loadReports();
-
-                                } catch (Exception ex) {
-
-                                    ErrorDialog.show(
-
-                                        ex.getMessage()
-                                    );
-                                }
-                            }
-                        });
-                    }
-
-                    @Override
-                    protected void updateItem(
-                            Void item,
-                            boolean empty
-                    ) {
-
-                        super.updateItem(item, empty);
-
-                        setGraphic(
-                                empty
-                                        ? null
-                                        : actions
-                        );
-                    }
-                }
-        );
-
-        return column;
-    }
-
-    private void loadReports() {
-
-        loadingOverlay.show();
-
-        AsyncExecutor.execute(
-
-                () -> {
-
-                        var reports =
-                                adminReportService
-                                        .getReports();
-
-                        javafx.application.Platform.runLater(() ->
-
-                                paginatedTable
-                                        .getTableView()
-                                        .setItems(
-
-                                                FXCollections
-                                                        .observableArrayList(
-                                                                reports
-                                                        )
-                                        )
-                        );
-                },
-
-                () -> {
-
-                        loadingOverlay.hide();
-
-                        Toast.show(
-
-                                "Reports loaded",
-
-                                ToastType.INFO
-                        );
-                },
-
-                () -> {
-
-                        loadingOverlay.hide();
-
-                        ErrorDialog.show(
-
-                                "Failed to load reports"
-                        );
-                }
-                );
-        }
+                setGraphic(empty ? null : actions);
+              }
+            });
+
+    return column;
+  }
+
+  private void loadReports() {
+
+    loadingOverlay.show();
+
+    AsyncExecutor.execute(
+        () -> {
+          var reports = adminReportService.getReports();
+
+          javafx.application.Platform.runLater(
+              () ->
+                  paginatedTable
+                      .getTableView()
+                      .setItems(FXCollections.observableArrayList(reports)));
+        },
+        () -> {
+          loadingOverlay.hide();
+
+          Toast.show("Reports loaded", ToastType.INFO);
+        },
+        () -> {
+          loadingOverlay.hide();
+
+          ErrorDialog.show("Failed to load reports");
+        });
+  }
 }

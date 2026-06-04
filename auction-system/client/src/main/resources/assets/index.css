@@ -79,6 +79,7 @@
     -fx-border-color: #E6DFD3;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
+    -fx-spacing: 10px;
     -fx-padding: 0 12px;
 }
 
@@ -89,7 +90,7 @@
 
 .input-icon {
     -fx-icon-color: #A89F91;
-    -fx-padding: 0 8px 0 0;
+    -fx-padding: 0;
 }
 
 .input-group:focused-within .input-icon {

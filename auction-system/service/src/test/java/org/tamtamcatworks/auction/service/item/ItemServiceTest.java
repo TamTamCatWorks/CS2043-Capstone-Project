@@ -20,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.tamtamcatworks.auction.model.item.Art;
 import org.tamtamcatworks.auction.model.item.Electronics;
 import org.tamtamcatworks.auction.model.item.Item;
-import org.tamtamcatworks.auction.model.item.ItemCondition;
 import org.tamtamcatworks.auction.model.item.Other;
 import org.tamtamcatworks.auction.model.item.Vehicle;
 import org.tamtamcatworks.auction.model.user.User;
@@ -31,14 +30,11 @@ import org.tamtamcatworks.auction.service.mapper.ItemMapper;
 @ExtendWith(MockitoExtension.class)
 class ItemServiceTest {
 
-  @Mock
-  private ItemRepository itemRepository;
+  @Mock private ItemRepository itemRepository;
 
-  @Mock
-  private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-  @Mock
-  private ItemMapper itemMapper;
+  @Mock private ItemMapper itemMapper;
 
   private ItemService itemService;
   private User seller;
@@ -47,12 +43,9 @@ class ItemServiceTest {
   void setUp() {
     seller = new User("seller", "seller@example.com", "pw", "John Seller", 1000.0);
 
-    List<ItemCreator> creators = List.of(
-        new ArtCreator(),
-        new ElectronicsCreator(),
-        new VehicleCreator(),
-        new OtherCreator()
-    );
+    List<ItemCreator> creators =
+        List.of(
+            new ArtCreator(), new ElectronicsCreator(), new VehicleCreator(), new OtherCreator());
 
     itemService = new ItemService(itemRepository, userRepository, creators, itemMapper);
     itemService.init(); // manually invoke PostConstruct
@@ -70,10 +63,16 @@ class ItemServiceTest {
     details.put("dimensions", "50x50");
     details.put("hasCertificate", false);
 
-    Item item = itemService.create(
-        "ART", "Starry Painting", "Beautiful art piece",
-        200.0, "GOOD", "imgUrl", details, "seller123"
-    );
+    Item item =
+        itemService.create(
+            "ART",
+            "Starry Painting",
+            "Beautiful art piece",
+            200.0,
+            "GOOD",
+            "imgUrl",
+            details,
+            "seller123");
 
     assertNotNull(item);
     assertTrue(item instanceof Art);
@@ -94,10 +93,9 @@ class ItemServiceTest {
     details.put("model", "OLED55");
     details.put("warrantyMonths", 24);
 
-    Item item = itemService.create(
-        "ELECTRONICS", "LG OLED", "Smart TV",
-        1000.0, "NEW", "imgUrl", details, "seller123"
-    );
+    Item item =
+        itemService.create(
+            "ELECTRONICS", "LG OLED", "Smart TV", 1000.0, "NEW", "imgUrl", details, "seller123");
 
     assertNotNull(item);
     assertTrue(item instanceof Electronics);
@@ -120,10 +118,16 @@ class ItemServiceTest {
     details.put("color", "Red");
     details.put("fuelType", "Electric");
 
-    Item item = itemService.create(
-        "VEHICLE", "Tesla 3", "Electric vehicle",
-        30000.0, "GOOD", "imgUrl", details, "seller123"
-    );
+    Item item =
+        itemService.create(
+            "VEHICLE",
+            "Tesla 3",
+            "Electric vehicle",
+            30000.0,
+            "GOOD",
+            "imgUrl",
+            details,
+            "seller123");
 
     assertNotNull(item);
     assertTrue(item instanceof Vehicle);
@@ -141,10 +145,16 @@ class ItemServiceTest {
     when(userRepository.findById("seller123")).thenReturn(Optional.of(seller));
     when(itemRepository.save(any(Item.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    Item item = itemService.create(
-        "OTHER", "Rare Comic", "Amazing Fantasy 15",
-        500.0, "FAIR", "imgUrl", Map.of(), "seller123"
-    );
+    Item item =
+        itemService.create(
+            "OTHER",
+            "Rare Comic",
+            "Amazing Fantasy 15",
+            500.0,
+            "FAIR",
+            "imgUrl",
+            Map.of(),
+            "seller123");
 
     assertNotNull(item);
     assertTrue(item instanceof Other);
@@ -153,11 +163,17 @@ class ItemServiceTest {
   @Test
   void testCreateInvalidConditionThrowsException() {
     when(userRepository.findById("seller123")).thenReturn(Optional.of(seller));
-    assertThrows(IllegalArgumentException.class, () -> 
-        itemService.create(
-            "OTHER", "Rare Comic", "Amazing Fantasy 15",
-            500.0, "INVALID_CONDITION", "imgUrl", Map.of(), "seller123"
-        )
-    );
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            itemService.create(
+                "OTHER",
+                "Rare Comic",
+                "Amazing Fantasy 15",
+                500.0,
+                "INVALID_CONDITION",
+                "imgUrl",
+                Map.of(),
+                "seller123"));
   }
 }

@@ -8,9 +8,9 @@ import org.tamtamcatworks.auction.client.ViewLoader;
 /**
  * Controller for the home sub-panel within the dashboard.
  *
- * <p>Hosts two tabs (Auctions / Bids) that swap a nested content area.
- * Uses {@link TabChipBar} for selection state and {@link ViewLoader} for
- * sub-view injection — no copy-pasted loadView() or applySelected() methods.
+ * <p>Hosts two tabs (Auctions / Bids) that swap a nested content area. Uses {@link TabChipBar} for
+ * selection state and {@link ViewLoader} for sub-view injection — no copy-pasted loadView() or
+ * applySelected() methods.
  */
 public class HomeViewController {
 

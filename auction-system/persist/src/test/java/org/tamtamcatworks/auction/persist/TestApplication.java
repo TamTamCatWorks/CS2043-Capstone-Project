@@ -9,5 +9,4 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableAutoConfiguration
 @EntityScan("org.tamtamcatworks.auction")
 @EnableJpaRepositories("org.tamtamcatworks.auction.persist.repository")
-public class TestApplication {
-}
+public class TestApplication {}

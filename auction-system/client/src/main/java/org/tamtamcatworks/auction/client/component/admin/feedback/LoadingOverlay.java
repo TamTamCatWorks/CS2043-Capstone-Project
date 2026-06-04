@@ -4,39 +4,34 @@ import javafx.geometry.Pos;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.StackPane;
 
-public class LoadingOverlay
-        extends StackPane {
+public class LoadingOverlay extends StackPane {
 
-    public LoadingOverlay() {
+  public LoadingOverlay() {
 
-        setStyle(
+    setStyle("-fx-background-color: rgba(0,0,0,0.25);");
 
-                "-fx-background-color: rgba(0,0,0,0.25);"
-        );
+    ProgressIndicator indicator = new ProgressIndicator();
 
-        ProgressIndicator indicator =
-                new ProgressIndicator();
+    setAlignment(Pos.CENTER);
 
-        setAlignment(Pos.CENTER);
+    getChildren().add(indicator);
 
-        getChildren().add(indicator);
+    setVisible(false);
 
-        setVisible(false);
+    setManaged(false);
+  }
 
-        setManaged(false);
-    }
+  public void show() {
 
-    public void show() {
+    setVisible(true);
 
-        setVisible(true);
+    setManaged(true);
+  }
 
-        setManaged(true);
-    }
+  public void hide() {
 
-    public void hide() {
+    setVisible(false);
 
-        setVisible(false);
-
-        setManaged(false);
-    }
+    setManaged(false);
+  }
 }

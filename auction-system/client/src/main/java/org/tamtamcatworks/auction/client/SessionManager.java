@@ -1,23 +1,22 @@
 package org.tamtamcatworks.auction.client;
 
-import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import org.tamtamcatworks.auction.client.ws.AuctionWebSocketClient;
-import org.tamtamcatworks.auction.shared.response.UserResponse;
-import org.springframework.messaging.simp.stomp.StompSession;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import org.springframework.messaging.simp.stomp.StompSession;
+import org.tamtamcatworks.auction.client.ws.AuctionWebSocketClient;
+import org.tamtamcatworks.auction.shared.response.UserResponse;
 
 /**
  * Application-wide session state.
  *
- * <p>{@code currentUser} is exposed as a JavaFX {@link ObjectProperty} so that
- * any controller can react to changes (e.g. balance updates after a top-up)
- * without needing {@code scene.lookup()} hacks.
+ * <p>{@code currentUser} is exposed as a JavaFX {@link ObjectProperty} so that any controller can
+ * react to changes (e.g. balance updates after a top-up) without needing {@code scene.lookup()}
+ * hacks.
  *
  * <pre>{@code
  * // Listen for user changes in any controller:
@@ -52,8 +51,8 @@ public class SessionManager {
   // ── Current user ───────────────────────────────────────────────────────────
 
   /**
-   * Observable property holding the currently logged-in user, or {@code null}
-   * when no one is logged in. Bind to this to react automatically to changes.
+   * Observable property holding the currently logged-in user, or {@code null} when no one is logged
+   * in. Bind to this to react automatically to changes.
    */
   public static ObjectProperty<UserResponse> currentUserProperty() {
     return currentUserProp;
@@ -65,8 +64,8 @@ public class SessionManager {
   }
 
   /**
-   * Set the current user. Any listeners on {@link #currentUserProperty()} are
-   * notified immediately on the calling thread (should be the FX thread).
+   * Set the current user. Any listeners on {@link #currentUserProperty()} are notified immediately
+   * on the calling thread (should be the FX thread).
    */
   public static void setCurrentUser(UserResponse user) {
     Runnable apply = () -> currentUserProp.set(user);
@@ -77,11 +76,14 @@ public class SessionManager {
     }
 
     if (user != null) {
-      ensureWebSocketConnected().thenCompose(ws -> ensureUserStateSubscription(ws, user.id()))
-          .exceptionally(ex -> {
-            System.err.println("WebSocket connect failed: " + (ex != null ? ex.getMessage() : "?"));
-            return null;
-          });
+      ensureWebSocketConnected()
+          .thenCompose(ws -> ensureUserStateSubscription(ws, user.id()))
+          .exceptionally(
+              ex -> {
+                System.err.println(
+                    "WebSocket connect failed: " + (ex != null ? ex.getMessage() : "?"));
+                return null;
+              });
     }
   }
 
@@ -91,8 +93,8 @@ public class SessionManager {
   }
 
   /**
-   * Refresh the current user from the API and publish the updated session
-   * state on the JavaFX thread.
+   * Refresh the current user from the API and publish the updated session state on the JavaFX
+   * thread.
    */
   public static CompletableFuture<UserResponse> refreshCurrentUser() {
     UserResponse currentUser = getCurrentUser();
@@ -101,17 +103,16 @@ public class SessionManager {
     }
 
     return CompletableFuture.supplyAsync(() -> apiClient.getUser(currentUser.id()))
-        .whenComplete((updatedUser, ex) -> {
-          if (ex != null || updatedUser == null) {
-            return;
-          }
-          Platform.runLater(() -> setCurrentUser(updatedUser));
-        });
+        .whenComplete(
+            (updatedUser, ex) -> {
+              if (ex != null || updatedUser == null) {
+                return;
+              }
+              Platform.runLater(() -> setCurrentUser(updatedUser));
+            });
   }
 
-  /**
-   * Clear the current user session (logout). Notifies any property listeners.
-   */
+  /** Clear the current user session (logout). Notifies any property listeners. */
   public static void logout() {
     // Tear down any session-level websocket subscriptions and connection
     // before clearing the user so no callbacks remain active after logout.
@@ -137,14 +138,14 @@ public class SessionManager {
     return webSocketClientFuture;
   }
 
-  private static synchronized CompletableFuture<StompSession.Subscription> ensureUserStateSubscription(
-      AuctionWebSocketClient ws, String userId) {
+  private static synchronized CompletableFuture<StompSession.Subscription>
+      ensureUserStateSubscription(AuctionWebSocketClient ws, String userId) {
     if (userStateSubscription != null) {
       return CompletableFuture.completedFuture(userStateSubscription);
     }
 
-    StompSession.Subscription sub = ws.subscribeToUserState(userId,
-        user -> Platform.runLater(() -> setCurrentUser(user)));
+    StompSession.Subscription sub =
+        ws.subscribeToUserState(userId, user -> Platform.runLater(() -> setCurrentUser(user)));
     if (sub != null) {
       userStateSubscription = sub;
       synchronized (activeSubscriptions) {
@@ -154,31 +155,46 @@ public class SessionManager {
     return CompletableFuture.completedFuture(sub);
   }
 
-  public static CompletableFuture<StompSession.Subscription> subscribeToPrice(String auctionId,
-      Consumer<AuctionWebSocketClient.AuctionPriceUpdate> onPriceUpdate) {
-    return ensureWebSocketConnected().thenApply(ws -> {
-      StompSession.Subscription sub = ws.subscribeToPrice(auctionId, onPriceUpdate);
-      if (sub != null) synchronized (activeSubscriptions) { activeSubscriptions.add(sub); }
-      return sub;
-    });
+  public static CompletableFuture<StompSession.Subscription> subscribeToPrice(
+      String auctionId, Consumer<AuctionWebSocketClient.AuctionPriceUpdate> onPriceUpdate) {
+    return ensureWebSocketConnected()
+        .thenApply(
+            ws -> {
+              StompSession.Subscription sub = ws.subscribeToPrice(auctionId, onPriceUpdate);
+              if (sub != null)
+                synchronized (activeSubscriptions) {
+                  activeSubscriptions.add(sub);
+                }
+              return sub;
+            });
   }
 
-  public static CompletableFuture<StompSession.Subscription> subscribeToStatus(String auctionId,
-      Consumer<AuctionWebSocketClient.AuctionStatusUpdate> onStatusUpdate) {
-    return ensureWebSocketConnected().thenApply(ws -> {
-      StompSession.Subscription sub = ws.subscribeToStatus(auctionId, onStatusUpdate);
-      if (sub != null) synchronized (activeSubscriptions) { activeSubscriptions.add(sub); }
-      return sub;
-    });
+  public static CompletableFuture<StompSession.Subscription> subscribeToStatus(
+      String auctionId, Consumer<AuctionWebSocketClient.AuctionStatusUpdate> onStatusUpdate) {
+    return ensureWebSocketConnected()
+        .thenApply(
+            ws -> {
+              StompSession.Subscription sub = ws.subscribeToStatus(auctionId, onStatusUpdate);
+              if (sub != null)
+                synchronized (activeSubscriptions) {
+                  activeSubscriptions.add(sub);
+                }
+              return sub;
+            });
   }
 
   public static CompletableFuture<StompSession.Subscription> subscribeToNotifications(
       Consumer<org.tamtamcatworks.auction.shared.response.NotificationResponse> onNotification) {
-    return ensureWebSocketConnected().thenApply(ws -> {
-      StompSession.Subscription sub = ws.subscribeToNotifications(onNotification);
-      if (sub != null) synchronized (activeSubscriptions) { activeSubscriptions.add(sub); }
-      return sub;
-    });
+    return ensureWebSocketConnected()
+        .thenApply(
+            ws -> {
+              StompSession.Subscription sub = ws.subscribeToNotifications(onNotification);
+              if (sub != null)
+                synchronized (activeSubscriptions) {
+                  activeSubscriptions.add(sub);
+                }
+              return sub;
+            });
   }
 
   public static synchronized void unsubscribe(StompSession.Subscription sub) {
@@ -193,13 +209,19 @@ public class SessionManager {
   private static synchronized void disconnectWebSocket() {
     // Unsubscribe any remaining subscriptions, then disconnect the client.
     for (StompSession.Subscription s : List.copyOf(activeSubscriptions)) {
-      try { s.unsubscribe(); } catch (Exception ignored) {}
+      try {
+        s.unsubscribe();
+      } catch (Exception ignored) {
+      }
     }
     activeSubscriptions.clear();
     userStateSubscription = null;
 
     if (webSocketClient != null) {
-      try { webSocketClient.disconnect(); } catch (Exception ignored) {}
+      try {
+        webSocketClient.disconnect();
+      } catch (Exception ignored) {
+      }
       webSocketClient = null;
     }
     webSocketClientFuture = null;
@@ -209,16 +231,13 @@ public class SessionManager {
 
     var user = getCurrentUser();
 
-    return user != null
-            && user.isAdmin();
+    return user != null && user.isAdmin();
   }
 
   public static boolean hasPermission(String permission) {
 
     var user = getCurrentUser();
 
-    return user != null
-            && user.permissions() != null
-            && user.permissions().contains(permission);
+    return user != null && user.permissions() != null && user.permissions().contains(permission);
   }
 }

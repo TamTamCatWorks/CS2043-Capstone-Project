@@ -34,23 +34,17 @@ import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 @ExtendWith(MockitoExtension.class)
 class AuctionServiceTest {
 
-  @Mock
-  private AuctionRepository auctionRepository;
+  @Mock private AuctionRepository auctionRepository;
 
-  @Mock
-  private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-  @Mock
-  private ItemService itemService;
+  @Mock private ItemService itemService;
 
-  @Mock
-  private AuctionMapper auctionMapper;
+  @Mock private AuctionMapper auctionMapper;
 
-  @Mock
-  private UserMapper userMapper;
+  @Mock private UserMapper userMapper;
 
-  @Mock
-  private ApplicationEventPublisher eventPublisher;
+  @Mock private ApplicationEventPublisher eventPublisher;
 
   private AuctionService auctionService;
 
@@ -60,14 +54,37 @@ class AuctionServiceTest {
 
   @BeforeEach
   void setUp() {
-    auctionService = new AuctionService(
-        auctionRepository, userRepository, itemService,
-        auctionMapper, userMapper, eventPublisher
-    );
+    auctionService =
+        new AuctionService(
+            auctionRepository,
+            userRepository,
+            itemService,
+            auctionMapper,
+            userMapper,
+            eventPublisher);
 
     seller = new User("seller", "seller@example.com", "pw", "John Seller", 1000.0);
-    item = new Art("Starry Paint", "Painting style replica", 200.0, ItemCondition.GOOD, "img1", seller, "Vincent", 2024, "Oil", "50x50", false);
-    auction = new Auction("Rare Art Masterpiece", seller, item, 200.0, LocalDateTime.now(), LocalDateTime.now().plusDays(2));
+    item =
+        new Art(
+            "Starry Paint",
+            "Painting style replica",
+            200.0,
+            ItemCondition.GOOD,
+            "img1",
+            seller,
+            "Vincent",
+            2024,
+            "Oil",
+            "50x50",
+            false);
+    auction =
+        new Auction(
+            "Rare Art Masterpiece",
+            seller,
+            item,
+            200.0,
+            LocalDateTime.now(),
+            LocalDateTime.now().plusDays(2));
   }
 
   @Test
@@ -76,7 +93,14 @@ class AuctionServiceTest {
     when(itemService.findById("item123")).thenReturn(item);
     when(auctionRepository.save(any(Auction.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    Auction created = auctionService.create("seller123", "item123", "Rare Art Masterpiece", 200.0, LocalDateTime.now(), LocalDateTime.now().plusDays(2));
+    Auction created =
+        auctionService.create(
+            "seller123",
+            "item123",
+            "Rare Art Masterpiece",
+            200.0,
+            LocalDateTime.now(),
+            LocalDateTime.now().plusDays(2));
     assertNotNull(created);
     assertEquals("Rare Art Masterpiece", created.getTitle());
     assertEquals(200.0, created.getStartingPrice());
@@ -138,8 +162,9 @@ class AuctionServiceTest {
   @Test
   void testSearchResponses() {
     when(auctionRepository.search("Art", AuctionStatus.ACTIVE)).thenReturn(List.of(auction));
-    
-    List<AuctionResponse> results = auctionService.searchResponses("Art", AuctionStatus.ACTIVE, "Art");
+
+    List<AuctionResponse> results =
+        auctionService.searchResponses("Art", AuctionStatus.ACTIVE, "Art");
     assertNotNull(results);
   }
 }

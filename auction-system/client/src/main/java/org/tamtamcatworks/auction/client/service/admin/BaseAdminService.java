@@ -2,63 +2,35 @@ package org.tamtamcatworks.auction.client.service.admin;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.client.RestClient;
-
 import org.tamtamcatworks.auction.client.ApiClient;
 import org.tamtamcatworks.auction.client.SessionManager;
 
 public abstract class BaseAdminService {
 
-    protected final ApiClient apiClient =
-                        SessionManager.getApiClient();
+  protected final ApiClient apiClient = SessionManager.getApiClient();
 
-    protected RestClient client() {
+  protected RestClient client() {
 
-        return apiClient.client();
-    }
+    return apiClient.client();
+  }
 
-    protected <T> T get(
-            String uri,
-            Class<T> responseType
-    ) {
+  protected <T> T get(String uri, Class<T> responseType) {
 
-        return client()
-                .get()
-                .uri(uri)
-                .retrieve()
-                .body(responseType);
-    }
+    return client().get().uri(uri).retrieve().body(responseType);
+  }
 
-    protected <T> T get(
-            String uri,
-            ParameterizedTypeReference<T> type
-    ) {
+  protected <T> T get(String uri, ParameterizedTypeReference<T> type) {
 
-        return client()
-                .get()
-                .uri(uri)
-                .retrieve()
-                .body(type);
-    }
+    return client().get().uri(uri).retrieve().body(type);
+  }
 
-    protected void patch(
-            String uri
-    ) {
+  protected void patch(String uri) {
 
-        client()
-                .patch()
-                .uri(uri)
-                .retrieve()
-                .toBodilessEntity();
-    }
+    client().patch().uri(uri).retrieve().toBodilessEntity();
+  }
 
-    protected void delete(
-            String uri
-    ) {
+  protected void delete(String uri) {
 
-        client()
-                .delete()
-                .uri(uri)
-                .retrieve()
-                .toBodilessEntity();
-    }
+    client().delete().uri(uri).retrieve().toBodilessEntity();
+  }
 }

@@ -11,19 +11,15 @@ import org.tamtamcatworks.auction.shared.response.BidResponse;
 @Mapper(componentModel = "spring")
 public interface BidMapper {
 
-    default BidTransaction toEntity(BidRequest request, Auction auction, User bidder) {
-        return new BidTransaction(
-            auction,
-            bidder,
-            request.amount(),
-            BidTransaction.BidType.valueOf(request.bidType())
-        );
-    }
+  default BidTransaction toEntity(BidRequest request, Auction auction, User bidder) {
+    return new BidTransaction(
+        auction, bidder, request.amount(), BidTransaction.BidType.valueOf(request.bidType()));
+  }
 
-    @Mapping(target = "auctionId", source = "auction.id")
-    @Mapping(target = "bidderId", source = "bidder.id")
-    @Mapping(target = "bidderName", source = "bidder.fullName")
-    @Mapping(target = "bidType", expression = "java(tx.getBidType().name())")
-    @Mapping(target = "createdAt", source = "creationDate")
-    BidResponse toResponse(BidTransaction tx);
+  @Mapping(target = "auctionId", source = "auction.id")
+  @Mapping(target = "bidderId", source = "bidder.id")
+  @Mapping(target = "bidderName", source = "bidder.fullName")
+  @Mapping(target = "bidType", expression = "java(tx.getBidType().name())")
+  @Mapping(target = "createdAt", source = "creationDate")
+  BidResponse toResponse(BidTransaction tx);
 }

@@ -6,12 +6,10 @@ import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
 
 /**
- * Fluent helper for loading an FXML view and injecting it into a
- * {@link StackPane} slot.
+ * Fluent helper for loading an FXML view and injecting it into a {@link StackPane} slot.
  *
- * <p>Eliminates the private {@code loadView(String)} method that was
- * copy-pasted across {@code DashboardController} and
- * {@code HomeViewController}.
+ * <p>Eliminates the private {@code loadView(String)} method that was copy-pasted across {@code
+ * DashboardController} and {@code HomeViewController}.
  *
  * <pre>{@code
  * // Before (repeated in every controller):
@@ -46,11 +44,10 @@ public final class ViewLoader {
   }
 
   /**
-   * Load the FXML at the given classpath resource path and inject it into the
-   * bound target pane, replacing any existing children.
+   * Load the FXML at the given classpath resource path and inject it into the bound target pane,
+   * replacing any existing children.
    *
-   * @param fxmlPath absolute classpath resource path
-   *                 (e.g. {@code "/fxml/dashboard/home.fxml"})
+   * @param fxmlPath absolute classpath resource path (e.g. {@code "/fxml/dashboard/home.fxml"})
    * @throws RuntimeException if the FXML cannot be loaded
    */
   public void load(String fxmlPath) {
@@ -64,10 +61,10 @@ public final class ViewLoader {
   }
 
   /**
-   * Load the FXML and return the controller instance for further
-   * configuration before the view is displayed.
+   * Load the FXML and return the controller instance for further configuration before the view is
+   * displayed.
    *
-   * @param <C>      controller type
+   * @param <C> controller type
    * @param fxmlPath absolute classpath resource path
    * @return the controller associated with the loaded FXML
    * @throws RuntimeException if the FXML cannot be loaded

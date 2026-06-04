@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,42 +28,45 @@ import org.tamtamcatworks.auction.shared.response.UserResponse;
 @AutoConfigureDataJpa
 class UserControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-    
-    @Autowired
-    private ObjectMapper objectMapper;
+  @Autowired private MockMvc mockMvc;
 
-    @MockBean
-    private UserService userService;
+  @Autowired private ObjectMapper objectMapper;
 
-    @MockBean
-    private AuthenticationManager authenticationManager;
+  @MockBean private UserService userService;
 
-    @MockBean
-    private SecurityContextRepository securityContextRepository;
+  @MockBean private AuthenticationManager authenticationManager;
 
-    @MockBean
-    private UserDetailsService userDetailsService; // needed for security context if loaded
+  @MockBean private SecurityContextRepository securityContextRepository;
 
-    @Test
-    void testRegisterUserEndpoint() throws Exception {
-        RegisterRequest req = new RegisterRequest("alice", "alice@example.com", "pass123", "Alice Smith");
-        UserResponse resp = new UserResponse("user123", "alice", "alice@example.com", "Alice Smith", 0.0, 0.0, true, false, null);
-        when(userService.registerByRequest(any(RegisterRequest.class))).thenReturn(resp);
-        mockMvc.perform(post("/users/register")
+  @MockBean private UserDetailsService userDetailsService; // needed for security context if loaded
+
+  @Test
+  void testRegisterUserEndpoint() throws Exception {
+    RegisterRequest req =
+        new RegisterRequest("alice", "alice@example.com", "pass123", "Alice Smith");
+    UserResponse resp =
+        new UserResponse(
+            "user123", "alice", "alice@example.com", "Alice Smith", 0.0, 0.0, true, false, null);
+    when(userService.registerByRequest(any(RegisterRequest.class))).thenReturn(resp);
+    mockMvc
+        .perform(
+            post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value("user123"))
-                .andExpect(jsonPath("$.username").value("alice"));
-    }
-    @Test
-    void testGetUserEndpoint() throws Exception {
-        UserResponse resp = new UserResponse("user123", "alice", "alice@example.com", "Alice Smith", 100.0, 0.0, true, false, null);
-        when(userService.findResponseById("user123")).thenReturn(resp);
-        mockMvc.perform(get("/users/user123"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.balance").value(100.0));
-    }
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.id").value("user123"))
+        .andExpect(jsonPath("$.username").value("alice"));
+  }
+
+  @Test
+  void testGetUserEndpoint() throws Exception {
+    UserResponse resp =
+        new UserResponse(
+            "user123", "alice", "alice@example.com", "Alice Smith", 100.0, 0.0, true, false, null);
+    when(userService.findResponseById("user123")).thenReturn(resp);
+    mockMvc
+        .perform(get("/users/user123"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.balance").value(100.0));
+  }
 }

@@ -5,24 +5,15 @@ import javafx.scene.layout.StackPane;
 
 public final class UiStateHelper {
 
-    private UiStateHelper() {}
+  private UiStateHelper() {}
 
-    public static void showError(
-            StackPane container,
-            String message
-    ) {
+  public static void showError(StackPane container, String message) {
 
-        container.getChildren().setAll(
-                new Label(message)
-        );
-    }
+    container.getChildren().setAll(new Label(message));
+  }
 
-    public static void showLoading(
-            StackPane container
-    ) {
+  public static void showLoading(StackPane container) {
 
-        container.getChildren().setAll(
-                new Label("Loading...")
-        );
-    }
+    container.getChildren().setAll(new Label("Loading..."));
+  }
 }

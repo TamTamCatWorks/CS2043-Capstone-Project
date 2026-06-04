@@ -55,10 +55,9 @@ final class VehicleDetailsForm extends AbstractItemDetailsForm {
     String fuelType = requireText(fuelTypeField);
 
     int year = requireInt(yearStr, "Year must be a valid integer.");
-    int mileage = requireNonNegativeInt(
-        mileageStr,
-        "Mileage must be a valid integer.",
-        "Mileage cannot be negative.");
+    int mileage =
+        requireNonNegativeInt(
+            mileageStr, "Mileage must be a valid integer.", "Mileage cannot be negative.");
 
     Map<String, Object> details = new HashMap<>();
     details.put("make", make);

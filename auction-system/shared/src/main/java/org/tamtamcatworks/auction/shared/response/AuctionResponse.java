@@ -20,6 +20,4 @@ public record AuctionResponse(
     String imageUrl,
     String itemDescription,
     String itemType,
-    String specificInfo
-) {
-}
+    String specificInfo) {}

@@ -5,9 +5,8 @@ import javafx.scene.control.Button;
 /**
  * Manages tab-chip selection state for a fixed set of {@link Button}s.
  *
- * <p>Eliminates the {@code applySelected(Button, boolean)} + {@code
- * setXxxSelected(Button)} pattern that was copy-pasted across
- * {@code DashboardController} and {@code HomeViewController}.
+ * <p>Eliminates the {@code applySelected(Button, boolean)} + {@code setXxxSelected(Button)} pattern
+ * that was copy-pasted across {@code DashboardController} and {@code HomeViewController}.
  *
  * <pre>{@code
  * // Create once in initialize():
@@ -27,7 +26,7 @@ public final class TabChipBar {
    * Create a bar managing the given buttons.
    *
    * @param selectedStyleClass CSS class applied to the currently selected button
-   * @param buttons            all buttons in the bar (order does not matter)
+   * @param buttons all buttons in the bar (order does not matter)
    */
   public TabChipBar(String selectedStyleClass, Button... buttons) {
     this.selectedStyleClass = selectedStyleClass;
@@ -35,8 +34,8 @@ public final class TabChipBar {
   }
 
   /**
-   * Mark {@code selected} as active and remove the active class from all
-   * others. Safe to call if {@code selected} is not in the original button set.
+   * Mark {@code selected} as active and remove the active class from all others. Safe to call if
+   * {@code selected} is not in the original button set.
    *
    * @param selected the button to activate
    */

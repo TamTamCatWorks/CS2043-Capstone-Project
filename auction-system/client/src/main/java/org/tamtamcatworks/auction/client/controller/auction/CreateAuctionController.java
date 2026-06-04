@@ -1,12 +1,12 @@
 package org.tamtamcatworks.auction.client.controller.auction;
 
+import com.dlsc.gemsfx.TimePicker;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
-import com.dlsc.gemsfx.TimePicker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -65,14 +65,16 @@ public class CreateAuctionController extends BaseController {
   public void initialize() {
     // Only add item types supported by backend's ItemType enum
     itemTypeCombo.getItems().addAll("Art", "Electronics", "Vehicle", "Other");
-    conditionCombo.getItems().addAll(
-        "New", "Like New", "Excellent", "Good", "Fair", "Poor"
-    );
+    conditionCombo.getItems().addAll("New", "Like New", "Excellent", "Good", "Fair", "Poor");
     durationDaysCombo.getItems().addAll(1, 3, 5, 7, 10);
     durationDaysCombo.setValue(7);
-    itemTypeCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-      handleItemTypeChange(newVal);
-    });
+    itemTypeCombo
+        .getSelectionModel()
+        .selectedItemProperty()
+        .addListener(
+            (obs, oldVal, newVal) -> {
+              handleItemTypeChange(newVal);
+            });
     messageLabel.setVisible(false);
     messageLabel.setManaged(false);
     progressIndicator.setVisible(false);
@@ -82,9 +84,10 @@ public class CreateAuctionController extends BaseController {
   private void handleChooseImage() {
     FileChooser fileChooser = new FileChooser();
     fileChooser.setTitle("Select Item Image");
-    fileChooser.getExtensionFilters().addAll(
-        new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
-    );
+    fileChooser
+        .getExtensionFilters()
+        .addAll(
+            new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif"));
     File file = fileChooser.showOpenDialog(titleField.getScene().getWindow());
     if (file != null) {
       selectedImageFile = file;
@@ -160,41 +163,54 @@ public class CreateAuctionController extends BaseController {
     setLoading(true);
     hideMessage();
 
-    String sellerId = SessionManager.getCurrentUser() != null
-        ? SessionManager.getCurrentUser().id() : "";
+    String sellerId =
+        SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().id() : "";
 
-    AsyncTask.<AuctionResponse>run(() -> {
-          String uploadedUrl = api.uploadImage(selectedImageFile);
-          if (uploadedUrl == null) {
-            throw new RuntimeException("Image upload failed");
-          }
+    AsyncTask.<AuctionResponse>run(
+            () -> {
+              String uploadedUrl = api.uploadImage(selectedImageFile);
+              if (uploadedUrl == null) {
+                throw new RuntimeException("Image upload failed");
+              }
 
-          ItemRequest itemRequest = new ItemRequest(
-              itemType, itemName, itemDesc, startingPrice,
-              condition, sellerId, uploadedUrl, detailsMap
-          );
+              ItemRequest itemRequest =
+                  new ItemRequest(
+                      itemType,
+                      itemName,
+                      itemDesc,
+                      startingPrice,
+                      condition,
+                      sellerId,
+                      uploadedUrl,
+                      detailsMap);
 
-          CreateAuctionRequest request = new CreateAuctionRequest(
-              title, itemRequest, startTime, endTime
-          );
+              CreateAuctionRequest request =
+                  new CreateAuctionRequest(title, itemRequest, startTime, endTime);
 
-          return api.createAuctionWithItem(request);
-        })
-        .onSuccess(result -> {
-          setLoading(false);
-          if (result != null) {
-            showSuccess(messageLabel, "Auction created successfully!");
-            javafx.application.Platform.runLater(() -> {
-              Navigation.setContextData(result.id());
-              Navigation.navigateTo("/fxml/auction-detail.fxml");
-            });
-          }
-        })
-        .onFailure(ex -> {
-          setLoading(false);
-          showError(messageLabel, "Failed to create auction: "
-              + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
-        })
+              return api.createAuctionWithItem(request);
+            })
+        .onSuccess(
+            result -> {
+              setLoading(false);
+              if (result != null) {
+                showSuccess(messageLabel, "Auction created successfully!");
+                javafx.application.Platform.runLater(
+                    () -> {
+                      Navigation.setContextData(result.id());
+                      Navigation.navigateTo("/fxml/auction-detail.fxml");
+                    });
+              }
+            })
+        .onFailure(
+            ex -> {
+              setLoading(false);
+              showError(
+                  messageLabel,
+                  "Failed to create auction: "
+                      + (ex != null && ex.getMessage() != null
+                          ? ex.getMessage()
+                          : "Unknown error"));
+            })
         .start();
   }
 
@@ -207,7 +223,9 @@ public class CreateAuctionController extends BaseController {
     }
 
     if (selectedDate == null || selectedTime == null) {
-      showError(messageLabel, "Please select both start date and time, or leave both blank to start now.");
+      showError(
+          messageLabel,
+          "Please select both start date and time, or leave both blank to start now.");
       return null;
     }
 

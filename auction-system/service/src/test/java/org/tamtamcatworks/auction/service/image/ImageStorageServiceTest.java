@@ -25,11 +25,9 @@ import org.springframework.web.multipart.MultipartFile;
 @ExtendWith(MockitoExtension.class)
 class ImageStorageServiceTest {
 
-  @Mock
-  private MinioClient minioClient;
+  @Mock private MinioClient minioClient;
 
-  @Mock
-  private MultipartFile multipartFile;
+  @Mock private MultipartFile multipartFile;
 
   private ImageStorageService imageStorageService;
 
@@ -64,7 +62,7 @@ class ImageStorageServiceTest {
   @Test
   void testUploadImageSuccess() throws Exception {
     when(multipartFile.getOriginalFilename()).thenReturn("test.png");
-    when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[]{1, 2, 3}));
+    when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] {1, 2, 3}));
     when(multipartFile.getSize()).thenReturn(3L);
     when(multipartFile.getContentType()).thenReturn("image/png");
 

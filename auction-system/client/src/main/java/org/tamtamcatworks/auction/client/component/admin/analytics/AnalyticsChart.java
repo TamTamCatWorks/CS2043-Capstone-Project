@@ -5,49 +5,29 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 
-public class AnalyticsChart
-        extends LineChart<String, Number> {
+public class AnalyticsChart extends LineChart<String, Number> {
 
-    public AnalyticsChart() {
+  public AnalyticsChart() {
 
-        super(
+    super(new CategoryAxis(), new NumberAxis());
 
-                new CategoryAxis(),
-                new NumberAxis()
-        );
+    setAnimated(false);
 
-        setAnimated(false);
+    setLegendVisible(false);
 
-        setLegendVisible(false);
+    setTitle("Analytics");
 
-        setTitle("Analytics");
+    getStyleClass().add("analytics-chart");
+  }
 
-        getStyleClass().add(
-                "analytics-chart"
-        );
-    }
+  public void addSeries(String name, java.util.Map<String, Number> data) {
 
-    public void addSeries(
-            String name,
-            java.util.Map<String, Number> data
-    ) {
+    XYChart.Series<String, Number> series = new XYChart.Series<>();
 
-        XYChart.Series<String, Number> series =
-                new XYChart.Series<>();
+    series.setName(name);
 
-        series.setName(name);
+    data.forEach((key, value) -> series.getData().add(new XYChart.Data<>(key, value)));
 
-        data.forEach((key, value) ->
-
-                series.getData().add(
-
-                        new XYChart.Data<>(
-                                key,
-                                value
-                        )
-                )
-        );
-
-        getData().add(series);
-    }
+    getData().add(series);
+  }
 }

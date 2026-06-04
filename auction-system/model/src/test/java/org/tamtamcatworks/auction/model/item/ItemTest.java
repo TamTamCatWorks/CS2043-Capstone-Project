@@ -5,13 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.tamtamcatworks.auction.model.user.User;
 
-/**
- * Unit tests for Item entity and its subclasses (Art, Electronics, Vehicle, Other).
- */
+/** Unit tests for Item entity and its subclasses (Art, Electronics, Vehicle, Other). */
 public class ItemTest {
 
   private User createTestSeller() {
@@ -29,7 +26,9 @@ public class ItemTest {
     User seller = createTestSeller();
 
     // Verify successful creation of a concrete subclass (Other)
-    Other item = new Other("Item Name", "Item Description", 100.0, ItemCondition.NEW, "http://img.url", seller);
+    Other item =
+        new Other(
+            "Item Name", "Item Description", 100.0, ItemCondition.NEW, "http://img.url", seller);
     assertEquals("Item Name", item.getName());
     assertEquals("Item Description", item.getDescription());
     assertEquals(100.0, item.getStartingPrice());
@@ -39,26 +38,33 @@ public class ItemTest {
     assertNotNull(item.getListedAt());
 
     // Validate null/empty name
-    assertThrows(IllegalArgumentException.class, () ->
-        new Other(null, "Desc", 100.0, ItemCondition.NEW, "img", seller));
-    assertThrows(IllegalArgumentException.class, () ->
-        new Other("   ", "Desc", 100.0, ItemCondition.NEW, "img", seller));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Other(null, "Desc", 100.0, ItemCondition.NEW, "img", seller));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Other("   ", "Desc", 100.0, ItemCondition.NEW, "img", seller));
 
     // Validate startingPrice <= 0
-    assertThrows(IllegalArgumentException.class, () ->
-        new Other("Name", "Desc", 0.0, ItemCondition.NEW, "img", seller));
-    assertThrows(IllegalArgumentException.class, () ->
-        new Other("Name", "Desc", -5.0, ItemCondition.NEW, "img", seller));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Other("Name", "Desc", 0.0, ItemCondition.NEW, "img", seller));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Other("Name", "Desc", -5.0, ItemCondition.NEW, "img", seller));
 
     // Validate condition cannot be null
-    assertThrows(IllegalArgumentException.class, () ->
-        new Other("Name", "Desc", 100.0, null, "img", seller));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Other("Name", "Desc", 100.0, null, "img", seller));
 
     // Validate image URL cannot be null/empty
-    assertThrows(IllegalArgumentException.class, () ->
-        new Other("Name", "Desc", 100.0, ItemCondition.NEW, null, seller));
-    assertThrows(IllegalArgumentException.class, () ->
-        new Other("Name", "Desc", 100.0, ItemCondition.NEW, "   ", seller));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Other("Name", "Desc", 100.0, ItemCondition.NEW, null, seller));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new Other("Name", "Desc", 100.0, ItemCondition.NEW, "   ", seller));
   }
 
   @Test
@@ -90,8 +96,8 @@ public class ItemTest {
 
     // PrePersist lifecycle test
     Other itemNoListedAt = new Other() {
-      // anonymous concrete class to invoke prePersist
-    };
+          // anonymous concrete class to invoke prePersist
+        };
     itemNoListedAt.prePersist();
     assertNotNull(itemNoListedAt.getListedAt());
   }
@@ -99,8 +105,19 @@ public class ItemTest {
   @Test
   public void testArtSubclass() {
     User seller = createTestSeller();
-    Art art = new Art("Mona Lisa", "Painting", 1000000.0, ItemCondition.LIKE_NEW, "img", seller,
-        "Da Vinci", 1503, "Oil", "77x53cm", true);
+    Art art =
+        new Art(
+            "Mona Lisa",
+            "Painting",
+            1000000.0,
+            ItemCondition.LIKE_NEW,
+            "img",
+            seller,
+            "Da Vinci",
+            1503,
+            "Oil",
+            "77x53cm",
+            true);
 
     assertEquals("Da Vinci", art.getArtist());
     assertEquals(1503, art.getYearCreated());
@@ -115,17 +132,13 @@ public class ItemTest {
     assertTrue(info.contains("Có chứng chỉ xác thực"));
 
     // Validation: artist blank
-    assertThrows(IllegalArgumentException.class, () ->
-        art.setArtist(""));
+    assertThrows(IllegalArgumentException.class, () -> art.setArtist(""));
     // Validation: yearCreated <= 0
-    assertThrows(IllegalArgumentException.class, () ->
-        art.setYearCreated(0));
+    assertThrows(IllegalArgumentException.class, () -> art.setYearCreated(0));
     // Validation: medium blank
-    assertThrows(IllegalArgumentException.class, () ->
-        art.setMedium(" "));
+    assertThrows(IllegalArgumentException.class, () -> art.setMedium(" "));
     // Validation: dimensions blank
-    assertThrows(IllegalArgumentException.class, () ->
-        art.setDimensions(null));
+    assertThrows(IllegalArgumentException.class, () -> art.setDimensions(null));
 
     art.setHasCertificate(false);
     assertTrue(art.getSpecificInfo().contains("Không có chứng chỉ"));
@@ -136,8 +149,17 @@ public class ItemTest {
   @Test
   public void testElectronicsSubclass() {
     User seller = createTestSeller();
-    Electronics phone = new Electronics("iPhone 15", "Apple smartphone", 999.0, ItemCondition.NEW,
-        "img", seller, "Apple", "15 Pro", 12);
+    Electronics phone =
+        new Electronics(
+            "iPhone 15",
+            "Apple smartphone",
+            999.0,
+            ItemCondition.NEW,
+            "img",
+            seller,
+            "Apple",
+            "15 Pro",
+            12);
 
     assertEquals("Apple", phone.getBrand());
     assertEquals("15 Pro", phone.getModel());
@@ -159,8 +181,20 @@ public class ItemTest {
   @Test
   public void testVehicleSubclass() {
     User seller = createTestSeller();
-    Vehicle car = new Vehicle("Tesla Model 3", "Electric sedan", 35000.0, ItemCondition.GOOD, "img",
-        seller, "Tesla", "Model 3", 2022, 15000, "Red", "Electric");
+    Vehicle car =
+        new Vehicle(
+            "Tesla Model 3",
+            "Electric sedan",
+            35000.0,
+            ItemCondition.GOOD,
+            "img",
+            seller,
+            "Tesla",
+            "Model 3",
+            2022,
+            15000,
+            "Red",
+            "Electric");
 
     assertEquals("Tesla", car.getMake());
     assertEquals("Model 3", car.getModel());

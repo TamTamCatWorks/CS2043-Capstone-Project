@@ -1,5 +1,6 @@
 package org.tamtamcatworks.auction.client.controller.shell;
 
+import java.util.List;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -15,18 +16,15 @@ import org.tamtamcatworks.auction.client.ViewLoader;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
-import java.util.List;
-
 /**
  * Controller for the profile-style dashboard.
  *
- * <p>Left column: profile card with name, balance and navigation.
- * Right column: dynamic content area loaded via {@link ViewLoader}.
+ * <p>Left column: profile card with name, balance and navigation. Right column: dynamic content
+ * area loaded via {@link ViewLoader}.
  *
- * <p>Balance labels update automatically whenever
- * {@link SessionManager#setCurrentUser(UserResponse)} is called from any
- * controller (e.g. after a top-up), via a listener on the reactive
- * {@link SessionManager#currentUserProperty()}.
+ * <p>Balance labels update automatically whenever {@link
+ * SessionManager#setCurrentUser(UserResponse)} is called from any controller (e.g. after a top-up),
+ * via a listener on the reactive {@link SessionManager#currentUserProperty()}.
  */
 @Route(fxml = "/fxml/dashboard.fxml", layout = Route.DASHBOARD_LAYOUT)
 public class DashboardController {
@@ -62,18 +60,21 @@ public class DashboardController {
       return;
     }
 
-    menuTabs = new TabChipBar("profile-tab-chip-selected",
-        menuHomeButton, menuNotificationsButton, menuTopUpButton);
+    menuTabs =
+        new TabChipBar(
+            "profile-tab-chip-selected", menuHomeButton, menuNotificationsButton, menuTopUpButton);
 
     UserResponse user = SessionManager.getCurrentUser();
     populateProfile(user);
 
     // React to user updates from any source, including websocket-driven state changes.
-    SessionManager.currentUserProperty().addListener((obs, old, updated) -> {
-      if (updated != null) {
-        populateProfile(updated);
-      }
-    });
+    SessionManager.currentUserProperty()
+        .addListener(
+            (obs, old, updated) -> {
+              if (updated != null) {
+                populateProfile(updated);
+              }
+            });
 
     // Wire left menu buttons
     menuHomeButton.setOnAction(e -> handleMenuHome());
@@ -83,9 +84,10 @@ public class DashboardController {
     // Honor pending dashboard view request (e.g. from notification menu)
     String pending = NavigationState.getDashboardViewPath();
     if (pending != null && !pending.isBlank()) {
-      Button preselect = pending.endsWith("notifications.fxml") ? menuNotificationsButton
-          : pending.endsWith("topup.fxml") ? menuTopUpButton
-          : menuHomeButton;
+      Button preselect =
+          pending.endsWith("notifications.fxml")
+              ? menuNotificationsButton
+              : pending.endsWith("topup.fxml") ? menuTopUpButton : menuHomeButton;
       menuTabs.select(preselect);
       ViewLoader.into(rightContentArea).load(pending);
       NavigationState.setDashboardViewPath(null);
@@ -131,23 +133,34 @@ public class DashboardController {
 
   private void loadCounts(UserResponse user) {
     AsyncTask.<List<AuctionResponse>>run(SessionManager.getApiClient()::getAllAuctions)
-        .onSuccess(all -> {
-          int auctions = (int) all.stream()
-              .filter(a -> user.id().equals(a.sellerId())).count();
-          int bids = (int) all.stream().flatMap(a -> {
-            try {
-              return SessionManager.getApiClient().getBids(a.id()).stream();
-            } catch (Exception ex) {
-              return java.util.stream.Stream.empty();
-            }
-          }).filter(b -> user.id().equals(b.bidderId())).count();
-          int won = (int) all.stream()
-              .filter(a -> "CLOSED".equals(a.status())
-                  && user.id().equals(a.leadingBidderId())).count();
-          auctionCountLabel.setText(String.valueOf(auctions));
-          bidCountLabel.setText(String.valueOf(bids));
-          wonCountLabel.setText(String.valueOf(won));
-        })
+        .onSuccess(
+            all -> {
+              int auctions = (int) all.stream().filter(a -> user.id().equals(a.sellerId())).count();
+              int bids =
+                  (int)
+                      all.stream()
+                          .flatMap(
+                              a -> {
+                                try {
+                                  return SessionManager.getApiClient().getBids(a.id()).stream();
+                                } catch (Exception ex) {
+                                  return java.util.stream.Stream.empty();
+                                }
+                              })
+                          .filter(b -> user.id().equals(b.bidderId()))
+                          .count();
+              int won =
+                  (int)
+                      all.stream()
+                          .filter(
+                              a ->
+                                  "CLOSED".equals(a.status())
+                                      && user.id().equals(a.leadingBidderId()))
+                          .count();
+              auctionCountLabel.setText(String.valueOf(auctions));
+              bidCountLabel.setText(String.valueOf(bids));
+              wonCountLabel.setText(String.valueOf(won));
+            })
         .start();
   }
 
@@ -159,8 +172,8 @@ public class DashboardController {
     double hold = user.holdBalance();
     double total = available + hold;
     totalBalanceLabel.setText(String.format("Total: $%,.2f", total));
-    holdBalanceLabel.setText(String.format("On Hold: $%,.2f (%.0f%%)",
-        hold, total == 0 ? 0.0 : (hold / total) * 100.0));
+    holdBalanceLabel.setText(
+        String.format("On Hold: $%,.2f (%.0f%%)", hold, total == 0 ? 0.0 : (hold / total) * 100.0));
     availableBalanceLabel.setText(String.format("$%,.2f", available));
     double progress = (total == 0) ? 0.0 : (available / total);
     balanceProgressBar.setProgress(progress);

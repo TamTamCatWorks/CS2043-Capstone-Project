@@ -223,6 +223,46 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>2.43.0</version> <!-- Use the latest stable version -->
+          <configuration>
+              <java>
+                  <!-- Define the files to include/exclude -->
+                  <includes>
+                      <include>src/main/java/**/*.java</include>
+                      <include>src/test/java/**/*.java</include>
+                  </includes>
+                  
+                  <!-- Clean up imports -->
+                  <removeUnusedImports />
+                  <importOrder /> 
+                  
+                  <!-- Apply a specific code formatter style -->
+                  <googleJavaFormat>
+                      <version>1.17.0</version>
+                      <style>GOOGLE</style>
+                  </googleJavaFormat>
+                  
+                  <!-- Optional: If you use a custom Eclipse formatter configuration file -->
+                  <!--
+                  <eclipse>
+                      <file>${maven.multiModuleProjectDirectory}/config/eclipse-formatter.xml</file>
+                  </eclipse>
+                  -->
+              </java>
+          </configuration>
+          <executions>
+              <execution>
+                  <!-- Validates formatting during the compile phase -->
+                  <goals>
+                      <goal>check</goal>
+                  </goals>
+                  <phase>compile</phase>
+              </execution>
+          </executions>
+      </plugin>
     </plugins>
   </build>
   <modules>

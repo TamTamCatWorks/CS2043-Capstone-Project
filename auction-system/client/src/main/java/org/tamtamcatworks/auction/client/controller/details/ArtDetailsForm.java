@@ -35,7 +35,8 @@ final class ArtDetailsForm extends AbstractItemDetailsForm {
     }
     mediumField.setText((String) existingDetails.getOrDefault("medium", ""));
     dimensionsField.setText((String) existingDetails.getOrDefault("dimensions", ""));
-    hasCertificateCheckbox.setSelected((Boolean) existingDetails.getOrDefault("hasCertificate", false));
+    hasCertificateCheckbox.setSelected(
+        (Boolean) existingDetails.getOrDefault("hasCertificate", false));
   }
 
   @Override

@@ -5,43 +5,32 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 
-public class TableToolbar
-        extends HBox {
+public class TableToolbar extends HBox {
 
-    private final TextField searchField =
-            new TextField();
+  private final TextField searchField = new TextField();
 
-    private final Button refreshButton =
-            new Button("Refresh");
+  private final Button refreshButton = new Button("Refresh");
 
-    public TableToolbar() {
+  public TableToolbar() {
 
-        setSpacing(10);
+    setSpacing(10);
 
-        setAlignment(Pos.CENTER_LEFT);
+    setAlignment(Pos.CENTER_LEFT);
 
-        getStyleClass().add(
-                "table-toolbar"
-        );
+    getStyleClass().add("table-toolbar");
 
-        searchField.setPromptText(
-                "Search..."
-        );
+    searchField.setPromptText("Search...");
 
-        getChildren().addAll(
+    getChildren().addAll(searchField, refreshButton);
+  }
 
-                searchField,
-                refreshButton
-        );
-    }
+  public TextField getSearchField() {
 
-    public TextField getSearchField() {
+    return searchField;
+  }
 
-        return searchField;
-    }
+  public Button getRefreshButton() {
 
-    public Button getRefreshButton() {
-
-        return refreshButton;
-    }
+    return refreshButton;
+  }
 }

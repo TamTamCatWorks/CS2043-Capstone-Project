@@ -1,4 +1,5 @@
 package org.tamtamcatworks.auction.shared.response;
+
 import java.time.LocalDateTime;
 
 public record BidResponse(
@@ -8,6 +9,4 @@ public record BidResponse(
     String bidderName,
     double amount,
     String bidType,
-    LocalDateTime createdAt
-) {
-}
+    LocalDateTime createdAt) {}

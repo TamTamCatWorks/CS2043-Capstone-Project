@@ -5,28 +5,18 @@ import javafx.scene.control.ButtonType;
 
 public final class ConfirmDialog {
 
-    private ConfirmDialog() {}
+  private ConfirmDialog() {}
 
-    public static boolean show(
-            String title,
-            String message
-    ) {
+  public static boolean show(String title, String message) {
 
-        Alert alert =
-                new Alert(
-                        Alert.AlertType.CONFIRMATION
-                );
+    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 
-        alert.setTitle(title);
+    alert.setTitle(title);
 
-        alert.setHeaderText(null);
+    alert.setHeaderText(null);
 
-        alert.setContentText(message);
+    alert.setContentText(message);
 
-        return alert.showAndWait()
-
-                .filter(ButtonType.OK::equals)
-
-                .isPresent();
-    }
+    return alert.showAndWait().filter(ButtonType.OK::equals).isPresent();
+  }
 }

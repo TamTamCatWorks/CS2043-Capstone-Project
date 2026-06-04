@@ -1,4 +1,3 @@
 package org.tamtamcatworks.auction.shared.request;
 
-public record TopUpRequest(double amount) {
-}
+public record TopUpRequest(double amount) {}

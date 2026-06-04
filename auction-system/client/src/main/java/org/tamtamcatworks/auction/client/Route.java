@@ -8,9 +8,8 @@ import java.lang.annotation.Target;
 /**
  * Declares the FXML resource path and optional layout wrapper for a controller.
  *
- * <p>Register all route-annotated controllers via
- * {@link Navigation#registerAll(Class[])} once at application startup.
- * After that, {@link Navigation#navigateTo(String)} resolves layouts
+ * <p>Register all route-annotated controllers via {@link Navigation#registerAll(Class[])} once at
+ * application startup. After that, {@link Navigation#navigateTo(String)} resolves layouts
  * automatically without any string-matching code in {@code Navigation}.
  *
  * <pre>{@code
@@ -35,8 +34,8 @@ public @interface Route {
   String fxml();
 
   /**
-   * Layout FXML path. Use {@link #DASHBOARD_LAYOUT}, {@link #AUTH_LAYOUT},
-   * or {@link #NONE} (default).
+   * Layout FXML path. Use {@link #DASHBOARD_LAYOUT}, {@link #AUTH_LAYOUT}, or {@link #NONE}
+   * (default).
    */
   String layout() default NONE;
 }

@@ -4,37 +4,30 @@ import org.tamtamcatworks.auction.client.SessionManager;
 
 public final class AdminPermissionGuard {
 
-    private AdminPermissionGuard() {}
+  private AdminPermissionGuard() {}
 
-    public static boolean hasPermission(
-            AdminPermission permission
-    ) {
+  public static boolean hasPermission(AdminPermission permission) {
 
-        var user =
-                SessionManager.getCurrentUser();
+    var user = SessionManager.getCurrentUser();
 
-        if (user == null) {
-            return false;
-        }
-
-        if (!user.isAdmin()) {
-            return false;
-        }
-
-        return user.permissions()
-                .contains(permission.name());
+    if (user == null) {
+      return false;
     }
 
-    public static void requireAdmin() {
-
-        var user =
-                SessionManager.getCurrentUser();
-
-        if (user == null || !user.isAdmin()) {
-
-            throw new RuntimeException(
-                    "Admin access denied"
-            );
-        }
+    if (!user.isAdmin()) {
+      return false;
     }
+
+    return user.permissions().contains(permission.name());
+  }
+
+  public static void requireAdmin() {
+
+    var user = SessionManager.getCurrentUser();
+
+    if (user == null || !user.isAdmin()) {
+
+      throw new RuntimeException("Admin access denied");
+    }
+  }
 }

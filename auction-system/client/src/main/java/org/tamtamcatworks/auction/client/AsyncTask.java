@@ -15,17 +15,17 @@ import javafx.concurrent.Task;
  *     .start();
  * }</pre>
  *
- * <p>Both {@code onSuccess} and {@code onFailure} callbacks are always
- * invoked on the JavaFX Application Thread.
+ * <p>Both {@code onSuccess} and {@code onFailure} callbacks are always invoked on the JavaFX
+ * Application Thread.
  *
  * @param <T> the result type produced by the background callable
  */
 public final class AsyncTask<T> {
 
   private final Callable<T> work;
-  private Consumer<T> successHandler = result -> { };
-  private Consumer<Throwable> failureHandler = ex -> { };
-  private Runnable finallyHandler = () -> { };
+  private Consumer<T> successHandler = result -> {};
+  private Consumer<Throwable> failureHandler = ex -> {};
+  private Runnable finallyHandler = () -> {};
 
   private AsyncTask(Callable<T> work) {
     this.work = work;
@@ -34,7 +34,7 @@ public final class AsyncTask<T> {
   /**
    * Create a new {@code AsyncTask} from a background {@link Callable}.
    *
-   * @param <T>  result type
+   * @param <T> result type
    * @param work the background operation to run
    * @return a new {@code AsyncTask} (not yet started)
    */
@@ -43,8 +43,7 @@ public final class AsyncTask<T> {
   }
 
   /**
-   * Register a callback to be invoked (on the FX thread) when the task
-   * completes successfully.
+   * Register a callback to be invoked (on the FX thread) when the task completes successfully.
    *
    * @param handler consumer of the result value
    * @return {@code this} for chaining
@@ -55,8 +54,7 @@ public final class AsyncTask<T> {
   }
 
   /**
-   * Register a callback to be invoked (on the FX thread) when the task
-   * fails with an exception.
+   * Register a callback to be invoked (on the FX thread) when the task fails with an exception.
    *
    * @param handler consumer of the thrown exception
    * @return {@code this} for chaining
@@ -67,8 +65,8 @@ public final class AsyncTask<T> {
   }
 
   /**
-   * Register a callback to be invoked on the FX thread after either success
-   * or failure (like a {@code finally} block).
+   * Register a callback to be invoked on the FX thread after either success or failure (like a
+   * {@code finally} block).
    *
    * @param handler runnable to always execute
    * @return {@code this} for chaining
@@ -79,32 +77,39 @@ public final class AsyncTask<T> {
   }
 
   /**
-   * Start the background task on a new daemon thread.
-   * The returned {@link Task} can be used to cancel execution if needed.
+   * Start the background task on a new daemon thread. The returned {@link Task} can be used to
+   * cancel execution if needed.
    *
    * @return the underlying {@link Task} (already started)
    */
   public Task<T> start() {
-    Task<T> task = new Task<>() {
-      @Override
-      protected T call() throws Exception {
-        return work.call();
-      }
-    };
+    Task<T> task =
+        new Task<>() {
+          @Override
+          protected T call() throws Exception {
+            return work.call();
+          }
+        };
 
     final Consumer<T> onSuccess = successHandler;
     final Consumer<Throwable> onFailure = failureHandler;
     final Runnable always = finallyHandler;
 
-    task.setOnSucceeded(e -> Platform.runLater(() -> {
-      onSuccess.accept(task.getValue());
-      always.run();
-    }));
+    task.setOnSucceeded(
+        e ->
+            Platform.runLater(
+                () -> {
+                  onSuccess.accept(task.getValue());
+                  always.run();
+                }));
 
-    task.setOnFailed(e -> Platform.runLater(() -> {
-      onFailure.accept(task.getException());
-      always.run();
-    }));
+    task.setOnFailed(
+        e ->
+            Platform.runLater(
+                () -> {
+                  onFailure.accept(task.getException());
+                  always.run();
+                }));
 
     Thread thread = new Thread(task, "async-task");
     thread.setDaemon(true);

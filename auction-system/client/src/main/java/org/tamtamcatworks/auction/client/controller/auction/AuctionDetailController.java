@@ -18,12 +18,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.springframework.messaging.simp.stomp.StompSession;
 import org.tamtamcatworks.auction.client.AsyncTask;
 import org.tamtamcatworks.auction.client.Navigation;
 import org.tamtamcatworks.auction.client.Route;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.client.controller.BaseController;
-import org.springframework.messaging.simp.stomp.StompSession;
 import org.tamtamcatworks.auction.shared.request.AutoBidRequest;
 import org.tamtamcatworks.auction.shared.request.BidRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
@@ -106,47 +106,67 @@ public class AuctionDetailController extends BaseController {
   }
 
   private void setupWebSocket() {
-    SessionManager.subscribeToPrice(auctionId, priceUpdate -> {
-      javafx.application.Platform.runLater(() -> {
-        currentPriceLabel.setText(String.format("$%.2f", priceUpdate.newPrice()));
-        if (currentAuction != null) {
-          currentAuction = new AuctionResponse(
-              currentAuction.id(),
-              currentAuction.title(),
-              currentAuction.sellerId(),
-              currentAuction.sellerName(),
-              currentAuction.itemId(),
-              currentAuction.itemName(),
-              currentAuction.leadingBidderId(),
-              currentAuction.leadingBidderName(),
-              currentAuction.startingPrice(),
-              priceUpdate.newPrice(),
-              currentAuction.minimumIncrement(),
-              currentAuction.status(),
-              currentAuction.startTime(),
-              currentAuction.endTime(),
-              currentAuction.imageUrl(),
-              currentAuction.itemDescription(),
-              currentAuction.itemType(),
-              currentAuction.specificInfo()
-          );
-        }
-        loadAuctionDetail();
-      });
-    }).thenAccept(sub -> priceSubscription = sub)
-      .exceptionally(ex -> { System.err.println("WebSocket subscribe failed: " + (ex != null ? ex.getMessage() : "?")); return null; });
+    SessionManager.subscribeToPrice(
+            auctionId,
+            priceUpdate -> {
+              javafx.application.Platform.runLater(
+                  () -> {
+                    currentPriceLabel.setText(String.format("$%.2f", priceUpdate.newPrice()));
+                    if (currentAuction != null) {
+                      currentAuction =
+                          new AuctionResponse(
+                              currentAuction.id(),
+                              currentAuction.title(),
+                              currentAuction.sellerId(),
+                              currentAuction.sellerName(),
+                              currentAuction.itemId(),
+                              currentAuction.itemName(),
+                              currentAuction.leadingBidderId(),
+                              currentAuction.leadingBidderName(),
+                              currentAuction.startingPrice(),
+                              priceUpdate.newPrice(),
+                              currentAuction.minimumIncrement(),
+                              currentAuction.status(),
+                              currentAuction.startTime(),
+                              currentAuction.endTime(),
+                              currentAuction.imageUrl(),
+                              currentAuction.itemDescription(),
+                              currentAuction.itemType(),
+                              currentAuction.specificInfo());
+                    }
+                    loadAuctionDetail();
+                  });
+            })
+        .thenAccept(sub -> priceSubscription = sub)
+        .exceptionally(
+            ex -> {
+              System.err.println(
+                  "WebSocket subscribe failed: " + (ex != null ? ex.getMessage() : "?"));
+              return null;
+            });
 
-    SessionManager.subscribeToStatus(auctionId, statusUpdate -> {
-      javafx.application.Platform.runLater(this::loadAuctionDetail);
-    }).thenAccept(sub -> statusSubscription = sub)
-      .exceptionally(ex -> { System.err.println("WebSocket subscribe failed: " + (ex != null ? ex.getMessage() : "?")); return null; });
+    SessionManager.subscribeToStatus(
+            auctionId,
+            statusUpdate -> {
+              javafx.application.Platform.runLater(this::loadAuctionDetail);
+            })
+        .thenAccept(sub -> statusSubscription = sub)
+        .exceptionally(
+            ex -> {
+              System.err.println(
+                  "WebSocket subscribe failed: " + (ex != null ? ex.getMessage() : "?"));
+              return null;
+            });
 
     if (contentPane != null) {
-      contentPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
-        if (newScene == null) {
-          cleanupWebSocket();
-        }
-      });
+      contentPane
+          .sceneProperty()
+          .addListener(
+              (obs, oldScene, newScene) -> {
+                if (newScene == null) {
+                  cleanupWebSocket();
+                }
+              });
     }
   }
 
@@ -166,18 +186,24 @@ public class AuctionDetailController extends BaseController {
     hideError();
 
     AsyncTask.<AuctionResponse>run(() -> api.getAuction(auctionId))
-        .onSuccess(auction -> {
-          setLoading(false);
-          currentAuction = auction;
-          populateAuctionInfo(currentAuction);
-          loadBidHistory();
-          loadAutoBidState();
-        })
-        .onFailure(ex -> {
-          setLoading(false);
-          showError(errorLabel, "Failed to load auction: "
-              + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
-        })
+        .onSuccess(
+            auction -> {
+              setLoading(false);
+              currentAuction = auction;
+              populateAuctionInfo(currentAuction);
+              loadBidHistory();
+              loadAutoBidState();
+            })
+        .onFailure(
+            ex -> {
+              setLoading(false);
+              showError(
+                  errorLabel,
+                  "Failed to load auction: "
+                      + (ex != null && ex.getMessage() != null
+                          ? ex.getMessage()
+                          : "Unknown error"));
+            })
         .start();
   }
 
@@ -241,13 +267,14 @@ public class AuctionDetailController extends BaseController {
     // Status badge
     String status = auction.status() != null ? auction.status() : "PENDING";
     statusLabel.setText(status);
-    statusLabel.getStyleClass().removeAll(
-        "status-active", "status-pending", "status-closed", "status-cancelled");
+    statusLabel
+        .getStyleClass()
+        .removeAll("status-active", "status-pending", "status-closed", "status-cancelled");
     statusLabel.getStyleClass().add(getStatusClass(status));
 
     // Show bid form only for active auctions the user doesn't own
-    String currentUserId = SessionManager.getCurrentUser() != null
-        ? SessionManager.getCurrentUser().id() : null;
+    String currentUserId =
+        SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().id() : null;
     boolean isOwner = currentUserId != null && currentUserId.equals(auction.sellerId());
     boolean isAdmin = SessionManager.isAdmin();
     boolean isActive = "ACTIVE".equalsIgnoreCase(status);
@@ -280,26 +307,28 @@ public class AuctionDetailController extends BaseController {
 
   private void loadBidHistory() {
     AsyncTask.<List<BidResponse>>run(() -> api.getBids(auctionId))
-        .onSuccess(bids -> {
-          bidHistoryContainer.getChildren().clear();
-          if (bids == null || bids.isEmpty()) {
-            clearBidChart();
-            noBidsLabel.setVisible(true);
-            noBidsLabel.setManaged(true);
-          } else {
-            noBidsLabel.setVisible(false);
-            noBidsLabel.setManaged(false);
-            populateBidChart(bids);
-            for (BidResponse bid : bids) {
-              bidHistoryContainer.getChildren().add(createBidRow(bid));
-            }
-          }
-        })
-        .onFailure(ex -> {
-          noBidsLabel.setText("Could not load bid history");
-          noBidsLabel.setVisible(true);
-          noBidsLabel.setManaged(true);
-        })
+        .onSuccess(
+            bids -> {
+              bidHistoryContainer.getChildren().clear();
+              if (bids == null || bids.isEmpty()) {
+                clearBidChart();
+                noBidsLabel.setVisible(true);
+                noBidsLabel.setManaged(true);
+              } else {
+                noBidsLabel.setVisible(false);
+                noBidsLabel.setManaged(false);
+                populateBidChart(bids);
+                for (BidResponse bid : bids) {
+                  bidHistoryContainer.getChildren().add(createBidRow(bid));
+                }
+              }
+            })
+        .onFailure(
+            ex -> {
+              noBidsLabel.setText("Could not load bid history");
+              noBidsLabel.setVisible(true);
+              noBidsLabel.setManaged(true);
+            })
         .start();
   }
 
@@ -309,19 +338,22 @@ public class AuctionDetailController extends BaseController {
       return;
     }
 
-    String currentUserId = SessionManager.getCurrentUser() != null
-        ? SessionManager.getCurrentUser().id() : null;
-    boolean canManageAutoBid = currentUserId != null && !currentUserId.equals(currentAuction.sellerId())
-        && "ACTIVE".equalsIgnoreCase(currentAuction.status());
+    String currentUserId =
+        SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().id() : null;
+    boolean canManageAutoBid =
+        currentUserId != null
+            && !currentUserId.equals(currentAuction.sellerId())
+            && "ACTIVE".equalsIgnoreCase(currentAuction.status());
     if (!canManageAutoBid) {
       clearAutoBidState();
       return;
     }
 
     AsyncTask.<AutoBidResponse>run(() -> api.getAutoBid(auctionId))
-        .onSuccess(autoBid -> {
-          showAutoBidState(autoBid);
-        })
+        .onSuccess(
+            autoBid -> {
+              showAutoBidState(autoBid);
+            })
         .onFailure(ex -> clearAutoBidState())
         .start();
   }
@@ -423,8 +455,7 @@ public class AuctionDetailController extends BaseController {
     Label amountLabel = new Label(String.format("$%.2f", bid.amount()));
     amountLabel.getStyleClass().add("bid-amount");
 
-    Label timeLabel = new Label(
-        bid.createdAt() != null ? bid.createdAt().format(TIME_FMT) : "");
+    Label timeLabel = new Label(bid.createdAt() != null ? bid.createdAt().format(TIME_FMT) : "");
     timeLabel.getStyleClass().add("bid-time");
 
     row.getChildren().addAll(bidderLabel, amountLabel, timeLabel);
@@ -448,30 +479,35 @@ public class AuctionDetailController extends BaseController {
     }
 
     if (currentAuction != null && amount <= currentAuction.currentPrice()) {
-      showBidMessage(String.format("Bid must be higher than $%.2f", currentAuction.currentPrice()),
-          true);
+      showBidMessage(
+          String.format("Bid must be higher than $%.2f", currentAuction.currentPrice()), true);
       return;
     }
 
     placeBidBtn.setDisable(true);
     BidRequest request = new BidRequest(amount, "MANUAL");
 
-    AsyncTask.<UserResponse>run(() -> {
-          api.placeBid(auctionId, request);
-          return null;
-        })
-        .onSuccess(refreshedUser -> {
-          placeBidBtn.setDisable(false);
-          bidAmountField.clear();
-          showBidMessage("Bid placed successfully!", false);
-          // Refresh the auction detail to show updated price and bid history
-          loadAuctionDetail();
-        })
-        .onFailure(ex -> {
-          placeBidBtn.setDisable(false);
-          showBidMessage("Bid failed: "
-              + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"), true);
-        })
+    AsyncTask.<UserResponse>run(
+            () -> {
+              api.placeBid(auctionId, request);
+              return null;
+            })
+        .onSuccess(
+            refreshedUser -> {
+              placeBidBtn.setDisable(false);
+              bidAmountField.clear();
+              showBidMessage("Bid placed successfully!", false);
+              // Refresh the auction detail to show updated price and bid history
+              loadAuctionDetail();
+            })
+        .onFailure(
+            ex -> {
+              placeBidBtn.setDisable(false);
+              showBidMessage(
+                  "Bid failed: "
+                      + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"),
+                  true);
+            })
         .start();
   }
 
@@ -492,8 +528,9 @@ public class AuctionDetailController extends BaseController {
     }
 
     if (currentAuction != null && maxBid <= currentAuction.currentPrice()) {
-      showAutoBidMessage(String.format("Maximum bid must be higher than $%.2f",
-          currentAuction.currentPrice()), true);
+      showAutoBidMessage(
+          String.format("Maximum bid must be higher than $%.2f", currentAuction.currentPrice()),
+          true);
       return;
     }
 
@@ -501,17 +538,21 @@ public class AuctionDetailController extends BaseController {
     AutoBidRequest request = new AutoBidRequest(maxBid);
 
     AsyncTask.<AutoBidResponse>run(() -> api.registerAutoBid(auctionId, request))
-        .onSuccess(response -> {
-          autoBidBtn.setDisable(false);
-          autoBidMaxField.clear();
-          showAutoBidMessage("Auto-bid placed successfully!", false);
-          loadAuctionDetail();
-        })
-        .onFailure(ex -> {
-          autoBidBtn.setDisable(false);
-          showAutoBidMessage("Auto-bid failed: "
-              + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"), true);
-        })
+        .onSuccess(
+            response -> {
+              autoBidBtn.setDisable(false);
+              autoBidMaxField.clear();
+              showAutoBidMessage("Auto-bid placed successfully!", false);
+              loadAuctionDetail();
+            })
+        .onFailure(
+            ex -> {
+              autoBidBtn.setDisable(false);
+              showAutoBidMessage(
+                  "Auto-bid failed: "
+                      + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"),
+                  true);
+            })
         .start();
   }
 
@@ -519,22 +560,27 @@ public class AuctionDetailController extends BaseController {
   private void handleCancelAutoBid() {
     cancelAutoBidBtn.setDisable(true);
 
-    AsyncTask.<Void>run(() -> {
-          api.cancelAutoBid(auctionId);
-          return null;
-        })
-        .onSuccess(ignored -> {
-          cancelAutoBidBtn.setDisable(false);
-          autoBidMaxField.clear();
-          showAutoBidMessage("Auto-bid canceled successfully.", false);
-          clearAutoBidState();
-          loadAuctionDetail();
-        })
-        .onFailure(ex -> {
-          cancelAutoBidBtn.setDisable(false);
-          showAutoBidMessage("Failed to cancel auto-bid: "
-              + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"), true);
-        })
+    AsyncTask.<Void>run(
+            () -> {
+              api.cancelAutoBid(auctionId);
+              return null;
+            })
+        .onSuccess(
+            ignored -> {
+              cancelAutoBidBtn.setDisable(false);
+              autoBidMaxField.clear();
+              showAutoBidMessage("Auto-bid canceled successfully.", false);
+              clearAutoBidState();
+              loadAuctionDetail();
+            })
+        .onFailure(
+            ex -> {
+              cancelAutoBidBtn.setDisable(false);
+              showAutoBidMessage(
+                  "Failed to cancel auto-bid: "
+                      + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"),
+                  true);
+            })
         .start();
   }
 
@@ -551,10 +597,15 @@ public class AuctionDetailController extends BaseController {
   private void runAuctionAction(java.util.concurrent.Callable<AuctionResponse> action) {
     AsyncTask.<AuctionResponse>run(action)
         .onSuccess(res -> loadAuctionDetail())
-        .onFailure(ex -> {
-          showError(errorLabel, "Action failed: "
-              + (ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error"));
-        })
+        .onFailure(
+            ex -> {
+              showError(
+                  errorLabel,
+                  "Action failed: "
+                      + (ex != null && ex.getMessage() != null
+                          ? ex.getMessage()
+                          : "Unknown error"));
+            })
         .start();
   }
 

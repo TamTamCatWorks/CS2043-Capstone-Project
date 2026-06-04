@@ -9,17 +9,14 @@ import org.tamtamcatworks.auction.service.event.UserStateEvent;
 @Component
 public class UserStateBroadcastListener {
 
-    private final SimpMessagingTemplate messagingTemplate;
+  private final SimpMessagingTemplate messagingTemplate;
 
-    public UserStateBroadcastListener(SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
-    }
+  public UserStateBroadcastListener(SimpMessagingTemplate messagingTemplate) {
+    this.messagingTemplate = messagingTemplate;
+  }
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void onUserStateChanged(UserStateEvent event) {
-        messagingTemplate.convertAndSend(
-            "/topic/user-state/" + event.userId(),
-            event.user()
-        );
-    }
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  public void onUserStateChanged(UserStateEvent event) {
+    messagingTemplate.convertAndSend("/topic/user-state/" + event.userId(), event.user());
+  }
 }

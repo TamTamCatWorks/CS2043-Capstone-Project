@@ -1,17 +1,16 @@
 package org.tamtamcatworks.auction.client.service.admin;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class AdminAuditLogServiceTest {
 
-    private final AdminAuditLogService service =
-            new AdminAuditLogService();
+  private final AdminAuditLogService service = new AdminAuditLogService();
 
-    @Test
-    void serviceShouldBeCreated() {
+  @Test
+  void serviceShouldBeCreated() {
 
-        assertNotNull(service);
-    }
+    assertNotNull(service);
+  }
 }

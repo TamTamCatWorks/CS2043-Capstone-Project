@@ -6,14 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-/**
- * Unit tests for Notification and NotificationType.
- */
+/** Unit tests for Notification and NotificationType. */
 public class NotificationTest {
 
   @Test
   public void testNotification() {
-    Notification notif = new Notification("user-1", NotificationType.OUTBID, "You have been outbid!");
+    Notification notif =
+        new Notification("user-1", NotificationType.OUTBID, "You have been outbid!");
 
     assertEquals("user-1", notif.getUserId());
     assertEquals(NotificationType.OUTBID, notif.getType());

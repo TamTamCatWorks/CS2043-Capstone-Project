@@ -1,20 +1,14 @@
 package org.tamtamcatworks.auction.client.exception;
 
-public class AdminApiException
-        extends RuntimeException {
+public class AdminApiException extends RuntimeException {
 
-    public AdminApiException(
-            String message
-    ) {
+  public AdminApiException(String message) {
 
-        super(message);
-    }
+    super(message);
+  }
 
-    public AdminApiException(
-            String message,
-            Throwable cause
-    ) {
+  public AdminApiException(String message, Throwable cause) {
 
-        super(message, cause);
-    }
+    super(message, cause);
+  }
 }

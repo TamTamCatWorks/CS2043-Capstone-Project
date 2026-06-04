@@ -1,12 +1,11 @@
 package org.tamtamcatworks.auction.client.auth.admin;
 
 public enum AdminRole {
+  SUPER_ADMIN,
 
-    SUPER_ADMIN,
+  MODERATOR,
 
-    MODERATOR,
+  SUPPORT_ADMIN,
 
-    SUPPORT_ADMIN,
-
-    FINANCE_ADMIN
+  FINANCE_ADMIN
 }

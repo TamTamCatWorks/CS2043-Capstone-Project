@@ -12,11 +12,9 @@ import org.tamtamcatworks.auction.shared.response.UserResponse;
 /**
  * Controller for the balance top-up form.
  *
- * <p>After a successful top-up, simply calls
- * {@link SessionManager#setCurrentUser(UserResponse)} — the
- * {@code DashboardController} reacts via its
- * {@link SessionManager#currentUserProperty()} listener and updates the
- * balance labels automatically. No {@code scene.lookup()} required.
+ * <p>After a successful top-up, simply calls {@link SessionManager#setCurrentUser(UserResponse)} —
+ * the {@code DashboardController} reacts via its {@link SessionManager#currentUserProperty()}
+ * listener and updates the balance labels automatically. No {@code scene.lookup()} required.
  */
 public class TopUpViewController {
 
@@ -48,17 +46,21 @@ public class TopUpViewController {
     feedbackLabel.setVisible(false);
 
     AsyncTask.<UserResponse>run(() -> SessionManager.getApiClient().topUp(new TopUpRequest(amount)))
-        .onSuccess(updatedUser -> {
-          // Updating the session property triggers DashboardController's listener
-          SessionManager.setCurrentUser(updatedUser);
-          amountField.clear();
-          showSuccess("Top-up successful! Available: $" + String.format("%,.2f", updatedUser.balance()));
-          submitButton.setDisable(false);
-        })
-        .onFailure(ex -> {
-          showError("Failed to process top-up: " + ex.getMessage());
-          submitButton.setDisable(false);
-        })
+        .onSuccess(
+            updatedUser -> {
+              // Updating the session property triggers DashboardController's listener
+              SessionManager.setCurrentUser(updatedUser);
+              amountField.clear();
+              showSuccess(
+                  "Top-up successful! Available: $"
+                      + String.format("%,.2f", updatedUser.balance()));
+              submitButton.setDisable(false);
+            })
+        .onFailure(
+            ex -> {
+              showError("Failed to process top-up: " + ex.getMessage());
+              submitButton.setDisable(false);
+            })
         .start();
   }
 

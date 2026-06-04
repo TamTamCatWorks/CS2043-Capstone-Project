@@ -5,8 +5,9 @@ package org.tamtamcatworks.auction.service.event;
  * after a user's account has been deactivated and the change committed to the database.
  *
  * <p>Consumed by:
+ *
  * <ul>
- *   <li>{@code SuspendedUserWsHandler} — to force-close any live WebSocket sessions for the user.</li>
+ *   <li>{@code SuspendedUserWsHandler} — to force-close any live WebSocket sessions for the user.
  * </ul>
  */
 public record UserSuspendedEvent(String userId) {}

@@ -1,42 +1,23 @@
 package org.tamtamcatworks.auction.client.service.admin;
 
 import java.util.List;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
-public class AdminUserService
-        extends BaseAdminService {
+public class AdminUserService extends BaseAdminService {
 
-    public List<UserResponse> getUsers() {
+  public List<UserResponse> getUsers() {
 
-        return get(
+    return get("/admin/users", new ParameterizedTypeReference<>() {});
+  }
 
-                "/admin/users",
+  public void suspendUser(String userId) {
 
-                new ParameterizedTypeReference<>() {}
-        );
-    }
+    patch("/admin/users/" + userId + "/suspend");
+  }
 
-    public void suspendUser(
-            String userId
-    ) {
+  public void activateUser(String userId) {
 
-        patch(
-                "/admin/users/" +
-                userId +
-                "/suspend"
-        );
-    }
-
-    public void activateUser(
-            String userId
-    ) {
-
-        patch(
-                "/admin/users/" +
-                userId +
-                "/activate"
-        );
-    }
+    patch("/admin/users/" + userId + "/activate");
+  }
 }

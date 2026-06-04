@@ -1,10 +1,9 @@
 package org.tamtamcatworks.auction.client.component.admin.feedback;
 
 public enum ToastType {
+  SUCCESS,
 
-    SUCCESS,
+  ERROR,
 
-    ERROR,
-
-    INFO
+  INFO
 }

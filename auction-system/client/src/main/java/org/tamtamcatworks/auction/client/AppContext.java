@@ -5,13 +5,12 @@ import org.tamtamcatworks.auction.client.controller.shell.LayoutController;
 /**
  * Lightweight application-scoped context.
  *
- * <p>Holds the single live {@link LayoutController} instance so that child
- * controllers (e.g. {@code AuctionsListController},
- * {@code SearchResultsController}) can call back into the layout shell without
- * needing a direct FXML injection path.
+ * <p>Holds the single live {@link LayoutController} instance so that child controllers (e.g. {@code
+ * AuctionsListController}, {@code SearchResultsController}) can call back into the layout shell
+ * without needing a direct FXML injection path.
  *
- * <p>The instance is set by {@link LayoutController#initialize()} and is
- * guaranteed to be non-null for the lifetime of any dashboard-layout child.
+ * <p>The instance is set by {@link LayoutController#initialize()} and is guaranteed to be non-null
+ * for the lifetime of any dashboard-layout child.
  */
 public final class AppContext {
 

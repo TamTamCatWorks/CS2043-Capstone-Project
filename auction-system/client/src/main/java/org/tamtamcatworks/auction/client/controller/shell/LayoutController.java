@@ -10,7 +10,6 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-
 import org.tamtamcatworks.auction.client.AppContext;
 import org.tamtamcatworks.auction.client.Navigation;
 import org.tamtamcatworks.auction.client.NavigationState;
@@ -24,24 +23,26 @@ import org.tamtamcatworks.auction.shared.response.UserResponse;
  * Shell controller for the dashboard layout.
  *
  * <h3>Single search entry point</h3>
- * <p>The global header search ({@code headerSearchField} + {@code headerCategoryFilter})
- * is the <em>only</em> place the user types a query.  Child views
- * ({@code auctions-list.fxml}, {@code search-results.fxml}) do not own their
- * own search fields.
+ *
+ * <p>The global header search ({@code headerSearchField} + {@code headerCategoryFilter}) is the
+ * <em>only</em> place the user types a query. Child views ({@code auctions-list.fxml}, {@code
+ * search-results.fxml}) do not own their own search fields.
  *
  * <h3>Navigation to search results</h3>
+ *
  * <ul>
  *   <li>If search-results is not the active view, {@link #navigateToSearchResults(SearchParams)}
- *       loads it into {@code mainContentArea} via {@link ViewLoader}, retrieves
- *       the controller, and calls {@link SearchResultsController#initWithParams}.</li>
- *   <li>If search-results is already active, it calls {@code initWithParams} on the
- *       cached controller — no view reload, results update in-place.</li>
+ *       loads it into {@code mainContentArea} via {@link ViewLoader}, retrieves the controller, and
+ *       calls {@link SearchResultsController#initWithParams}.
+ *   <li>If search-results is already active, it calls {@code initWithParams} on the cached
+ *       controller — no view reload, results update in-place.
  * </ul>
  *
  * <h3>Back-sync from child controllers</h3>
- * <p>When the user changes filters <em>inside</em> search-results, the child calls
- * {@link #syncHeaderSearch(String, String)} to push the new state back into the
- * header controls so they stay consistent.
+ *
+ * <p>When the user changes filters <em>inside</em> search-results, the child calls {@link
+ * #syncHeaderSearch(String, String)} to push the new state back into the header controls so they
+ * stay consistent.
  */
 public class LayoutController {
 
@@ -49,23 +50,23 @@ public class LayoutController {
       PseudoClass.getPseudoClass("header-search-active");
 
   // ── FXML fields ──────────────────────────────────────────────────────────
-  @FXML private MenuButton         userMenuButton;
-  @FXML private MenuItem           userNameItem;
-  @FXML private MenuItem           userEmailItem;
-  @FXML private MenuItem           adminPanelItem;
-  @FXML private MenuItem           notificationsHeaderItem;
-  @FXML private SeparatorMenuItem  notificationsSeparatorItem;
-  @FXML private HBox               headerSearchShell;
-  @FXML private TextField          headerSearchField;
-  @FXML private ComboBox<String>   headerCategoryFilter;
-  @FXML private Button             headerCreateAuctionButton;
-  @FXML private StackPane          mainContentArea;
+  @FXML private MenuButton userMenuButton;
+  @FXML private MenuItem userNameItem;
+  @FXML private MenuItem userEmailItem;
+  @FXML private MenuItem adminPanelItem;
+  @FXML private MenuItem notificationsHeaderItem;
+  @FXML private SeparatorMenuItem notificationsSeparatorItem;
+  @FXML private HBox headerSearchShell;
+  @FXML private TextField headerSearchField;
+  @FXML private ComboBox<String> headerCategoryFilter;
+  @FXML private Button headerCreateAuctionButton;
+  @FXML private StackPane mainContentArea;
 
   // ── Internal state ───────────────────────────────────────────────────────
-  private NotificationMenuManager  notificationMenuManager;
+  private NotificationMenuManager notificationMenuManager;
 
   /** Cached reference to the SearchResultsController when it is the active view. */
-  private SearchResultsController  activeSearchController;
+  private SearchResultsController activeSearchController;
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -76,25 +77,29 @@ public class LayoutController {
 
     UserResponse user = SessionManager.getCurrentUser();
     updateUserMenu(user);
-    SessionManager.currentUserProperty().addListener(
-        (obs, old, updated) -> updateUserMenu(updated));
+    SessionManager.currentUserProperty()
+        .addListener((obs, old, updated) -> updateUserMenu(updated));
 
-    notificationMenuManager = new NotificationMenuManager(
-        userMenuButton, notificationsHeaderItem, notificationsSeparatorItem);
+    notificationMenuManager =
+        new NotificationMenuManager(
+            userMenuButton, notificationsHeaderItem, notificationsSeparatorItem);
 
     // ── Category filter ──
     if (headerCategoryFilter != null) {
-      headerCategoryFilter.getItems().setAll(
-          "All categories", "Art", "Electronics", "Vehicle", "Other");
+      headerCategoryFilter
+          .getItems()
+          .setAll("All categories", "Art", "Electronics", "Vehicle", "Other");
       headerCategoryFilter.setValue("All categories");
-      headerCategoryFilter.showingProperty().addListener(
-          (obs, was, is) -> updateHeaderSearchActive());
-      headerCategoryFilter.setOnMousePressed(e -> {
-        if (!headerCategoryFilter.isShowing()) {
-          headerCategoryFilter.show();
-          e.consume();
-        }
-      });
+      headerCategoryFilter
+          .showingProperty()
+          .addListener((obs, was, is) -> updateHeaderSearchActive());
+      headerCategoryFilter.setOnMousePressed(
+          e -> {
+            if (!headerCategoryFilter.isShowing()) {
+              headerCategoryFilter.show();
+              e.consume();
+            }
+          });
       // Changing category fires search immediately
       headerCategoryFilter.setOnAction(e -> handleHeaderSearchCommitted());
     }
@@ -102,8 +107,7 @@ public class LayoutController {
     // ── Search field ──
     if (headerSearchField != null) {
       headerSearchField.setOnAction(e -> handleHeaderSearchCommitted());
-      headerSearchField.focusedProperty().addListener(
-          (obs, was, is) -> updateHeaderSearchActive());
+      headerSearchField.focusedProperty().addListener((obs, was, is) -> updateHeaderSearchActive());
     }
 
     if (headerCreateAuctionButton != null) {
@@ -117,11 +121,11 @@ public class LayoutController {
   // ── Public API for child controllers ─────────────────────────────────────
 
   /**
-   * Navigate to search-results, or update results in-place if already active,
-   * using the given {@link SearchParams}.
+   * Navigate to search-results, or update results in-place if already active, using the given
+   * {@link SearchParams}.
    *
-   * <p>This is the single navigation method used by every "See all →" link
-   * and pill button in child views.
+   * <p>This is the single navigation method used by every "See all →" link and pill button in child
+   * views.
    */
   public void navigateToSearchResults(SearchParams params) {
     // Sync the header controls to reflect the params being applied
@@ -133,18 +137,16 @@ public class LayoutController {
     } else {
       // Load search-results.fxml, capture its controller, then initialise
       activeSearchController =
-          ViewLoader.into(mainContentArea)
-                    .loadWithController("/fxml/search-results.fxml");
+          ViewLoader.into(mainContentArea).loadWithController("/fxml/search-results.fxml");
       activeSearchController.initWithParams(params);
     }
   }
 
   /**
-   * Back-sync called by {@link SearchResultsController} whenever the user
-   * changes a filter inside the results page.  Keeps the header controls
-   * consistent with what is currently being searched.
+   * Back-sync called by {@link SearchResultsController} whenever the user changes a filter inside
+   * the results page. Keeps the header controls consistent with what is currently being searched.
    *
-   * @param query    current search text (may be empty)
+   * @param query current search text (may be empty)
    * @param category current category label (e.g. "Art", "All categories")
    */
   public void syncHeaderSearch(String query, String category) {
@@ -155,7 +157,7 @@ public class LayoutController {
       String cat = (category == null || category.isBlank()) ? "All categories" : category;
       // Only update if the value actually changed to avoid spurious onAction events
       if (!cat.equals(headerCategoryFilter.getValue())) {
-        headerCategoryFilter.setOnAction(null);          // suppress re-trigger
+        headerCategoryFilter.setOnAction(null); // suppress re-trigger
         headerCategoryFilter.setValue(cat);
         headerCategoryFilter.setOnAction(e -> handleHeaderSearchCommitted());
       }
@@ -190,10 +192,9 @@ public class LayoutController {
   void handleHeaderSearchCommitted() {
     if (headerSearchField == null) return;
 
-    String query    = headerSearchField.getText() != null
-                      ? headerSearchField.getText().trim() : "";
-    String category = headerCategoryFilter != null
-                      ? headerCategoryFilter.getValue() : "All categories";
+    String query = headerSearchField.getText() != null ? headerSearchField.getText().trim() : "";
+    String category =
+        headerCategoryFilter != null ? headerCategoryFilter.getValue() : "All categories";
 
     NavigationState.addRecentSearch(query.isEmpty() ? category : query);
 
@@ -203,7 +204,9 @@ public class LayoutController {
 
   // ── Private helpers ───────────────────────────────────────────────────────
 
-  /** @return true if the current child in {@code mainContentArea} is the search-results view. */
+  /**
+   * @return true if the current child in {@code mainContentArea} is the search-results view.
+   */
   private boolean isSearchResultsActive() {
     return mainContentArea != null
         && !mainContentArea.getChildren().isEmpty()
@@ -261,9 +264,7 @@ public class LayoutController {
 
   @FXML
   private void handleOpenAdminPanel() {
-    NavigationState.setDashboardViewPath(
-        "/fxml/admin/dashboard/admin-dashboard.fxml"
-    );
+    NavigationState.setDashboardViewPath("/fxml/admin/dashboard/admin-dashboard.fxml");
 
     Navigation.navigateTo("/fxml/admin/dashboard/admin-dashboard.fxml");
   }

@@ -1,24 +1,26 @@
 package org.tamtamcatworks.auction.persist.repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.tamtamcatworks.auction.model.item.Item;
-import org.tamtamcatworks.auction.model.Auction;
-import org.tamtamcatworks.auction.model.AuctionStatus;
-import org.tamtamcatworks.auction.model.user.User;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.tamtamcatworks.auction.model.Auction;
+import org.tamtamcatworks.auction.model.AuctionStatus;
+import org.tamtamcatworks.auction.model.item.Item;
+import org.tamtamcatworks.auction.model.user.User;
 
 public interface AuctionRepository extends JpaRepository<Auction, String> {
-    List<Auction> findByStatusAndEndTimeBefore(AuctionStatus status, LocalDateTime time);
-    List<Auction> findByStatus(AuctionStatus status);
-    List<Auction> findBySeller(User seller);
+  List<Auction> findByStatusAndEndTimeBefore(AuctionStatus status, LocalDateTime time);
 
-    @Query("""
+  List<Auction> findByStatus(AuctionStatus status);
+
+  List<Auction> findBySeller(User seller);
+
+  @Query(
+      """
         select distinct a
         from Auction a
         join a.item i
@@ -33,10 +35,10 @@ public interface AuctionRepository extends JpaRepository<Auction, String> {
           )
         order by a.creationDate desc
         """)
-    List<Auction> search(@Param("keyword") String keyword,
-                         @Param("status") AuctionStatus status);
+  List<Auction> search(@Param("keyword") String keyword, @Param("status") AuctionStatus status);
 
-    @Query("""
+  @Query(
+      """
         select distinct a
         from Auction a
         join a.item i
@@ -52,8 +54,9 @@ public interface AuctionRepository extends JpaRepository<Auction, String> {
           and (:itemType is null or TYPE(i) = :itemType)
         order by a.creationDate desc
         """)
-    Page<Auction> searchPaged(@Param("keyword") String keyword,
-                              @Param("status") AuctionStatus status,
-                              @Param("itemType") Class<? extends Item> itemType,
-                              Pageable pageable);
+  Page<Auction> searchPaged(
+      @Param("keyword") String keyword,
+      @Param("status") AuctionStatus status,
+      @Param("itemType") Class<? extends Item> itemType,
+      Pageable pageable);
 }

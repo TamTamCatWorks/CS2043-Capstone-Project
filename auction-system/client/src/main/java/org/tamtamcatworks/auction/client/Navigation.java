@@ -13,10 +13,11 @@ import javafx.stage.Stage;
  * Central navigation manager — layout-aware SPA-style routing.
  *
  * <h3>Route registration</h3>
- * <p>Routes are registered at startup via {@link #registerAll(Class[])} which
- * reads the {@link Route} annotation from each controller class. After that,
- * {@link #navigateTo(String)} resolves the correct layout automatically —
- * <strong>no edits to this class are needed when adding a new view</strong>.
+ *
+ * <p>Routes are registered at startup via {@link #registerAll(Class[])} which reads the {@link
+ * Route} annotation from each controller class. After that, {@link #navigateTo(String)} resolves
+ * the correct layout automatically — <strong>no edits to this class are needed when adding a new
+ * view</strong>.
  *
  * <pre>{@code
  * // In Launcher.start():
@@ -28,6 +29,7 @@ import javafx.stage.Stage;
  * }</pre>
  *
  * <h3>Passing context between views</h3>
+ *
  * <pre>{@code
  * Navigation.setContextData(auction.id());
  * Navigation.navigateTo("/fxml/auction-detail.fxml");
@@ -38,14 +40,16 @@ public class Navigation {
   private static Stage primaryStage;
   private static Parent activeLayoutRoot;
   private static String activeLayoutPath;
+
   /** Direct reference to the content slot in the active layout. */
   private static StackPane activeContentSlot;
+
   /** Arbitrary context passed between views (e.g. an auction ID). */
   private static String contextData;
 
   /**
-   * Map from FXML path → layout path, populated by {@link #registerAll}.
-   * A {@code null} layout value means no layout (full-scene replacement).
+   * Map from FXML path → layout path, populated by {@link #registerAll}. A {@code null} layout
+   * value means no layout (full-scene replacement).
    */
   private static final Map<String, String> routeMap = new HashMap<>();
 
@@ -59,17 +63,17 @@ public class Navigation {
   /**
    * Register a single route explicitly.
    *
-   * @param fxmlPath   the view's classpath resource path
-   * @param layoutPath the required layout path, or {@code null} / {@code ""}
-   *                   for a full-scene (no-layout) view
+   * @param fxmlPath the view's classpath resource path
+   * @param layoutPath the required layout path, or {@code null} / {@code ""} for a full-scene
+   *     (no-layout) view
    */
   public static void register(String fxmlPath, String layoutPath) {
     routeMap.put(fxmlPath, layoutPath == null ? "" : layoutPath);
   }
 
   /**
-   * Scan all provided controller classes for a {@link Route} annotation and
-   * register each one. Controllers without the annotation are silently skipped.
+   * Scan all provided controller classes for a {@link Route} annotation and register each one.
+   * Controllers without the annotation are silently skipped.
    *
    * @param controllerClasses controller classes to inspect
    */
@@ -85,15 +89,16 @@ public class Navigation {
   // ── Navigation ────────────────────────────────────────────────────────────
 
   /**
-   * Navigate to the given FXML view. If the view has a registered layout the
-   * layout is loaded (or reused) and the content injected into its slot.
+   * Navigate to the given FXML view. If the view has a registered layout the layout is loaded (or
+   * reused) and the content injected into its slot.
    *
    * @param fxmlPath classpath resource path to the target view
    * @throws RuntimeException if the FXML cannot be loaded
    */
   public static void navigateTo(String fxmlPath) {
     if (primaryStage == null) {
-      throw new IllegalStateException("Primary stage not set — call Navigation.setPrimaryStage() first.");
+      throw new IllegalStateException(
+          "Primary stage not set — call Navigation.setPrimaryStage() first.");
     }
 
     try {
@@ -152,8 +157,8 @@ public class Navigation {
   // ── Private helpers ───────────────────────────────────────────────────────
 
   /**
-   * Resolve the required layout for {@code fxmlPath} using the registered
-   * route map. Falls back to {@code null} (no layout) for unknown paths.
+   * Resolve the required layout for {@code fxmlPath} using the registered route map. Falls back to
+   * {@code null} (no layout) for unknown paths.
    */
   private static String getLayoutForPath(String fxmlPath) {
     return routeMap.getOrDefault(fxmlPath, null);
@@ -163,8 +168,9 @@ public class Navigation {
     Scene scene = primaryStage.getScene();
     if (scene == null) {
       scene = new Scene(root, 800, 600);
-      scene.getStylesheets().add(
-          Launcher.class.getResource(Launcher.ASSETS_DIR + "index.css").toExternalForm());
+      scene
+          .getStylesheets()
+          .add(Launcher.class.getResource(Launcher.ASSETS_DIR + "index.css").toExternalForm());
       primaryStage.setScene(scene);
     } else {
       scene.setRoot(root);

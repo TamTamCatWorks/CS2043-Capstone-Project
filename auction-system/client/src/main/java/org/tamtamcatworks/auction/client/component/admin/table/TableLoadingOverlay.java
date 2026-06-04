@@ -4,17 +4,14 @@ import javafx.geometry.Pos;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.StackPane;
 
-public class TableLoadingOverlay
-        extends StackPane {
+public class TableLoadingOverlay extends StackPane {
 
-    public TableLoadingOverlay() {
+  public TableLoadingOverlay() {
 
-        setAlignment(Pos.CENTER);
+    setAlignment(Pos.CENTER);
 
-        getChildren().add(
-                new ProgressIndicator()
-        );
+    getChildren().add(new ProgressIndicator());
 
-        setVisible(false);
-    }
+    setVisible(false);
+  }
 }

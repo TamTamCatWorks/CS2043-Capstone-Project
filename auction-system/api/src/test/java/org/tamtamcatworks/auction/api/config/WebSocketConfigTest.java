@@ -1,145 +1,135 @@
 package org.tamtamcatworks.auction.api.config;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-import org.springframework.web.socket.config.annotation.StompWebSocketEndpointRegistration;
-
-
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.StompWebSocketEndpointRegistration;
+
 /**
  * Tests for {@link WebSocketConfig}.
  *
- * The broker configuration and endpoint registration are verified by passing in
- * Mockito mocks — no real WebSocket connection is needed.
- * A minimal {@code @SpringBootTest} slice is used only for the bean-presence
- * check; the behavioral tests are plain unit tests.
+ * <p>The broker configuration and endpoint registration are verified by passing in Mockito mocks —
+ * no real WebSocket connection is needed. A minimal {@code @SpringBootTest} slice is used only for
+ * the bean-presence check; the behavioral tests are plain unit tests.
  */
 class WebSocketConfigTest {
 
-    private final WebSocketSessionRegistry registry =
-        mock(WebSocketSessionRegistry.class);
+  private final WebSocketSessionRegistry registry = mock(WebSocketSessionRegistry.class);
 
-    private final WebSocketConfig config =
-        new WebSocketConfig(registry);
+  private final WebSocketConfig config = new WebSocketConfig(registry);
 
-    // ── configureMessageBroker ────────────────────────────────────────────────
+  // ── configureMessageBroker ────────────────────────────────────────────────
 
-    @Test
-    void configureMessageBrokerEnablesTopicAndQueueDestinations() {
-        MessageBrokerRegistry registry = mock(MessageBrokerRegistry.class);
-        when(registry.enableSimpleBroker(any(String[].class))).thenReturn(null);
-        when(registry.setApplicationDestinationPrefixes(any(String[].class))).thenReturn(null);
+  @Test
+  void configureMessageBrokerEnablesTopicAndQueueDestinations() {
+    MessageBrokerRegistry registry = mock(MessageBrokerRegistry.class);
+    when(registry.enableSimpleBroker(any(String[].class))).thenReturn(null);
+    when(registry.setApplicationDestinationPrefixes(any(String[].class))).thenReturn(null);
 
-        config.configureMessageBroker(registry);
+    config.configureMessageBroker(registry);
 
-        // /topic (public broadcast) and /queue (user-private) must both be enabled
-        verify(registry).enableSimpleBroker("/topic", "/queue");
-    }
+    // /topic (public broadcast) and /queue (user-private) must both be enabled
+    verify(registry).enableSimpleBroker("/topic", "/queue");
+  }
 
-    @Test
-    void configureMessageBrokerSetsApplicationDestinationPrefix() {
-        MessageBrokerRegistry registry = mock(MessageBrokerRegistry.class);
-        when(registry.enableSimpleBroker(any(String[].class))).thenReturn(null);
-        when(registry.setApplicationDestinationPrefixes(any(String[].class))).thenReturn(null);
+  @Test
+  void configureMessageBrokerSetsApplicationDestinationPrefix() {
+    MessageBrokerRegistry registry = mock(MessageBrokerRegistry.class);
+    when(registry.enableSimpleBroker(any(String[].class))).thenReturn(null);
+    when(registry.setApplicationDestinationPrefixes(any(String[].class))).thenReturn(null);
 
-        config.configureMessageBroker(registry);
+    config.configureMessageBroker(registry);
 
-        verify(registry).setApplicationDestinationPrefixes("/app");
-    }
+    verify(registry).setApplicationDestinationPrefixes("/app");
+  }
 
-    @Test
-    void configureMessageBrokerSetsUserDestinationPrefix() {
-        MessageBrokerRegistry registry = mock(MessageBrokerRegistry.class);
-        when(registry.enableSimpleBroker(any(String[].class))).thenReturn(null);
-        when(registry.setApplicationDestinationPrefixes(any(String[].class))).thenReturn(null);
+  @Test
+  void configureMessageBrokerSetsUserDestinationPrefix() {
+    MessageBrokerRegistry registry = mock(MessageBrokerRegistry.class);
+    when(registry.enableSimpleBroker(any(String[].class))).thenReturn(null);
+    when(registry.setApplicationDestinationPrefixes(any(String[].class))).thenReturn(null);
 
-        config.configureMessageBroker(registry);
+    config.configureMessageBroker(registry);
 
-        verify(registry).setUserDestinationPrefix("/user");
-    }
+    verify(registry).setUserDestinationPrefix("/user");
+  }
 
-    // ── registerStompEndpoints ────────────────────────────────────────────────
+  // ── registerStompEndpoints ────────────────────────────────────────────────
 
+  @Test
+  void registerStompEndpointsRegistersWsEndpoint() {
+    StompEndpointRegistry registry = mock(StompEndpointRegistry.class);
+    StompWebSocketEndpointRegistration registration =
+        mock(StompWebSocketEndpointRegistration.class);
 
-    @Test
-    void registerStompEndpointsRegistersWsEndpoint() {
-        StompEndpointRegistry registry = mock(StompEndpointRegistry.class);
-        StompWebSocketEndpointRegistration registration =
-            mock(StompWebSocketEndpointRegistration.class);
+    when(registry.addEndpoint("/ws")).thenReturn(registration);
+    when(registration.setAllowedOriginPatterns(any(String[].class))).thenReturn(registration);
+    when(registration.withSockJS()).thenReturn(null);
 
-        when(registry.addEndpoint("/ws")).thenReturn(registration);
-        when(registration.setAllowedOriginPatterns(any(String[].class))).thenReturn(registration);
-        when(registration.withSockJS()).thenReturn(null);
+    config.registerStompEndpoints(registry);
 
-        config.registerStompEndpoints(registry);
+    verify(registry).addEndpoint("/ws");
+  }
 
-        verify(registry).addEndpoint("/ws");
-    }
+  @Test
+  void registerStompEndpointsAllowsAllOrigins() {
+    StompEndpointRegistry registry = mock(StompEndpointRegistry.class);
+    StompWebSocketEndpointRegistration registration =
+        mock(StompWebSocketEndpointRegistration.class);
 
-    @Test
-    void registerStompEndpointsAllowsAllOrigins() {
-        StompEndpointRegistry registry = mock(StompEndpointRegistry.class);
-        StompWebSocketEndpointRegistration registration =
-            mock(StompWebSocketEndpointRegistration.class);
+    when(registry.addEndpoint("/ws")).thenReturn(registration);
+    when(registration.setAllowedOriginPatterns(any(String[].class))).thenReturn(registration);
+    when(registration.withSockJS()).thenReturn(null);
 
-        when(registry.addEndpoint("/ws")).thenReturn(registration);
-        when(registration.setAllowedOriginPatterns(any(String[].class))).thenReturn(registration);
-        when(registration.withSockJS()).thenReturn(null);
+    config.registerStompEndpoints(registry);
 
-        config.registerStompEndpoints(registry);
+    // Wildcard origin pattern is required for cross-origin clients
+    verify(registration).setAllowedOriginPatterns("*");
+  }
 
-        // Wildcard origin pattern is required for cross-origin clients
-        verify(registration).setAllowedOriginPatterns("*");
-    }
+  @Test
+  void registerStompEndpointsEnablesSockJsFallback() {
+    StompEndpointRegistry registry = mock(StompEndpointRegistry.class);
+    StompWebSocketEndpointRegistration registration =
+        mock(StompWebSocketEndpointRegistration.class);
 
-    @Test
-    void registerStompEndpointsEnablesSockJsFallback() {
-        StompEndpointRegistry registry = mock(StompEndpointRegistry.class);
-        StompWebSocketEndpointRegistration registration =
-            mock(StompWebSocketEndpointRegistration.class);
+    when(registry.addEndpoint("/ws")).thenReturn(registration);
+    when(registration.setAllowedOriginPatterns(any(String[].class))).thenReturn(registration);
+    when(registration.withSockJS()).thenReturn(null);
 
-        when(registry.addEndpoint("/ws")).thenReturn(registration);
-        when(registration.setAllowedOriginPatterns(any(String[].class))).thenReturn(registration);
-        when(registration.withSockJS()).thenReturn(null);
+    config.registerStompEndpoints(registry);
 
-        config.registerStompEndpoints(registry);
+    // SockJS fallback is required for environments that don't support WebSocket
+    verify(registration).withSockJS();
+  }
 
-        // SockJS fallback is required for environments that don't support WebSocket
-        verify(registration).withSockJS();
-    }
+  // ── Guard: configureMessageBroker does not throw ──────────────────────────
 
-    // ── Guard: configureMessageBroker does not throw ──────────────────────────
+  @Test
+  void configureMessageBrokerDoesNotThrow() {
+    MessageBrokerRegistry registry = mock(MessageBrokerRegistry.class);
+    when(registry.enableSimpleBroker(any(String[].class))).thenReturn(null);
+    when(registry.setApplicationDestinationPrefixes(any(String[].class))).thenReturn(null);
 
-    @Test
-    void configureMessageBrokerDoesNotThrow() {
-        MessageBrokerRegistry registry = mock(MessageBrokerRegistry.class);
-        when(registry.enableSimpleBroker(any(String[].class))).thenReturn(null);
-        when(registry.setApplicationDestinationPrefixes(any(String[].class))).thenReturn(null);
+    assertDoesNotThrow(() -> config.configureMessageBroker(registry));
+  }
 
-        assertDoesNotThrow(() -> config.configureMessageBroker(registry));
-    }
+  @Test
+  void registerStompEndpointsDoesNotThrow() {
+    StompEndpointRegistry registry = mock(StompEndpointRegistry.class);
+    StompWebSocketEndpointRegistration registration =
+        mock(StompWebSocketEndpointRegistration.class);
 
-    @Test
-    void registerStompEndpointsDoesNotThrow() {
-        StompEndpointRegistry registry = mock(StompEndpointRegistry.class);
-        StompWebSocketEndpointRegistration registration =
-            mock(StompWebSocketEndpointRegistration.class);
+    when(registry.addEndpoint("/ws")).thenReturn(registration);
+    when(registration.setAllowedOriginPatterns(any(String[].class))).thenReturn(registration);
+    when(registration.withSockJS()).thenReturn(null);
 
-        when(registry.addEndpoint("/ws")).thenReturn(registration);
-        when(registration.setAllowedOriginPatterns(any(String[].class))).thenReturn(registration);
-        when(registration.withSockJS()).thenReturn(null);
-
-        assertDoesNotThrow(() -> config.registerStompEndpoints(registry));
-    }
+    assertDoesNotThrow(() -> config.registerStompEndpoints(registry));
+  }
 }

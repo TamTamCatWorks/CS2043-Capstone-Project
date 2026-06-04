@@ -10,14 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.lang.reflect.Field;
 import org.junit.jupiter.api.Test;
 
-/**
- * Unit tests for BaseEntity.
- */
+/** Unit tests for BaseEntity. */
 public class BaseEntityTest {
 
-  /**
-   * Helper class to instantiate BaseEntity.
-   */
+  /** Helper class to instantiate BaseEntity. */
   private static class TestEntity extends BaseEntity {
     protected TestEntity() {
       super();

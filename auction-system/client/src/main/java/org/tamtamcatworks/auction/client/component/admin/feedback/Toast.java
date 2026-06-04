@@ -11,78 +11,46 @@ import javafx.util.Duration;
 
 public final class Toast {
 
-    private Toast() {}
+  private Toast() {}
 
-    public static void show(
+  public static void show(String message, ToastType type) {
 
-            String message,
+    Popup popup = new Popup();
 
-            ToastType type
-    ) {
+    Label label = new Label(message);
 
-        Popup popup =
-                new Popup();
+    label
+        .getStyleClass()
+        .addAll(
+            "toast",
+            switch (type) {
+              case SUCCESS -> "toast-success";
 
-        Label label =
-                new Label(message);
+              case ERROR -> "toast-error";
 
-        label.getStyleClass().addAll(
+              case INFO -> "toast-info";
+            });
 
-                "toast",
+    StackPane root = new StackPane(label);
 
-                switch (type) {
+    root.setAlignment(Pos.CENTER);
 
-                    case SUCCESS ->
-                            "toast-success";
+    popup.getContent().add(root);
 
-                    case ERROR ->
-                            "toast-error";
+    Stage stage = (Stage) Stage.getWindows().filtered(window -> window.isShowing()).getFirst();
 
-                    case INFO ->
-                            "toast-info";
-                }
-        );
+    Scene scene = stage.getScene();
 
-        StackPane root =
-                new StackPane(label);
+    popup.show(stage);
 
-        root.setAlignment(Pos.CENTER);
+    popup.setX(stage.getX() + scene.getWidth() - 350);
 
-        popup.getContent().add(root);
+    popup.setY(stage.getY() + 80);
 
-        Stage stage =
-                (Stage) Stage.getWindows()
-                        .filtered(window -> window.isShowing())
-                        .getFirst();
+    PauseTransition delay = new PauseTransition(Duration.seconds(3));
 
-        Scene scene =
-                stage.getScene();
+    delay.setOnFinished(event -> popup.hide());
 
-        popup.show(stage);
-
-        popup.setX(
-
-                stage.getX()
-                        + scene.getWidth()
-                        - 350
-        );
-
-        popup.setY(
-
-                stage.getY()
-                        + 80
-        );
-
-        PauseTransition delay =
-                new PauseTransition(
-                        Duration.seconds(3)
-                );
-
-        delay.setOnFinished(event ->
-
-                popup.hide()
-        );
-
-        delay.play();
-    }
+    delay.play();
+  }
 }

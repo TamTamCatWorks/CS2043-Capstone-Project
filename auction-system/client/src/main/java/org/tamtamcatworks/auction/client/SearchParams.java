@@ -3,30 +3,26 @@ package org.tamtamcatworks.auction.client;
 /**
  * Immutable carrier of all search/filter intent passed between controllers.
  *
- * <p>Factory methods provide convenient entry-points for the most common
- * navigation scenarios (category shelf "See all →", status pill click, etc.).
+ * <p>Factory methods provide convenient entry-points for the most common navigation scenarios
+ * (category shelf "See all →", status pill click, etc.).
  */
 public record SearchParams(
     /** Free-text query typed by the user. Empty string means "no query". */
     String query,
     /**
-     * Category string matching the API values: "All categories", "Art",
-     * "Electronics", "Vehicle", "Other".
+     * Category string matching the API values: "All categories", "Art", "Electronics", "Vehicle",
+     * "Other".
      */
     String category,
-    /**
-     * Status filter: "ALL", "ACTIVE", "PENDING", "CLOSED".
-     */
+    /** Status filter: "ALL", "ACTIVE", "PENDING", "CLOSED". */
     String status,
     /**
-     * Sort-order label matching the values in the sortCombo:
-     * "Newest First", "Ending Soon", "Most Bids",
-     * "Price: Low to High", "Price: High to Low", "Oldest First".
+     * Sort-order label matching the values in the sortCombo: "Newest First", "Ending Soon", "Most
+     * Bids", "Price: Low to High", "Price: High to Low", "Oldest First".
      */
     String sortOrder,
     /** 0-based page index. */
-    int page
-) {
+    int page) {
 
   /** No filters, no query — shows everything, default sort. */
   public static SearchParams empty() {

@@ -7,31 +7,44 @@ import org.tamtamcatworks.auction.model.BaseEntity;
 @Table(name = "notifications")
 public class Notification extends BaseEntity {
 
-    @Column(name = "user_id", nullable = false)
-    private String userId;
+  @Column(name = "user_id", nullable = false)
+  private String userId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private NotificationType type;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private NotificationType type;
 
-    @Column(nullable = false)
-    private String message;
+  @Column(nullable = false)
+  private String message;
 
-    @Column(name = "is_read", nullable = false)
-    private boolean isRead = false;
+  @Column(name = "is_read", nullable = false)
+  private boolean isRead = false;
 
-    protected Notification() {}
+  protected Notification() {}
 
-    public Notification(String userId, NotificationType type, String message) {
-        this.userId  = userId;
-        this.type    = type;
-        this.message = message;
-    }
+  public Notification(String userId, NotificationType type, String message) {
+    this.userId = userId;
+    this.type = type;
+    this.message = message;
+  }
 
-    public void markRead() { this.isRead = true; }
+  public void markRead() {
+    this.isRead = true;
+  }
 
-    public String getUserId()          { return userId; }
-    public NotificationType getType()  { return type; }
-    public String getMessage()         { return message; }
-    public boolean isRead()            { return isRead; }
+  public String getUserId() {
+    return userId;
+  }
+
+  public NotificationType getType() {
+    return type;
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public boolean isRead() {
+    return isRead;
+  }
 }

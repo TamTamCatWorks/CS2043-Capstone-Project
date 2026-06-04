@@ -21,8 +21,7 @@ import org.tamtamcatworks.auction.model.AuctionStatus;
 @ExtendWith(MockitoExtension.class)
 class AuctionSchedulerTest {
 
-  @Mock
-  private AuctionService auctionService;
+  @Mock private AuctionService auctionService;
 
   private AuctionScheduler scheduler;
 

@@ -5,31 +5,29 @@ import javafx.concurrent.Task;
 
 public final class AsyncHelper {
 
-    private AsyncHelper() {}
+  private AsyncHelper() {}
 
-    public static void runAsync(
-            Runnable backgroundTask,
-            Runnable onSuccess
-    ) {
+  public static void runAsync(Runnable backgroundTask, Runnable onSuccess) {
 
-        Task<Void> task = new Task<>() {
+    Task<Void> task =
+        new Task<>() {
 
-            @Override
-            protected Void call() {
+          @Override
+          protected Void call() {
 
-                backgroundTask.run();
+            backgroundTask.run();
 
-                return null;
-            }
+            return null;
+          }
         };
 
-        task.setOnSucceeded(event -> {
-
-            if (onSuccess != null) {
-                Platform.runLater(onSuccess);
-            }
+    task.setOnSucceeded(
+        event -> {
+          if (onSuccess != null) {
+            Platform.runLater(onSuccess);
+          }
         });
 
-        new Thread(task).start();
-    }
+    new Thread(task).start();
+  }
 }

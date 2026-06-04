@@ -34,10 +34,11 @@ final class ElectronicsDetailsForm extends AbstractItemDetailsForm {
     String model = requireText(modelField);
     String warrantyStr = requireText(warrantyMonthsField);
 
-    int warranty = requireNonNegativeInt(
-        warrantyStr,
-        "Warranty Months must be a valid integer.",
-        "Warranty months cannot be negative.");
+    int warranty =
+        requireNonNegativeInt(
+            warrantyStr,
+            "Warranty Months must be a valid integer.",
+            "Warranty months cannot be negative.");
 
     Map<String, Object> details = new HashMap<>();
     details.put("brand", brand);
