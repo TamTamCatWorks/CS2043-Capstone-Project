@@ -85,12 +85,11 @@ Chiều phụ thuộc module: shared ← model ← persist ← service ← api �
 **Step 4**: Chạy Server (API):
     mvn -pl api spring-boot:run
 
-**Bước 5**: Chạy Client (JavaFX):
-    # Linux / macOS
+**Step 5**: Chạy Client (JavaFX):
     mvn -pl client javafx:run
 
-    # Windows (PowerShell hoặc Command Prompt)
-    mvn -pl client javafx:run
+**Step 6**: Run the seed script
+    psql -h localhost -U postgres -d tamtamcatworks -f seed-dataset.sql
 
 **Clean up**: 
 Để tắt Docker sau khi dùng xong: 
