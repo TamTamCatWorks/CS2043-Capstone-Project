@@ -210,9 +210,9 @@ public class AuctionDetailController extends BaseController {
     titleLabel.setText(auction.title());
     sellerLabel.setText(auction.sellerName() != null ? auction.sellerName() : "-");
     itemLabel.setText(auction.itemName() != null ? auction.itemName() : "-");
-    startPriceLabel.setText(String.format("$%.2f", auction.startingPrice()));
-    autoBidIncrementLabel.setText(String.format("$%.2f", auction.minimumIncrement()));
-    currentPriceLabel.setText(String.format("$%.2f", auction.currentPrice()));
+    startPriceLabel.setText(formatMoney(auction.startingPrice()));
+    autoBidIncrementLabel.setText(formatMoney(auction.minimumIncrement()));
+    currentPriceLabel.setText(formatMoney(auction.currentPrice()));
 
     leadingBidderLabel.setText(
         auction.leadingBidderName() != null ? auction.leadingBidderName() : "No bids yet");
@@ -332,7 +332,7 @@ public class AuctionDetailController extends BaseController {
     }
 
     autoBidStateLabel.setText(autoBid.active() ? "Active auto-bid" : "Inactive auto-bid");
-    autoBidMaxLabel.setText(String.format("$%.2f", autoBid.maxBid()));
+    autoBidMaxLabel.setText(formatMoney(autoBid.maxBid()));
     autoBidMaxField.setText(String.format("%.2f", autoBid.maxBid()));
     autoBidBtn.setText("Update Auto-Bid");
     cancelAutoBidBtn.setVisible(true);
@@ -586,6 +586,10 @@ public class AuctionDetailController extends BaseController {
       case "CANCELLED" -> "status-cancelled";
       default -> "status-pending";
     };
+  }
+
+  private String formatMoney(double amount) {
+    return String.format("$%.2f", amount);
   }
 
   private void hideError() {

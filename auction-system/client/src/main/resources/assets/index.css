@@ -1219,3 +1219,302 @@
     -fx-icon-color: #1A1A1A;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BROWSE AUCTIONS — sticky top bar
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.browse-top-bar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: rgba(228, 196, 149, 0.4);
+    -fx-border-width: 0 0 1px 0;
+}
+
+.browse-search-shell {
+    -fx-background-color: #FCFAF7;
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(228, 196, 149, 0.55);
+    -fx-border-radius: 999;
+    -fx-border-width: 1;
+    -fx-padding: 6 14;
+    -fx-min-height: 38;
+    -fx-max-height: 38;
+}
+
+.browse-search-shell:focused-within {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #8F7246;
+    -fx-effect: dropshadow(gaussian, rgba(143, 114, 70, 0.12), 10, 0, 0, 2);
+}
+
+.browse-search-icon {
+    -fx-icon-color: #8F7246;
+}
+
+.browse-search-field {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-padding: 6 0;
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 10.5pt;
+    -fx-prompt-text-fill: #9C9282;
+}
+
+.browse-search-field:focused {
+    -fx-background-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BROWSE AUCTIONS — filter pill strip
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.filter-strip-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: rgba(228, 196, 149, 0.3);
+    -fx-border-width: 0 0 1px 0;
+}
+
+.filter-pill {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: rgba(228, 196, 149, 0.55);
+    -fx-border-width: 1;
+    -fx-border-radius: 999;
+    -fx-background-radius: 999;
+    -fx-text-fill: #5C5549;
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 9.5pt;
+    -fx-font-weight: 600;
+    -fx-padding: 5 14;
+    -fx-cursor: hand;
+}
+
+.filter-pill:hover {
+    -fx-background-color: rgba(228, 196, 149, 0.12);
+    -fx-border-color: rgba(143, 114, 70, 0.45);
+}
+
+.filter-pill:selected {
+    -fx-background-color: #1A1A1A;
+    -fx-border-color: #1A1A1A;
+    -fx-text-fill: #FFFFFF;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SHELF SECTION
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.shelf-title {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 15pt;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1A1A1A;
+}
+
+.shelf-subtitle {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 9.5pt;
+    -fx-text-fill: #7C7467;
+}
+
+.shelf-empty-label {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 10pt;
+    -fx-text-fill: #A89F91;
+    -fx-font-style: italic;
+}
+
+.see-all-link {
+    -fx-text-fill: #8F7246;
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 10pt;
+    -fx-font-weight: 600;
+    -fx-underline: false;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.see-all-link:hover {
+    -fx-text-fill: #6B5535;
+    -fx-underline: true;
+}
+
+.shelf-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SEARCH RESULTS — search header bar
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.search-header-bar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: rgba(228, 196, 149, 0.4);
+    -fx-border-width: 0 0 1px 0;
+    -fx-effect: dropshadow(gaussian, rgba(46, 38, 26, 0.04), 6, 0, 0, 2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SEARCH RESULTS — filter/sort bar
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.filter-bar {
+    -fx-background-color: #FDFCFA;
+    -fx-border-color: rgba(228, 196, 149, 0.3);
+    -fx-border-width: 0 0 1px 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SEARCH RESULTS — active filter chips
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.filter-chip {
+    -fx-background-color: #1A1A1A;
+    -fx-background-radius: 999;
+    -fx-padding: 3 10 3 12;
+    -fx-alignment: center-left;
+}
+
+.filter-chip-label {
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 9pt;
+    -fx-font-weight: 600;
+    -fx-text-fill: #FFFFFF;
+}
+
+.filter-chip-remove {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255, 255, 255, 0.75);
+    -fx-font-size: 11pt;
+    -fx-padding: 0 2;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-min-width: 18;
+    -fx-max-width: 18;
+    -fx-min-height: 18;
+    -fx-max-height: 18;
+    -fx-background-radius: 999;
+}
+
+.filter-chip-remove:hover {
+    -fx-text-fill: #FFFFFF;
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SEARCH RESULTS — view-toggle buttons
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.view-toggle-btn {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: rgba(228, 196, 149, 0.55);
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 6 10;
+    -fx-cursor: hand;
+    -fx-text-fill: #7C7467;
+}
+
+.view-toggle-btn:hover {
+    -fx-background-color: rgba(228, 196, 149, 0.12);
+}
+
+.view-toggle-btn:selected {
+    -fx-background-color: #1A1A1A;
+    -fx-border-color: #1A1A1A;
+}
+
+.view-toggle-btn:selected .ikonli-font-icon {
+    -fx-icon-color: #FFFFFF;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SEARCH RESULTS — list-view card
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.list-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(228, 196, 149, 0.3);
+    -fx-border-width: 1;
+    -fx-padding: 0 16 0 0;
+    -fx-effect: dropshadow(gaussian, rgba(46, 38, 26, 0.04), 6, 0, 0, 2);
+    -fx-cursor: hand;
+}
+
+.list-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(143, 114, 70, 0.14), 12, 0, 0, 3);
+    -fx-border-color: rgba(143, 114, 70, 0.45);
+}
+
+.list-card-thumb {
+    -fx-background-color: #F5EFE6;
+    -fx-background-radius: 11 0 0 11;
+    -fx-border-radius: 11 0 0 11;
+    -fx-alignment: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SEARCH RESULTS — pagination bar
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.pagination-bar {
+    -fx-background-color: #FDFCFA;
+    -fx-border-color: rgba(228, 196, 149, 0.3);
+    -fx-border-width: 1px 0 0 0;
+}
+
+.page-btn-active {
+    -fx-background-color: #1A1A1A;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 10pt;
+    -fx-font-weight: 700;
+    -fx-padding: 6 10;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #1A1A1A;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+    -fx-min-width: 34;
+}
+
+.btn-ghost {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(228, 196, 149, 0.5);
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: #5C5549;
+    -fx-font-family: 'Montserrat';
+    -fx-font-size: 10pt;
+    -fx-font-weight: 600;
+    -fx-padding: 6 10;
+    -fx-cursor: hand;
+    -fx-min-width: 34;
+}
+
+.btn-ghost:hover {
+    -fx-background-color: rgba(228, 196, 149, 0.12);
+    -fx-border-color: rgba(143, 114, 70, 0.45);
+}
+
+.btn-ghost:disabled {
+    -fx-opacity: 0.38;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SEARCH RESULTS — filter bar block (topmost element after search-header removed)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.filter-bar-block {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: rgba(228, 196, 149, 0.35);
+    -fx-border-width: 0 0 1px 0;
+    -fx-effect: dropshadow(gaussian, rgba(46, 38, 26, 0.03), 4, 0, 0, 1);
+}
