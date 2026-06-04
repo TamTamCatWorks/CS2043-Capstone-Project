@@ -42,6 +42,16 @@ public class UserService {
         this.auctionRepository = auctionRepository;
     }
 
+    public void validateActiveUser(String userId) {
+
+        User user = findById(userId);
+
+        if (!user.isActive()) {
+
+            throw new IllegalStateException("Your account has been suspended.");
+        }
+    }
+
     @Transactional
     public User register(String username, String email, String password, String fullName) {
         validateRegistrationInputs(username, email);
@@ -52,12 +62,17 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    @Transactional(readOnly = true)
+   @Transactional(readOnly = true)
     public User login(String email, String password) {
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new NoSuchElementException("Invalid email or password."));
+
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException("Invalid email or password."));
+
         if (!passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new IllegalArgumentException("Invalid email or password.");
+        }
+
+        if (!user.isActive()) {
+            throw new IllegalStateException("Your account has been suspended.");
         }
         return user;
     }
@@ -128,11 +143,24 @@ public class UserService {
 
     @Transactional
     public UserResponse topUp(@NonNull String id, double amount) {
+
         User user = findById(id);
+
+        if (!user.isActive()) {
+
+            throw new IllegalStateException("Suspended users cannot top up balance.");
+        }
+
         user.addBalance(amount);
+
         userRepository.save(user);
+
         UserResponse response = userMapper.toResponse(user);
-        eventPublisher.publishEvent(new UserStateEvent(id, response));
+
+        eventPublisher.publishEvent(
+            new UserStateEvent(id, response)
+        );
+
         return response;
     }
 

@@ -8,144 +8,154 @@
 <?import javafx.scene.image.ImageView?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox spacing="16.0"
-      xmlns="http://javafx.com/javafx/17"
-      xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="org.tamtamcatworks.auction.client.controller.auction.AuctionDetailController">
+<ScrollPane
+        fitToWidth="true"
+        hbarPolicy="NEVER"
+        xmlns="http://javafx.com/javafx/17"
+        xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="org.tamtamcatworks.auction.client.controller.auction.AuctionDetailController">
 
-    <!-- Back Link -->
-    <Hyperlink fx:id="backLink" text="Back to Auctions" onAction="#handleBack" styleClass="back-link"/>
+    <content>
 
-    <!-- Loading -->
-    <StackPane fx:id="loadingPane" visible="false" managed="false" prefHeight="300.0">
-        <VBox alignment="CENTER" spacing="12.0">
-            <ProgressIndicator maxWidth="36" maxHeight="36" styleClass="progress-spinner"/>
-            <Label text="Loading auction details..." styleClass="text-muted"/>
-        </VBox>
-    </StackPane>
+        <VBox spacing="16.0">
 
-    <!-- Error -->
-    <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false" styleClass="error-label"/>
+            <!-- Back Link -->
+            <Hyperlink fx:id="backLink" text="Back to Auctions" onAction="#handleBack" styleClass="back-link"/>
 
-    <!-- Main Content: Two Columns -->
-    <HBox fx:id="contentPane" spacing="20.0" VBox.vgrow="ALWAYS" visible="false" managed="false">
-
-        <!-- Left Column: Auction Info (60%) -->
-        <VBox spacing="16.0" HBox.hgrow="ALWAYS" minWidth="300.0">
-            <!-- Item Image -->
-            <StackPane styleClass="detail-panel" style="-fx-padding: 0; -fx-background-color: #F5EFE6; -fx-background-radius: 14; -fx-border-radius: 14;" maxHeight="300.0">
-                <ImageView fx:id="itemImageView" fitHeight="300.0" fitWidth="500.0" preserveRatio="true"/>
-                <Label fx:id="imagePlaceholderLabel" text="No Image Available" styleClass="text-muted"/>
+            <!-- Loading -->
+            <StackPane fx:id="loadingPane" visible="false" managed="false" prefHeight="300.0">
+                <VBox alignment="CENTER" spacing="12.0">
+                    <ProgressIndicator maxWidth="36" maxHeight="36" styleClass="progress-spinner"/>
+                    <Label text="Loading auction details..." styleClass="text-muted"/>
+                </VBox>
             </StackPane>
 
-            <VBox styleClass="detail-panel" spacing="16.0">
-                <!-- Title + Status -->
-                <HBox alignment="CENTER_LEFT" spacing="12.0">
-                    <Label fx:id="titleLabel" text="Auction Title" styleClass="section-title" HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="statusLabel" text="ACTIVE" styleClass="status-badge, status-active"/>
-                </HBox>
+            <!-- Error -->
+            <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false" styleClass="error-label"/>
 
-                <Separator/>
+            <!-- Main Content: Two Columns -->
+            <HBox fx:id="contentPane" spacing="20.0" VBox.vgrow="ALWAYS" visible="false" managed="false">
 
-                <!-- Info Grid -->
-                <HBox spacing="40.0">
-                    <VBox spacing="4.0">
-                        <Label text="SELLER" styleClass="info-label"/>
-                        <Label fx:id="sellerLabel" text="-" styleClass="info-value"/>
-                    </VBox>
-                    <VBox spacing="4.0">
-                        <Label text="ITEM" styleClass="info-label"/>
-                        <Label fx:id="itemLabel" text="-" styleClass="info-value"/>
-                    </VBox>
-                </HBox>
+                <!-- Left Column: Auction Info (60%) -->
+                <VBox spacing="16.0" HBox.hgrow="ALWAYS" minWidth="300.0">
+                    <!-- Item Image -->
+                    <StackPane styleClass="detail-panel" style="-fx-padding: 0; -fx-background-color: #F5EFE6; -fx-background-radius: 14; -fx-border-radius: 14;" maxHeight="300.0">
+                        <ImageView fx:id="itemImageView" fitHeight="300.0" fitWidth="500.0" preserveRatio="true"/>
+                        <Label fx:id="imagePlaceholderLabel" text="No Image Available" styleClass="text-muted"/>
+                    </StackPane>
 
-                <HBox spacing="40.0">
-                    <VBox spacing="4.0">
-                        <Label text="START TIME" styleClass="info-label"/>
-                        <Label fx:id="startTimeLabel" text="-" styleClass="info-value"/>
-                    </VBox>
-                    <VBox spacing="4.0">
-                        <Label text="END TIME" styleClass="info-label"/>
-                        <Label fx:id="endTimeLabel" text="-" styleClass="info-value"/>
-                    </VBox>
-                </HBox>
+                    <VBox styleClass="detail-panel" spacing="16.0">
+                        <!-- Title + Status -->
+                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                            <Label fx:id="titleLabel" text="Auction Title" styleClass="section-title" HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="statusLabel" text="ACTIVE" styleClass="status-badge, status-active"/>
+                        </HBox>
 
-                <HBox spacing="40.0">
-                    <VBox spacing="4.0">
-                        <Label text="STARTING PRICE" styleClass="info-label"/>
-                        <Label fx:id="startPriceLabel" text="-" styleClass="info-value"/>
-                    </VBox>
-                    <VBox spacing="4.0">
-                        <Label text="LEADING BIDDER" styleClass="info-label"/>
-                        <Label fx:id="leadingBidderLabel" text="-" styleClass="info-value"/>
-                    </VBox>
-                </HBox>
+                        <Separator/>
 
-                <Separator fx:id="specificInfoSeparator" visible="false" managed="false"/>
+                        <!-- Info Grid -->
+                        <HBox spacing="40.0">
+                            <VBox spacing="4.0">
+                                <Label text="SELLER" styleClass="info-label"/>
+                                <Label fx:id="sellerLabel" text="-" styleClass="info-value"/>
+                            </VBox>
+                            <VBox spacing="4.0">
+                                <Label text="ITEM" styleClass="info-label"/>
+                                <Label fx:id="itemLabel" text="-" styleClass="info-value"/>
+                            </VBox>
+                        </HBox>
 
-                <!-- Specific Category Details -->
-                <VBox fx:id="specificInfoBox" spacing="4.0" visible="false" managed="false">
-                    <Label text="SPECIFIC DETAILS" styleClass="info-label"/>
-                    <Label fx:id="specificInfoLabel" text="-" styleClass="info-value" wrapText="true"/>
+                        <HBox spacing="40.0">
+                            <VBox spacing="4.0">
+                                <Label text="START TIME" styleClass="info-label"/>
+                                <Label fx:id="startTimeLabel" text="-" styleClass="info-value"/>
+                            </VBox>
+                            <VBox spacing="4.0">
+                                <Label text="END TIME" styleClass="info-label"/>
+                                <Label fx:id="endTimeLabel" text="-" styleClass="info-value"/>
+                            </VBox>
+                        </HBox>
+
+                        <HBox spacing="40.0">
+                            <VBox spacing="4.0">
+                                <Label text="STARTING PRICE" styleClass="info-label"/>
+                                <Label fx:id="startPriceLabel" text="-" styleClass="info-value"/>
+                            </VBox>
+                            <VBox spacing="4.0">
+                                <Label text="LEADING BIDDER" styleClass="info-label"/>
+                                <Label fx:id="leadingBidderLabel" text="-" styleClass="info-value"/>
+                            </VBox>
+                        </HBox>
+
+                        <Separator fx:id="specificInfoSeparator" visible="false" managed="false"/>
+
+                        <!-- Specific Category Details -->
+                        <VBox fx:id="specificInfoBox" spacing="4.0" visible="false" managed="false">
+                            <Label text="SPECIFIC DETAILS" styleClass="info-label"/>
+                            <Label fx:id="specificInfoLabel" text="-" styleClass="info-value" wrapText="true"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- Bid Trend Chart -->
+                    <VBox fx:id="bidTrendBox" styleClass="detail-panel bid-chart-panel" spacing="10.0" VBox.vgrow="NEVER"
+                        visible="false" managed="false">
+                        <Label text="BID TREND" styleClass="info-value"/>
+                        <LineChart fx:id="bidHistoryChart" animated="false" createSymbols="true" legendVisible="false"
+                                prefHeight="240.0" maxHeight="240.0" verticalZeroLineVisible="false"
+                                styleClass="bid-trend-chart">
+                            <xAxis>
+                                <NumberAxis fx:id="bidHistoryXAxis" autoRanging="false" lowerBound="1" upperBound="1"
+                                            tickUnit="1" label="Bid #"/>
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis fx:id="bidHistoryYAxis" autoRanging="false" lowerBound="0" upperBound="1"
+                                            tickUnit="1" label="Amount ($)"/>
+                            </yAxis>
+                        </LineChart>
+                    </VBox>
+                    
+                    <!-- Owner Controls -->
+                    <HBox fx:id="ownerControls" spacing="10.0" visible="false" managed="false">
+                        <Button fx:id="openBtn" text="Open Auction" onAction="#handleOpenAuction" styleClass="btn-success"/>
+                        <Button fx:id="closeBtn" text="Close Auction" onAction="#handleCloseAuction" styleClass="btn-danger-outline"/>
+                    </HBox>
                 </VBox>
-            </VBox>
 
-            <!-- Bid Trend Chart -->
-            <VBox fx:id="bidTrendBox" styleClass="detail-panel bid-chart-panel" spacing="10.0" VBox.vgrow="ALWAYS"
-                visible="false" managed="false">
-                <Label text="BID TREND" styleClass="info-value"/>
-                <LineChart fx:id="bidHistoryChart" animated="false" createSymbols="true" legendVisible="false"
-                           minHeight="220.0" prefHeight="240.0" verticalZeroLineVisible="false"
-                           styleClass="bid-trend-chart">
-                    <xAxis>
-                        <NumberAxis fx:id="bidHistoryXAxis" autoRanging="false" lowerBound="1" upperBound="1"
-                                    tickUnit="1" label="Bid #"/>
-                    </xAxis>
-                    <yAxis>
-                        <NumberAxis fx:id="bidHistoryYAxis" autoRanging="false" lowerBound="0" upperBound="1"
-                                    tickUnit="1" label="Amount ($)"/>
-                    </yAxis>
-                </LineChart>
-            </VBox>
-            
-            <!-- Owner Controls -->
-            <HBox fx:id="ownerControls" spacing="10.0" visible="false" managed="false">
-                <Button fx:id="openBtn" text="Open Auction" onAction="#handleOpenAuction" styleClass="btn-success"/>
-                <Button fx:id="closeBtn" text="Close Auction" onAction="#handleCloseAuction" styleClass="btn-danger-outline"/>
+                <!-- Right Column: Bidding Panel (40%) -->
+                <VBox spacing="16.0" minWidth="280.0" prefWidth="320.0">
+                    <!-- Current Price -->
+                    <VBox styleClass="detail-panel" spacing="8.0" alignment="CENTER">
+                        <Label text="CURRENT PRICE" styleClass="price-label"/>
+                        <Label fx:id="currentPriceLabel" text="\$0.00" styleClass="price-display"/>
+                    </VBox>
+
+                    <!-- Place Bid (only for active auctions user doesn't own) -->
+                    <VBox fx:id="bidFormBox" styleClass="detail-panel" spacing="12.0" visible="false" managed="false">
+                        <Label text="Place a Bid" styleClass="info-value"/>
+                        <HBox spacing="8.0" alignment="CENTER_LEFT" styleClass="bid-input-group">
+                            <Label text="\$" styleClass="info-value"/>
+                            <TextField fx:id="bidAmountField" promptText="Enter amount" HBox.hgrow="ALWAYS"
+                                    styleClass="edge-to-edge-field"/>
+                        </HBox>
+                        <Label fx:id="bidMessageLabel" wrapText="true" visible="false" managed="false"/>
+                        <Button fx:id="placeBidBtn" text="Place Bid" onAction="#handlePlaceBid"
+                                maxWidth="Infinity" styleClass="btn-primary"/>
+                    </VBox>
+
+                    <!-- Bid History -->
+                    <VBox styleClass="detail-panel" spacing="8.0" VBox.vgrow="ALWAYS">
+                        <Label text="Bid History" styleClass="info-value"/>
+                        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" prefHeight="200.0"
+                                    style="-fx-background-color: transparent; -fx-background: transparent;">
+                            <VBox fx:id="bidHistoryContainer" spacing="0"/>
+                        </ScrollPane>
+                        <Label fx:id="noBidsLabel" text="No bids yet" styleClass="text-muted" alignment="CENTER"
+                            visible="false" managed="false"/>
+                    </VBox>
+                </VBox>
             </HBox>
-        </VBox>
+       </VBox>
 
-        <!-- Right Column: Bidding Panel (40%) -->
-        <VBox spacing="16.0" minWidth="280.0" prefWidth="320.0">
-            <!-- Current Price -->
-            <VBox styleClass="detail-panel" spacing="8.0" alignment="CENTER">
-                <Label text="CURRENT PRICE" styleClass="price-label"/>
-                <Label fx:id="currentPriceLabel" text="\$0.00" styleClass="price-display"/>
-            </VBox>
+    </content>
 
-            <!-- Place Bid (only for active auctions user doesn't own) -->
-            <VBox fx:id="bidFormBox" styleClass="detail-panel" spacing="12.0" visible="false" managed="false">
-                <Label text="Place a Bid" styleClass="info-value"/>
-                <HBox spacing="8.0" alignment="CENTER_LEFT" styleClass="bid-input-group">
-                    <Label text="\$" styleClass="info-value"/>
-                    <TextField fx:id="bidAmountField" promptText="Enter amount" HBox.hgrow="ALWAYS"
-                               styleClass="edge-to-edge-field"/>
-                </HBox>
-                <Label fx:id="bidMessageLabel" wrapText="true" visible="false" managed="false"/>
-                <Button fx:id="placeBidBtn" text="Place Bid" onAction="#handlePlaceBid"
-                        maxWidth="Infinity" styleClass="btn-primary"/>
-            </VBox>
-
-            <!-- Bid History -->
-            <VBox styleClass="detail-panel" spacing="8.0" VBox.vgrow="ALWAYS">
-                <Label text="Bid History" styleClass="info-value"/>
-                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" prefHeight="200.0"
-                            style="-fx-background-color: transparent; -fx-background: transparent;">
-                    <VBox fx:id="bidHistoryContainer" spacing="0"/>
-                </ScrollPane>
-                <Label fx:id="noBidsLabel" text="No bids yet" styleClass="text-muted" alignment="CENTER"
-                       visible="false" managed="false"/>
-            </VBox>
-        </VBox>
-    </HBox>
-</VBox>
+</ScrollPane>
