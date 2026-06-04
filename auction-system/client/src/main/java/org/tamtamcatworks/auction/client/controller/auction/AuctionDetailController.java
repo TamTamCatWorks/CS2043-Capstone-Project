@@ -249,6 +249,7 @@ public class AuctionDetailController extends BaseController {
     String currentUserId = SessionManager.getCurrentUser() != null
         ? SessionManager.getCurrentUser().id() : null;
     boolean isOwner = currentUserId != null && currentUserId.equals(auction.sellerId());
+    boolean isAdmin = SessionManager.isAdmin();
     boolean isActive = "ACTIVE".equalsIgnoreCase(status);
 
     if (isActive && !isOwner) {
@@ -263,8 +264,8 @@ public class AuctionDetailController extends BaseController {
       autoBidFormBox.setManaged(false);
     }
 
-    // Show owner controls
-    if (isOwner) {
+    // Show admin controls
+    if (isAdmin) {
       ownerControls.setVisible(true);
       ownerControls.setManaged(true);
       openBtn.setVisible("PENDING".equalsIgnoreCase(status));

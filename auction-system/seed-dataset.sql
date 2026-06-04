@@ -703,6 +703,31 @@ BEGIN
 	END LOOP;
 END $$;
 
+
+-- -----------------------------------------------------------------------------
+-- 7. RECONCILE WALLET HOLDS FOR ACTIVE AUCTIONS
+-- -----------------------------------------------------------------------------
+
+WITH required_holds AS (
+	SELECT
+		u.id AS user_id,
+		COALESCE(SUM(a.current_price), 0.0) AS required_hold
+	FROM "users" u
+	LEFT JOIN auctions a
+		ON a.leading_bidder_id = u.id
+		AND a.status = 'ACTIVE'
+	GROUP BY u.id
+)
+UPDATE "users" u
+SET
+	hold_balance = rh.required_hold,
+	balance = CASE
+		WHEN u.id IN ('usr-bidder-0001', 'usr-buyer-0001')
+			THEN GREATEST((u.balance + u.hold_balance) - rh.required_hold, 250000.0)
+		ELSE (u.balance + u.hold_balance) - rh.required_hold
+	END
+FROM required_holds rh
+WHERE u.id = rh.user_id;
 -- -----------------------------------------------------------------------------
 -- 7. RECONCILE WALLET HOLDS FOR ACTIVE AUCTIONS
 -- -----------------------------------------------------------------------------

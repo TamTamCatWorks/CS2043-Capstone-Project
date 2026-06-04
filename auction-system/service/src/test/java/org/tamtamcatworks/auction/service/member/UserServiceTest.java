@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
+import org.tamtamcatworks.auction.service.auction.AuctionService;
 import org.tamtamcatworks.auction.service.mapper.UserMapper;
 import org.tamtamcatworks.auction.shared.response.UserResponse;
 
@@ -36,13 +37,16 @@ class UserServiceTest {
   private UserMapper userMapper;
 
   @Mock
+  private AuctionService auctionService;
+
+  @Mock
   private ApplicationEventPublisher eventPublisher;
 
   private UserService userService;
 
   @BeforeEach
   void setUp() {
-    userService = new UserService(userRepository, passwordEncoder, userMapper, eventPublisher, null);
+    userService = new UserService(userRepository, passwordEncoder, userMapper, eventPublisher, null, null);
   }
 
   @Test

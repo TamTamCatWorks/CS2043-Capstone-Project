@@ -5,12 +5,14 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.user.AdminProfile;
 import org.tamtamcatworks.auction.model.user.BuyerProfile;
 import org.tamtamcatworks.auction.model.user.SellerProfile;
 import org.tamtamcatworks.auction.model.user.User;
 import org.tamtamcatworks.auction.persist.repository.AuctionRepository;
 import org.tamtamcatworks.auction.persist.repository.UserRepository;
+import org.tamtamcatworks.auction.service.auction.AuctionService;
 import org.tamtamcatworks.auction.service.event.UserStateEvent;
 import org.tamtamcatworks.auction.service.event.UserSuspendedEvent;
 import org.tamtamcatworks.auction.service.mapper.UserMapper;
@@ -27,6 +29,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuctionService auctionService;
     private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
     private final AuctionRepository auctionRepository;
@@ -35,12 +38,14 @@ public class UserService {
                        PasswordEncoder passwordEncoder,
                        UserMapper userMapper,
                        ApplicationEventPublisher eventPublisher,
-                       AuctionRepository auctionRepository) {
+                       AuctionRepository auctionRepository,
+                       AuctionService auctionService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.eventPublisher = eventPublisher;
         this.auctionRepository = auctionRepository;
+        this.auctionService = auctionService;
     }
 
     public void validateActiveUser(String userId) {
@@ -129,7 +134,14 @@ public class UserService {
 
         user.setActive(false);
 
+        List<Auction> suspendedAuctions = auctionRepository.findBySeller(user);
+
+        for (Auction suspendedAuction : suspendedAuctions) {
+            auctionService.cancel(suspendedAuction.getId(), "Seller suspended, auction canceled");
+        }
+
         userRepository.save(user);
+
 
         // Notify WebSocket handler to force-close any live sessions for this user
         eventPublisher.publishEvent(new UserSuspendedEvent(userId));
