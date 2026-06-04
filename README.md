@@ -12,6 +12,123 @@ Phạm vi triển khai bao gồm:
 - Các tính năng nâng cao: chống snipe, tự động đặt giá (auto-bid), tìm kiếm & phân trang, lưu trữ ảnh với MinIO
 - Giao diện desktop JavaFX cho cả người dùng thông thường và quản trị viên
 
+## Class Diagram
+
+```mermaid
+classDiagram
+direction LR
+
+class BaseEntity {
+  <<mappedSuperclass>>
+  +String id
+  +LocalDateTime creationDate
+}
+
+class User {
+  +String username
+  +String email
+  +String passwordHash
+  +String fullName
+  +double balance
+  +double holdBalance
+  +boolean active
+}
+
+class BuyerProfile {
+  +int totalWins
+  +double totalSpent
+  +List~String~ biddingHistory
+  +List~String~ watchlist
+}
+
+class SellerProfile {
+  +double rating
+  +int ratingCount
+  +double totalRevenue
+  +int totalSold
+  +List~String~ listings
+}
+
+class AdminProfile {
+  +List~String~ permissions
+  +List~String~ actionLog
+}
+
+class Auction {
+  +String title
+  +double startingPrice
+  +double currentPrice
+  +double minimumIncrement
+  +LocalDateTime startTime
+  +LocalDateTime endTime
+  +AuctionStatus status
+  +Long version
+}
+
+class Item {
+  <<abstract>>
+  +String name
+  +String description
+  +double startingPrice
+  +ItemCondition condition
+  +String imageUrl
+  +LocalDateTime listedAt
+}
+
+class Art
+class Electronics
+class Vehicle
+class Other
+
+class BidTransaction {
+  +double amount
+  +BidType bidType
+}
+
+class AutoBid {
+  +double maxBid
+  +boolean active
+}
+
+class Notification {
+  +String userId
+  +NotificationType type
+  +String message
+  +boolean read
+}
+
+BaseEntity <|-- User
+BaseEntity <|-- BuyerProfile
+BaseEntity <|-- SellerProfile
+BaseEntity <|-- AdminProfile
+BaseEntity <|-- Auction
+BaseEntity <|-- Item
+BaseEntity <|-- BidTransaction
+BaseEntity <|-- AutoBid
+BaseEntity <|-- Notification
+
+Item <|-- Art
+Item <|-- Electronics
+Item <|-- Vehicle
+Item <|-- Other
+
+User "1" o-- "0..1" BuyerProfile : buyerProfile
+User "1" o-- "0..1" SellerProfile : sellerProfile
+User "1" o-- "0..1" AdminProfile : adminProfile
+
+User "1" <-- "0..*" Auction : seller
+User "1" <-- "0..*" Auction : leadingBidder
+Auction "1" --> "1" Item : item
+Auction "1" o-- "0..*" BidTransaction : bidHistory
+
+Auction "1" <-- "0..*" BidTransaction : auction
+User "1" <-- "0..*" BidTransaction : bidder
+
+Auction "1" <-- "0..*" AutoBid : auction
+User "1" <-- "0..*" AutoBid : bidder
+
+Notification ..> User : userId only
+```
 
 ## Tech Stack
 
@@ -36,6 +153,7 @@ Yêu cầu cài đặt trước khi chạy:
 - Docker & Docker Compose (để chạy PostgreSQL + MinIO)
 
 Kiểm tra phiên bản trên terminal (Linux/macOS/Windows):
+
     java -version
     mvn -version
     docker --version
@@ -44,6 +162,8 @@ Kiểm tra phiên bản trên terminal (Linux/macOS/Windows):
 ## Cấu trúc các module chính
 
 Dự án sử dụng Maven multi-module, tổ chức theo thứ tự phụ thuộc từ dưới lên:
+
+```
 CS2043-Capstone-Project/
 └── auction-system/
     ├── pom.xml                  ← Parent POM
@@ -54,28 +174,35 @@ CS2043-Capstone-Project/
     ├── service/                 ← Business logic (BidService, AuctionService, ...)
     ├── api/                     ← Spring Boot REST API + WebSocket
     └── client/                  ← JavaFX desktop application
-
-Chiều phụ thuộc module: shared ← model ← persist ← service ← api ← client
+```
+**Dependency**:
+```mermaid
+graph TD
+    shared --> api
+    shared --> client
+    service --> api
+    persist --> service
+    model --> persist
+```
 
 
 ## Commands
 
 **Step 1**: Clone dự án:
+
     git clone https://github.com/TamTamCatWorks/CS2043-Capstone-Project.git
     cd CS2043-Capstone-Project/auction-system
 
 **Step 2**: Khởi động PostgreSQL và MinIO bằng Docker Compose:
+
     docker compose up -d
 
-    Lệnh này sẽ khởi động:
-    - PostgreSQL 16 tại cổng 5432, database tamtamcatworks
-    - MinIO tại cổng 9000 (API) và 9001 (Console)
-    - Init container tự động tạo bucket auction-images với quyền truy cập public
+Kiểm tra container đã chạy:
 
-    Kiểm tra container đã chạy:
         docker compose ps
 
 **Step 3**: Build toàn bộ dự án:
+
     # Linux / macOS
     mvn clean package -DskipTests
 
@@ -83,19 +210,24 @@ Chiều phụ thuộc module: shared ← model ← persist ← service ← api �
     mvn clean package "-DskipTests"
 
 **Step 4**: Chạy Server (API):
+
     mvn -pl api spring-boot:run
 
 **Step 5**: Chạy Client (JavaFX):
+
     mvn -pl client javafx:run
 
 **Step 6**: Run the seed script
+
     psql -h localhost -U postgres -d tamtamcatworks -f seed-dataset.sql
 
 **Clean up**: 
 Để tắt Docker sau khi dùng xong: 
+
     docker compose down
 
 Nếu muốn xoá luôn dữ liệu (database + ảnh MinIO):
+
     docker compose down -v
 
 
@@ -122,7 +254,7 @@ Nếu muốn xoá luôn dữ liệu (database + ảnh MinIO):
 7. Link báo cáo PDF và video demo
 
     - Link báo cáo PDF:
-        ...
+        https://github.com/TamTamCatWorks/CS2043-Capstone-Project/blob/main/docs/docs.pdf
 
     - Link video demo:
         https://drive.google.com/drive/folders/1X-gnQJJQ-8LMUYonsePNU4ffjVp54QlD
