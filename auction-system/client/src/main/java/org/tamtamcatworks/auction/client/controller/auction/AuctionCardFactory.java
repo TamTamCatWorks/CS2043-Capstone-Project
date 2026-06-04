@@ -18,7 +18,7 @@ public final class AuctionCardFactory {
 
   private static final DateTimeFormatter TIME_FMT =
       DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
-  private static final double CARD_SCALE_OFFSET = -0.1;
+  private static final double CARD_SCALE_OFFSET = -0.07;
   private static final double BASE_CARD_WIDTH = 200;
   private static final double BASE_CARD_IMAGE_HEIGHT = 128;
 
