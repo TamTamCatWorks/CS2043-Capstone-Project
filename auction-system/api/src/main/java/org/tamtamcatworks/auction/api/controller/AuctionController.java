@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Pageable;
 import org.tamtamcatworks.auction.shared.response.PageResponse;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,10 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.tamtamcatworks.auction.model.AuctionStatus;
 import org.tamtamcatworks.auction.service.auction.AuctionService;
 import org.tamtamcatworks.auction.service.auction.BidService;
+import org.tamtamcatworks.auction.service.auction.AutoBidService;
 import org.tamtamcatworks.auction.shared.request.AuctionRequest;
+import org.tamtamcatworks.auction.shared.request.AutoBidRequest;
 import org.tamtamcatworks.auction.shared.request.BidRequest;
 import org.tamtamcatworks.auction.shared.request.CreateAuctionRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
+import org.tamtamcatworks.auction.shared.response.AutoBidResponse;
 import org.tamtamcatworks.auction.shared.response.BidResponse;
 
 import java.util.Objects;
@@ -31,10 +35,14 @@ public class AuctionController {
 
     private final AuctionService auctionService;
     private final BidService bidService;
+    private final AutoBidService autoBidService;
 
-    public AuctionController(AuctionService auctionService, BidService bidService) {
+    public AuctionController(AuctionService auctionService,
+                             BidService bidService,
+                             AutoBidService autoBidService) {
         this.auctionService = auctionService;
         this.bidService = bidService;
+        this.autoBidService = autoBidService;
     }
 
     @PostMapping
@@ -100,7 +108,7 @@ public class AuctionController {
     public ResponseEntity<BidResponse> placeBid(@PathVariable String id,
                                                 @RequestBody BidRequest req,
                                                 HttpSession session) {
-        String bidderId = (String) session.getAttribute("userId");
+        String bidderId = requireUserId(session);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(bidService.placeBid(id, bidderId, req));
     }
@@ -108,6 +116,30 @@ public class AuctionController {
     @GetMapping("/{id}/bids")
     public ResponseEntity<List<BidResponse>> getBids(@PathVariable String id) {
         return ResponseEntity.ok(bidService.findByAuction(id));
+    }
+
+    @PostMapping("/{id}/auto-bid")
+    public ResponseEntity<AutoBidResponse> registerAutoBid(@PathVariable String id,
+                                                           @RequestBody AutoBidRequest req,
+                                                           HttpSession session) {
+        String bidderId = requireUserId(session);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(autoBidService.register(id, bidderId, req));
+    }
+
+    @GetMapping("/{id}/auto-bid")
+    public ResponseEntity<AutoBidResponse> getAutoBid(@PathVariable String id,
+                                                      HttpSession session) {
+        String bidderId = requireUserId(session);
+        return ResponseEntity.ok(autoBidService.getByAuctionAndBidder(id, bidderId));
+    }
+
+    @DeleteMapping("/{id}/auto-bid")
+    public ResponseEntity<Void> cancelAutoBid(@PathVariable String id,
+                                              HttpSession session) {
+        String bidderId = requireUserId(session);
+        autoBidService.cancel(id, bidderId);
+        return ResponseEntity.noContent().build();
     }
 
     private String requireUserId(HttpSession session) {

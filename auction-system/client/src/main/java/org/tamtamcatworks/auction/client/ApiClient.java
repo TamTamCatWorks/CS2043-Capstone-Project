@@ -8,6 +8,7 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestClient;
 import org.tamtamcatworks.auction.shared.request.AuctionRequest;
+import org.tamtamcatworks.auction.shared.request.AutoBidRequest;
 import org.tamtamcatworks.auction.shared.request.BidRequest;
 import org.tamtamcatworks.auction.shared.request.CreateAuctionRequest;
 import org.tamtamcatworks.auction.shared.request.ItemRequest;
@@ -15,6 +16,7 @@ import org.tamtamcatworks.auction.shared.request.LoginRequest;
 import org.tamtamcatworks.auction.shared.request.RegisterRequest;
 import org.tamtamcatworks.auction.shared.request.TopUpRequest;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
+import org.tamtamcatworks.auction.shared.response.AutoBidResponse;
 import org.tamtamcatworks.auction.shared.response.BidResponse;
 import org.tamtamcatworks.auction.shared.response.ItemResponse;
 import org.tamtamcatworks.auction.shared.response.NotificationResponse;
@@ -243,6 +245,29 @@ public class ApiClient {
             .body(request)
             .retrieve()
             .body(BidResponse.class);
+    }
+
+    public AutoBidResponse registerAutoBid(String auctionId, AutoBidRequest request) {
+        return client.post()
+            .uri("/auctions/{id}/auto-bid", auctionId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .retrieve()
+            .body(AutoBidResponse.class);
+    }
+
+    public AutoBidResponse getAutoBid(String auctionId) {
+        return client.get()
+            .uri("/auctions/{id}/auto-bid", auctionId)
+            .retrieve()
+            .body(AutoBidResponse.class);
+    }
+
+    public void cancelAutoBid(String auctionId) {
+        client.delete()
+            .uri("/auctions/{id}/auto-bid", auctionId)
+            .retrieve()
+            .toBodilessEntity();
     }
 
     public List<BidResponse> getBids(String auctionId) {

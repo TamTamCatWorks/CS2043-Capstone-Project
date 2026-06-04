@@ -10,9 +10,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
 
     List<Notification> findByUserIdOrderByCreationDateDesc(String userId);
 
-    List<Notification> findByUserIdAndReadFalseOrderByCreationDateDesc(String userId);
+    List<Notification> findByUserIdAndIsReadFalseOrderByCreationDateDesc(String userId);
 
     @Modifying
-    @Query("UPDATE Notification n SET n.read = true WHERE n.userId = :userId")
+    @Query("UPDATE Notification n SET n.isRead = true WHERE n.userId = :userId")
     void markAllReadByUserId(String userId);
 }

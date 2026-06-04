@@ -66,8 +66,8 @@ public class Auction extends BaseEntity {
      * - endTime phải sau startTime (phiên phải có thời lượng)
      *
      * @param title tiêu đề phiên đấu giá
-     * @param itemId ID của item đang đấu giá
-     * @param sellerId ID của người bán
+     * @param item đối tượng item đang đấu giá
+     * @param seller đối tượng người bán
      * @param startingPrice giá khởi điểm (phải > 0)
      * @param startTime thời điểm bắt đầu
      * @param endTime thời điểm kết thúc (phải sau startTime)

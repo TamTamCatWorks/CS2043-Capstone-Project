@@ -45,6 +45,7 @@ public interface AuctionMapper {
     @Mapping(target = "specificInfo", expression = "java(auction.getItem() != null ? auction.getItem().getSpecificInfo() : null)")
     @Mapping(target = "leadingBidderId", source = "leadingBidder.id")
     @Mapping(target = "leadingBidderName", source = "leadingBidder.fullName")
+    @Mapping(target = "minimumIncrement", source = "minimumIncrement")
     AuctionResponse toResponse(Auction auction);
 
     default PageResponse<AuctionResponse> toPageResponse(Page<Auction> page) {

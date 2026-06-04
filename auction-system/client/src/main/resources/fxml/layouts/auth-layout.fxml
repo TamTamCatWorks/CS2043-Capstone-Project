@@ -24,7 +24,7 @@
                     <Image url="@../../assets/icons/app-icon.png"/>
                 </ImageView>
             </StackPane>
-            <Label text="GoodBids" styleClass="/brand-title"/>
+            <Label text="GoodBids" styleClass="brand-title"/>
         </VBox>
 
         <!-- Dynamic Content Slot -->

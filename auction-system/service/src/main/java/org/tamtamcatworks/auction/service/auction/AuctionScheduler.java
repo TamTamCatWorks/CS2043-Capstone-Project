@@ -38,4 +38,21 @@ public class AuctionScheduler {
             }
         }
     }
+
+    @Scheduled(fixedRate = 30_000)  //runs every 30 seconds
+    @Transactional
+    public void openPendingAuctions() {
+        List<Auction> pending = auctionService.findByStatus(AuctionStatus.PENDING).stream()
+            .filter(auction -> auction.getStartTime().isBefore(LocalDateTime.now()))
+            .toList();
+
+        for (Auction auction : pending) {
+            try {
+                auctionService.open(auction.getId());
+                log.info("Auto-opened auction: {} ({})", auction.getTitle(), auction.getId());
+            } catch (IllegalStateException e) {
+                log.warn("Could not auto-open auction {}: {}", auction.getId(), e.getMessage());
+            }
+        }
+    }
 }
