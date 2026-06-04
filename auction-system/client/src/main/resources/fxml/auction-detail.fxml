@@ -142,6 +142,27 @@
                                 maxWidth="Infinity" styleClass="btn-primary"/>
                     </VBox>
 
+                    <!-- Auto-Bid -->
+                    <VBox fx:id="autoBidFormBox" styleClass="detail-panel" spacing="12.0" visible="false" managed="false">
+                        <Label text="Auto-Bid" styleClass="info-value"/>
+                        <Label text="Minimum Increment" styleClass="info-label"/>
+                        <Label fx:id="autoBidIncrementLabel" text="-" styleClass="info-value"/>
+                        <Label fx:id="autoBidStateLabel" text="No auto-bid set" styleClass="info-value" visible="false" managed="false"/>
+                        <Label fx:id="autoBidMaxLabel" text="-" styleClass="info-value" visible="false" managed="false"/>
+                        <HBox spacing="8.0" alignment="CENTER_LEFT" styleClass="bid-input-group">
+                            <Label text="\$" styleClass="info-value"/>
+                            <TextField fx:id="autoBidMaxField" promptText="Enter max amount" HBox.hgrow="ALWAYS"
+                                       styleClass="edge-to-edge-field"/>
+                        </HBox>
+                        <Label fx:id="autoBidMessageLabel" wrapText="true" visible="false" managed="false"/>
+                        <HBox spacing="8.0">
+                            <Button fx:id="autoBidBtn" text="Place Auto-Bid" onAction="#handlePlaceAutoBid"
+                                    maxWidth="Infinity" styleClass="btn-primary" HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="cancelAutoBidBtn" text="Cancel" onAction="#handleCancelAutoBid"
+                                    visible="false" managed="false" styleClass="btn-danger-outline"/>
+                        </HBox>
+                    </VBox>
+
                     <!-- Bid History -->
                     <VBox styleClass="detail-panel" spacing="8.0" VBox.vgrow="ALWAYS">
                         <Label text="Bid History" styleClass="info-value"/>

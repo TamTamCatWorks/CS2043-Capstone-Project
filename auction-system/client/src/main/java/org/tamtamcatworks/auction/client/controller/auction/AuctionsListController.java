@@ -1,104 +1,295 @@
 package org.tamtamcatworks.auction.client.controller.auction;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javafx.geometry.Pos;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+
+import org.tamtamcatworks.auction.client.AppContext;
 import org.tamtamcatworks.auction.client.AsyncTask;
-import org.tamtamcatworks.auction.client.NavigationState;
 import org.tamtamcatworks.auction.client.Route;
+import org.tamtamcatworks.auction.client.SearchParams;
 import org.tamtamcatworks.auction.client.SessionManager;
 import org.tamtamcatworks.auction.shared.response.AuctionResponse;
 
-/** Controller for the auction browse/list view. */
+/**
+ * Controller for the Browse Auctions page — horizontal shelf (Netflix-row) layout.
+ *
+ * <h3>Responsibilities</h3>
+ * <ul>
+ *   <li>Fetch all auctions once and distribute them across 8 named shelf rows.</li>
+ *   <li>Respond to status-filter pills ("All", "Active", "Ending Soon") which
+ *       show/hide auctions <em>within</em> each discovery shelf.</li>
+ *   <li>Delegate "See all →" clicks to
+ *       {@link org.tamtamcatworks.auction.client.controller.shell.LayoutController#navigateToSearchResults}
+ *       so the global header stays in sync and the correct SearchParams are
+ *       forwarded to the search-results page.</li>
+ * </ul>
+ *
+ * <h3>No search bar</h3>
+ * <p>This controller owns <em>no</em> search field.  The global header search
+ * in {@code dashboard-layout.fxml} is the single search entry point.
+ */
 @Route(fxml = "/fxml/auctions-list.fxml", layout = Route.DASHBOARD_LAYOUT)
 public class AuctionsListController {
 
-  @FXML private ComboBox<String> statusFilter;
-  @FXML private StackPane loadingPane;
-  @FXML private StackPane emptyPane;
-  @FXML private Label errorLabel;
-  @FXML private FlowPane auctionsContainer;
+  // ── FXML injected fields ─────────────────────────────────────────────────
 
-  private final List<AuctionResponse> loadedAuctions = new ArrayList<>();
-  private String searchQuery = "";
-  private String searchCategory = "All categories";
+  @FXML private Label      errorLabel;
+  @FXML private HBox       filterStrip;   // status-only pill strip
+
+  // Discovery shelf rows
+  @FXML private HBox       featuredRow;
+  @FXML private HBox       endingSoonRow;
+  @FXML private HBox       newArrivalsRow;
+  @FXML private HBox       popularRow;
+
+  // Category shelf rows
+  @FXML private HBox       artRow;
+  @FXML private HBox       electronicsRow;
+  @FXML private HBox       vehiclesRow;
+  @FXML private HBox       otherRow;
+
+  // Per-shelf overlays
+  @FXML private StackPane  featuredOverlay;
+  @FXML private StackPane  endingSoonOverlay;
+  @FXML private StackPane  newArrivalsOverlay;
+  @FXML private StackPane  popularOverlay;
+  @FXML private StackPane  artOverlay;
+  @FXML private StackPane  electronicsOverlay;
+  @FXML private StackPane  vehiclesOverlay;
+  @FXML private StackPane  otherOverlay;
+
+  // ── Internal state ───────────────────────────────────────────────────────
+
+  private final List<AuctionResponse> allAuctions = new ArrayList<>();
+
+  /** Status pill currently selected: "All", "Active", "Ending Soon". */
+  private String activeStatusFilter = "All";
+
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   @FXML
   public void initialize() {
-    String pendingQuery = NavigationState.getPendingSearchQuery();
-    String pendingCategory = NavigationState.getPendingSearchCategory();
-    if (pendingQuery != null) {
-      searchQuery = pendingQuery.trim();
-    }
-    if (pendingCategory != null && !pendingCategory.isBlank()) {
-      searchCategory = pendingCategory.trim();
-    }
-    if (pendingQuery != null || pendingCategory != null) {
-      NavigationState.clearPendingSearch();
-    }
-
-    statusFilter.getItems().addAll("ALL", "ACTIVE", "PENDING", "CLOSED");
-    statusFilter.setValue("ALL");
-    statusFilter.setOnAction(e -> loadAuctions());
-    loadAuctions();
+    buildStatusPills();
+    loadAllAuctions();
   }
 
-  private void loadAuctions() {
-    setLoading(true);
-    errorLabel.setVisible(false);
-    errorLabel.setManaged(false);
-    emptyPane.setVisible(false);
-    emptyPane.setManaged(false);
-    auctionsContainer.getChildren().clear();
+  // ── Status-filter pill strip ──────────────────────────────────────────────
 
-    String selected = statusFilter.getValue();
-    boolean hasSearch = (searchQuery != null && !searchQuery.isBlank())
-        || (searchCategory != null && !searchCategory.isBlank()
-            && !"All categories".equalsIgnoreCase(searchCategory));
+  private static final String[] STATUS_PILLS = {"All", "Active", "Ending Soon"};
 
-    AsyncTask.<List<AuctionResponse>>run(() -> {
-          if (hasSearch) {
-            return SessionManager.getApiClient().searchAuctions(searchQuery, selected, searchCategory);
-          }
-          if ("ALL".equals(selected)) {
-            return SessionManager.getApiClient().getAllAuctions();
-          } else {
-            return SessionManager.getApiClient().getAuctionsByStatus(selected);
-          }
-        })
+  private void buildStatusPills() {
+    ToggleGroup tg = new ToggleGroup();
+    for (String label : STATUS_PILLS) {
+      ToggleButton btn = new ToggleButton(label);
+      btn.getStyleClass().add("filter-pill");
+      btn.setToggleGroup(tg);
+      if ("All".equals(label)) btn.setSelected(true);
+      btn.selectedProperty().addListener((obs, was, is) -> {
+        if (is) {
+          activeStatusFilter = label;
+          renderShelves(filteredList());
+        }
+      });
+      filterStrip.getChildren().add(btn);
+    }
+  }
+
+  // ── Data loading ──────────────────────────────────────────────────────────
+
+  private void loadAllAuctions() {
+    showAllOverlays(true);
+    clearAllRows();
+
+    AsyncTask.<List<AuctionResponse>>run(() -> SessionManager.getApiClient().getAllAuctions())
         .onSuccess(auctions -> {
-          setLoading(false);
-          loadedAuctions.clear();
-          if (auctions != null) {
-            loadedAuctions.addAll(auctions);
-          }
-
-          if (loadedAuctions.isEmpty()) {
-            emptyPane.setVisible(true);
-            emptyPane.setManaged(true);
-          } else {
-            for (AuctionResponse auction : loadedAuctions) {
-              auctionsContainer.getChildren().add(AuctionCardFactory.createAuctionCard(auction));
-            }
-          }
+          allAuctions.clear();
+          if (auctions != null) allAuctions.addAll(auctions);
+          renderShelves(filteredList());
+          showAllOverlays(false);
         })
         .onFailure(ex -> {
-          setLoading(false);
+          showAllOverlays(false);
           String msg = ex != null && ex.getMessage() != null ? ex.getMessage() : "Unknown error";
           errorLabel.setText("Failed to load auctions: " + msg);
           errorLabel.setVisible(true);
           errorLabel.setManaged(true);
+          showEmptyOnAllShelves();
         })
         .start();
   }
 
-  private void setLoading(boolean loading) {
-    loadingPane.setVisible(loading);
-    loadingPane.setManaged(loading);
+  // ── Filtering ─────────────────────────────────────────────────────────────
+
+  private List<AuctionResponse> filteredList() {
+    return switch (activeStatusFilter) {
+      case "Active"      -> allAuctions.stream()
+                              .filter(a -> "ACTIVE".equalsIgnoreCase(a.status()))
+                              .collect(Collectors.toList());
+      case "Ending Soon" -> allAuctions.stream()
+                              .filter(this::isEndingSoon)
+                              .collect(Collectors.toList());
+      default            -> new ArrayList<>(allAuctions);
+    };
   }
 
+  // ── Shelf rendering ───────────────────────────────────────────────────────
+
+  private void renderShelves(List<AuctionResponse> source) {
+    List<AuctionResponse> featured = source.stream()
+        .filter(a -> "ACTIVE".equalsIgnoreCase(a.status()))
+        .sorted(Comparator.comparingDouble(AuctionResponse::currentPrice).reversed())
+        .limit(12).collect(Collectors.toList());
+
+    List<AuctionResponse> endingSoon = source.stream()
+        .filter(this::isEndingSoon)
+        .sorted(Comparator.comparing(a -> a.endTime() != null ? a.endTime() : LocalDateTime.MAX))
+        .limit(12).collect(Collectors.toList());
+
+    List<AuctionResponse> newArrivals = source.stream()
+        .filter(this::isNew)
+        .sorted(Comparator.comparing((AuctionResponse a) ->
+                a.startTime() != null ? a.startTime() : LocalDateTime.MIN).reversed())
+        .limit(12).collect(Collectors.toList());
+
+    List<AuctionResponse> popular = source.stream()
+        .filter(a -> "ACTIVE".equalsIgnoreCase(a.status()))
+        .sorted(Comparator.comparingDouble((AuctionResponse a) -> a.currentPrice()).reversed())
+        .limit(12).collect(Collectors.toList());
+
+    List<AuctionResponse> art = source.stream()
+        .filter(a -> "ART".equalsIgnoreCase(a.itemType()))
+        .limit(12).collect(Collectors.toList());
+
+    List<AuctionResponse> electronics = source.stream()
+        .filter(a -> "ELECTRONICS".equalsIgnoreCase(a.itemType()))
+        .limit(12).collect(Collectors.toList());
+
+    List<AuctionResponse> vehicles = source.stream()
+        .filter(a -> "VEHICLE".equalsIgnoreCase(a.itemType()))
+        .limit(12).collect(Collectors.toList());
+
+    List<AuctionResponse> other = source.stream()
+        .filter(a -> a.itemType() == null
+            || (!a.itemType().equalsIgnoreCase("ART")
+                && !a.itemType().equalsIgnoreCase("ELECTRONICS")
+                && !a.itemType().equalsIgnoreCase("VEHICLE")))
+        .limit(12).collect(Collectors.toList());
+
+    populateShelf(featuredRow,    featuredOverlay,    featured);
+    populateShelf(endingSoonRow,  endingSoonOverlay,  endingSoon);
+    populateShelf(newArrivalsRow, newArrivalsOverlay, newArrivals);
+    populateShelf(popularRow,     popularOverlay,     popular);
+    populateShelf(artRow,         artOverlay,         art);
+    populateShelf(electronicsRow, electronicsOverlay, electronics);
+    populateShelf(vehiclesRow,    vehiclesOverlay,    vehicles);
+    populateShelf(otherRow,       otherOverlay,       other);
+  }
+
+  private void populateShelf(HBox row, StackPane overlay, List<AuctionResponse> items) {
+    row.getChildren().clear();
+    overlay.getChildren().clear();
+
+    if (items.isEmpty()) {
+      Label empty = new Label("Nothing here yet");
+      empty.getStyleClass().add("shelf-empty-label");
+      VBox wrap = new VBox(empty);
+      wrap.setAlignment(Pos.CENTER);
+      overlay.getChildren().add(wrap);
+      overlay.setVisible(true);
+      overlay.setManaged(true);
+    } else {
+      overlay.setVisible(false);
+      overlay.setManaged(false);
+      for (AuctionResponse a : items) {
+        row.getChildren().add(AuctionCardFactory.createAuctionCard(a));
+      }
+    }
+  }
+
+  // ── Overlay helpers ───────────────────────────────────────────────────────
+
+  private void showAllOverlays(boolean loading) {
+    for (StackPane overlay : allOverlays()) {
+      overlay.getChildren().clear();
+      if (loading) {
+        ProgressIndicator pi = new ProgressIndicator();
+        pi.setMaxWidth(32);
+        pi.setMaxHeight(32);
+        pi.getStyleClass().add("progress-spinner");
+        VBox wrap = new VBox(pi);
+        wrap.setAlignment(Pos.CENTER);
+        overlay.getChildren().add(wrap);
+        overlay.setVisible(true);
+        overlay.setManaged(true);
+      } else {
+        overlay.setVisible(false);
+        overlay.setManaged(false);
+      }
+    }
+  }
+
+  private void clearAllRows() {
+    List.of(featuredRow, endingSoonRow, newArrivalsRow, popularRow,
+            artRow, electronicsRow, vehiclesRow, otherRow)
+        .forEach(r -> r.getChildren().clear());
+  }
+
+  private void showEmptyOnAllShelves() {
+    for (StackPane overlay : allOverlays()) {
+      overlay.getChildren().clear();
+      Label empty = new Label("Nothing here yet");
+      empty.getStyleClass().add("shelf-empty-label");
+      VBox wrap = new VBox(empty);
+      wrap.setAlignment(Pos.CENTER);
+      overlay.getChildren().add(wrap);
+      overlay.setVisible(true);
+      overlay.setManaged(true);
+    }
+  }
+
+  private List<StackPane> allOverlays() {
+    return List.of(featuredOverlay, endingSoonOverlay, newArrivalsOverlay, popularOverlay,
+                   artOverlay, electronicsOverlay, vehiclesOverlay, otherOverlay);
+  }
+
+  // ── Time helpers ──────────────────────────────────────────────────────────
+
+  private boolean isEndingSoon(AuctionResponse a) {
+    if (a.endTime() == null || !"ACTIVE".equalsIgnoreCase(a.status())) return false;
+    LocalDateTime soon = LocalDateTime.now().plusHours(24);
+    return a.endTime().isAfter(LocalDateTime.now()) && a.endTime().isBefore(soon);
+  }
+
+  private boolean isNew(AuctionResponse a) {
+    if (a.startTime() == null) return false;
+    return a.startTime().isAfter(LocalDateTime.now().minusDays(3));
+  }
+
+  // ── "See all" handlers — delegate to LayoutController ────────────────────
+
+  @FXML private void onSeeAllFeatured()    { navigateTo(SearchParams.forStatus("ACTIVE")); }
+  @FXML private void onSeeAllEndingSoon()  { navigateTo(new SearchParams("", "All categories", "ACTIVE", "Ending Soon", 0)); }
+  @FXML private void onSeeAllNew()         { navigateTo(new SearchParams("", "All categories", "ALL", "Newest First", 0)); }
+  @FXML private void onSeeAllPopular()     { navigateTo(new SearchParams("", "All categories", "ACTIVE", "Most Bids", 0)); }
+  @FXML private void onSeeAllArt()         { navigateTo(SearchParams.forCategory("Art")); }
+  @FXML private void onSeeAllElectronics() { navigateTo(SearchParams.forCategory("Electronics")); }
+  @FXML private void onSeeAllVehicles()    { navigateTo(SearchParams.forCategory("Vehicle")); }
+  @FXML private void onSeeAllOther()       { navigateTo(SearchParams.forCategory("Other")); }
+
+  private void navigateTo(SearchParams params) {
+    AppContext.getLayoutController().navigateToSearchResults(params);
+  }
 }
