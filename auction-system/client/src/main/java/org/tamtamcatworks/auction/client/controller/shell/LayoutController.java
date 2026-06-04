@@ -1,6 +1,5 @@
 package org.tamtamcatworks.auction.client.controller.shell;
 
-import javafx.animation.PauseTransition;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -11,7 +10,6 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.util.Duration;
 
 import org.tamtamcatworks.auction.client.AppContext;
 import org.tamtamcatworks.auction.client.Navigation;
@@ -69,10 +67,6 @@ public class LayoutController {
   /** Cached reference to the SearchResultsController when it is the active view. */
   private SearchResultsController  activeSearchController;
 
-  /** 350 ms debounce for live-typing in the header search field. */
-  private final PauseTransition    searchDebounce =
-      new PauseTransition(Duration.millis(350));
-
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   @FXML
@@ -108,15 +102,9 @@ public class LayoutController {
     // ── Search field ──
     if (headerSearchField != null) {
       headerSearchField.setOnAction(e -> handleHeaderSearchCommitted());
-      headerSearchField.textProperty().addListener((obs, old, nv) -> {
-        updateHeaderSearchActive();
-        searchDebounce.playFromStart();
-      });
       headerSearchField.focusedProperty().addListener(
           (obs, was, is) -> updateHeaderSearchActive());
     }
-
-    searchDebounce.setOnFinished(e -> handleHeaderSearchCommitted());
 
     if (headerCreateAuctionButton != null) {
       headerCreateAuctionButton.setOnAction(e -> handleHeaderCreateAuction());
@@ -161,8 +149,6 @@ public class LayoutController {
    */
   public void syncHeaderSearch(String query, String category) {
     if (headerSearchField != null) {
-      // Temporarily disconnect the debounce to avoid a feedback loop
-      searchDebounce.stop();
       headerSearchField.setText(query == null ? "" : query);
     }
     if (headerCategoryFilter != null) {
