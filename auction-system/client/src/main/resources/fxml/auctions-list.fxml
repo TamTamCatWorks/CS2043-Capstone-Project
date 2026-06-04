@@ -11,37 +11,24 @@
       fx:controller="org.tamtamcatworks.auction.client.controller.auction.AuctionsListController">
 
     <!-- ═══════════════════════════════════════════════════════════════
-         TOP BAR — title + subtitle only.
-         Search lives exclusively in the global header.
-         ═══════════════════════════════════════════════════════════════ -->
-    <VBox styleClass="browse-top-bar" spacing="4">
-        <padding><Insets top="20" right="24" bottom="16" left="24"/></padding>
-        <Label text="Browse Auctions" styleClass="section-title"/>
-        <Label text="Discover items from sellers around the world" styleClass="section-subtitle"/>
-        <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false"
-               styleClass="error-label"/>
-    </VBox>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         STATUS FILTER STRIP
-         (Status-only pills — "All", "Active", "Ending Soon".
-          Category filtering is handled by the header category filter.)
-         ═══════════════════════════════════════════════════════════════ -->
-    <ScrollPane fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="NEVER"
-                styleClass="filter-strip-scroll">
-        <HBox fx:id="filterStrip" spacing="8" alignment="CENTER_LEFT">
-            <padding><Insets top="10" right="24" bottom="10" left="24"/></padding>
-            <!-- Status-filter ToggleButtons injected by controller -->
-        </HBox>
-    </ScrollPane>
-
-    <!-- ═══════════════════════════════════════════════════════════════
          MAIN SCROLL REGION — shelf sections
          ═══════════════════════════════════════════════════════════════ -->
     <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
                 style="-fx-background-color: transparent; -fx-background: transparent;">
         <VBox fx:id="shelvesContainer" spacing="28">
             <padding><Insets top="8" right="24" bottom="32" left="24"/></padding>
+
+          <!-- ═══════════════════════════════════════════════════════════════
+              TOP BAR — title + subtitle only.
+              Search lives exclusively in the global header.
+              ═══════════════════════════════════════════════════════════════ -->
+          <VBox styleClass="browse-top-bar" spacing="4">
+             <padding><Insets top="20" right="0" bottom="16" left="10"/></padding>
+             <Label text="Browse Auctions" styleClass="section-title"/>
+             <Label text="Spend wisely (or not, who are we to judge)" styleClass="section-subtitle"/>
+             <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false"
+                   styleClass="error-label"/>
+          </VBox>
 
             <!-- ── 1. FEATURED AUCTIONS ── -->
             <VBox spacing="4" styleClass="shelf-section">

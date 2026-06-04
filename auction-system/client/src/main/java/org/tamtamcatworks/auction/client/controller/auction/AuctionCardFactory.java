@@ -18,25 +18,34 @@ public final class AuctionCardFactory {
 
   private static final DateTimeFormatter TIME_FMT =
       DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
+  private static final double CARD_SCALE_OFFSET = -0.1;
+  private static final double BASE_CARD_WIDTH = 200;
+  private static final double BASE_CARD_IMAGE_HEIGHT = 128;
+
+  private static double scale(double value) {
+    return value * (1.0 + CARD_SCALE_OFFSET);
+  }
 
   private AuctionCardFactory() {}
 
   public static VBox createAuctionCard(AuctionResponse auction) {
     VBox card = new VBox(0);
     card.getStyleClass().add("asset-card");
-    card.setPrefWidth(220);
-    card.setMinWidth(220);
-    card.setMaxWidth(220);
+    double cardWidth = scale(BASE_CARD_WIDTH);
+    card.setPrefWidth(cardWidth);
+    card.setMinWidth(cardWidth);
+    card.setMaxWidth(cardWidth);
 
     StackPane imgWrapper = new StackPane();
     imgWrapper.getStyleClass().add("asset-card-image-wrapper");
-    imgWrapper.setPrefHeight(140);
-    imgWrapper.setMinHeight(140);
-    imgWrapper.setMaxHeight(140);
+    double cardImageHeight = scale(BASE_CARD_IMAGE_HEIGHT);
+    imgWrapper.setPrefHeight(cardImageHeight);
+    imgWrapper.setMinHeight(cardImageHeight);
+    imgWrapper.setMaxHeight(cardImageHeight);
 
     ImageView imgView = new ImageView();
-    imgView.setFitWidth(220);
-    imgView.setFitHeight(140);
+    imgView.setFitWidth(cardWidth);
+    imgView.setFitHeight(cardImageHeight);
     imgView.setPreserveRatio(true);
 
     Label placeholderLabel = new Label();
@@ -59,7 +68,7 @@ public final class AuctionCardFactory {
 
     imgWrapper.getChildren().addAll(imgView, placeholderLabel);
 
-    VBox details = new VBox(6);
+    VBox details = new VBox(5);
     details.getStyleClass().add("asset-card-details");
 
     String itemType = auction.itemType() != null ? auction.itemType() : "Unknown";
@@ -69,8 +78,8 @@ public final class AuctionCardFactory {
     Label titleLabel = new Label(auction.title());
     titleLabel.getStyleClass().add("asset-card-title");
     titleLabel.setWrapText(true);
-    titleLabel.setMaxHeight(40);
-    titleLabel.setMinHeight(40);
+    titleLabel.setMaxHeight(scale(30));
+    titleLabel.setMinHeight(scale(30));
 
     Label sellerLabel = new Label("by " + (auction.sellerName() != null ? auction.sellerName() : "Unknown"));
     sellerLabel.getStyleClass().add("asset-card-seller");

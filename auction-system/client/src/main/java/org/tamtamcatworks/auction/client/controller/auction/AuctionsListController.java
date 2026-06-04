@@ -10,8 +10,6 @@ import javafx.geometry.Pos;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -29,8 +27,6 @@ import org.tamtamcatworks.auction.shared.response.AuctionResponse;
  * <h3>Responsibilities</h3>
  * <ul>
  *   <li>Fetch all auctions once and distribute them across 8 named shelf rows.</li>
- *   <li>Respond to status-filter pills ("All", "Active", "Ending Soon") which
- *       show/hide auctions <em>within</em> each discovery shelf.</li>
  *   <li>Delegate "See all →" clicks to
  *       {@link org.tamtamcatworks.auction.client.controller.shell.LayoutController#navigateToSearchResults}
  *       so the global header stays in sync and the correct SearchParams are
@@ -47,7 +43,6 @@ public class AuctionsListController {
   // ── FXML injected fields ─────────────────────────────────────────────────
 
   @FXML private Label      errorLabel;
-  @FXML private HBox       filterStrip;   // status-only pill strip
 
   // Discovery shelf rows
   @FXML private HBox       featuredRow;
@@ -75,36 +70,11 @@ public class AuctionsListController {
 
   private final List<AuctionResponse> allAuctions = new ArrayList<>();
 
-  /** Status pill currently selected: "All", "Active", "Ending Soon". */
-  private String activeStatusFilter = "All";
-
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   @FXML
   public void initialize() {
-    buildStatusPills();
     loadAllAuctions();
-  }
-
-  // ── Status-filter pill strip ──────────────────────────────────────────────
-
-  private static final String[] STATUS_PILLS = {"All", "Active", "Ending Soon"};
-
-  private void buildStatusPills() {
-    ToggleGroup tg = new ToggleGroup();
-    for (String label : STATUS_PILLS) {
-      ToggleButton btn = new ToggleButton(label);
-      btn.getStyleClass().add("filter-pill");
-      btn.setToggleGroup(tg);
-      if ("All".equals(label)) btn.setSelected(true);
-      btn.selectedProperty().addListener((obs, was, is) -> {
-        if (is) {
-          activeStatusFilter = label;
-          renderShelves(filteredList());
-        }
-      });
-      filterStrip.getChildren().add(btn);
-    }
   }
 
   // ── Data loading ──────────────────────────────────────────────────────────
@@ -117,7 +87,7 @@ public class AuctionsListController {
         .onSuccess(auctions -> {
           allAuctions.clear();
           if (auctions != null) allAuctions.addAll(auctions);
-          renderShelves(filteredList());
+          renderShelves(allAuctions);
           showAllOverlays(false);
         })
         .onFailure(ex -> {
@@ -132,18 +102,6 @@ public class AuctionsListController {
   }
 
   // ── Filtering ─────────────────────────────────────────────────────────────
-
-  private List<AuctionResponse> filteredList() {
-    return switch (activeStatusFilter) {
-      case "Active"      -> allAuctions.stream()
-                              .filter(a -> "ACTIVE".equalsIgnoreCase(a.status()))
-                              .collect(Collectors.toList());
-      case "Ending Soon" -> allAuctions.stream()
-                              .filter(this::isEndingSoon)
-                              .collect(Collectors.toList());
-      default            -> new ArrayList<>(allAuctions);
-    };
-  }
 
   // ── Shelf rendering ───────────────────────────────────────────────────────
 
