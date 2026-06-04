@@ -118,3 +118,41 @@ Khi tắt, nên dừng theo thứ tự ngược lại: Client → Server → Doc
 
 Nếu muốn xoá luôn dữ liệu (database + ảnh MinIO):
     docker compose down -v
+
+
+6. Danh sách chức năng đã hoàn thành
+
+    6.1. User/Item Management (1p)
+
+        - User Management
+        - Auction Item Management
+
+    6.2. Auction Functionalities (1p)
+
+        - Bidding
+        - Auction Closure & Management with Spring Scheduler
+        - Global Exception Handling with @RestControllerAdvice
+        - GUI with javaFX & atlantaFX
+
+    6.3. Concurrency & Realtime Update (1.5p)
+
+        - Concurrent Bidding Handling (Thanks to Spring) (1p)
+        - Realtime Update (Observer/Websockets) (0.5p)
+
+    6.4. Further Functionalities (0.5 per), max (1.5p)
+
+        - Admin Panel
+        - Anti-sniping
+        - Auto-bidding
+        - Bid History Visualization with Line chart
+        - Search & Pagination
+        - Object Storage with Minio
+
+
+7. Link báo cáo PDF và video demo
+
+    - Link báo cáo PDF:
+        ...
+
+    - Link video demo:
+        https://drive.google.com/drive/folders/1X-gnQJJQ-8LMUYonsePNU4ffjVp54QlD
