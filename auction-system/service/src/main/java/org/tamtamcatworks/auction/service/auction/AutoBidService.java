@@ -1,6 +1,7 @@
 package org.tamtamcatworks.auction.service.auction;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -53,16 +54,19 @@ public class AutoBidService {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
     private final BidService bidService;
+    private final ApplicationEventPublisher eventPublisher;
     private AutoBidService self;
 
     public AutoBidService(AutoBidRepository autoBidRepository,
                           AuctionRepository auctionRepository,
                           UserRepository userRepository,
-                          BidService bidService) {
+                          BidService bidService,
+                          ApplicationEventPublisher eventPublisher) {
         this.autoBidRepository = autoBidRepository;
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.bidService = bidService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Autowired
@@ -108,14 +112,50 @@ public class AutoBidService {
             throw new IllegalStateException("Seller không thể tự auto-bid trên phiên của mình.");
         }
 
+        // Track which upsert path was taken so post-save dispatch can differ.
+        boolean[] isNew = {false};
         AutoBid autoBid = autoBidRepository.findByAuctionAndBidder(auction, bidder)
             .map(existing -> {
                 existing.update(request.maxBid());
                 return existing;
             })
-            .orElseGet(() -> new AutoBid(auction, bidder, request.maxBid()));
+            .orElseGet(() -> {
+                isNew[0] = true;
+                return new AutoBid(auction, bidder, request.maxBid());
+            });
 
-        return toResponse(autoBidRepository.save(autoBid));
+        AutoBid saved = autoBidRepository.save(autoBid);
+
+        // ── Immediate-bid dispatch ─────────────────────────────────────────────
+        // Determine whether this bidder currently holds the lead.
+        String leaderId = auction.getLeadingBidder() != null
+                ? auction.getLeadingBidder().getId() : null;
+        boolean isCurrentLeader = bidderId.equals(leaderId);
+        double minimumNext = auction.getCurrentPrice() + auction.getMinimumIncrement();
+
+        if (!isCurrentLeader) {
+            // Non-leader (fresh registration or update): bid immediately at the
+            // minimum next price, but only if the declared ceiling covers it.
+            if (saved.getMaxBid() >= minimumNext) {
+                self.executeAutoBid(auctionId, saved.getId(), bidderId, minimumNext);
+            }
+        } else if (!isNew[0]) {
+            // Leader updating maxBid: no immediate bid needed — they already hold
+            // the top position.  Publish a synthetic BidEvent so onBidPlaced
+            // re-evaluates competitors that may have been capped against the old
+            // ceiling.  The event fires AFTER_COMMIT of this transaction.
+            eventPublisher.publishEvent(new BidEvent(
+                    auctionId,
+                    auction.getTitle(),
+                    auction.getSeller().getId(),
+                    bidderId,
+                    null,
+                    auction.getCurrentPrice()
+            ));
+        }
+        // else: fresh registration where bidder is already the leader — no action.
+
+        return toResponse(saved);
     }
 
     /**

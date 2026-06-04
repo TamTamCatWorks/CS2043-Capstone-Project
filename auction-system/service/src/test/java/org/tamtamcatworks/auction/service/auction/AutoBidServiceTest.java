@@ -24,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.tamtamcatworks.auction.model.Auction;
 import org.tamtamcatworks.auction.model.AutoBid;
@@ -53,6 +54,9 @@ class AutoBidServiceTest {
     @Mock
     private BidService bidService;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     private AutoBidService autoBidService;
 
     private User seller;
@@ -62,7 +66,7 @@ class AutoBidServiceTest {
 
     @BeforeEach
     void setUp() {
-        autoBidService = new AutoBidService(autoBidRepository, auctionRepository, userRepository, bidService);
+        autoBidService = new AutoBidService(autoBidRepository, auctionRepository, userRepository, bidService, eventPublisher);
         ReflectionTestUtils.setField(autoBidService, "self", autoBidService);
 
         seller = new User("seller", "seller@example.com", "pw", "John Seller", 1000.0);
@@ -434,5 +438,147 @@ class AutoBidServiceTest {
         assertEquals(200.0, resp.maxBid());
         assertEquals("bidder1Id", resp.bidderId());
         assertTrue(resp.active());
+    }
+
+    // ── register() immediate-bid dispatch tests ────────────────────────────────────
+
+    @Test
+    void testRegisterNew_NonLeader_ImmediateBidFired() {
+        // Fresh registration while NOT the leader: executeAutoBid must fire at
+        // currentPrice + minimumIncrement (110), NOT at the declared maxBid (300).
+        AutoBidRequest req = new AutoBidRequest(300.0);
+        when(auctionRepository.findById("auctionId")).thenReturn(Optional.of(auction));
+        when(userRepository.findById("bidder1Id")).thenReturn(Optional.of(bidder1));
+        when(autoBidRepository.findByAuctionAndBidder(auction, bidder1)).thenReturn(Optional.empty());
+        when(autoBidRepository.save(any(AutoBid.class))).thenAnswer(inv -> {
+            AutoBid ab = inv.getArgument(0);
+            ReflectionTestUtils.setField(ab, "id", "ab1Id");
+            return ab;
+        });
+
+        // leadingBidder = manualBidder, so bidder1 is not the leader.
+        User manualBidder = new User("manual", "m@example.com", "pw", "Manual", 100.0);
+        ReflectionTestUtils.setField(manualBidder, "id", "manualId");
+        ReflectionTestUtils.setField(auction, "leadingBidder", manualBidder);
+        ReflectionTestUtils.setField(auction, "currentPrice", 100.0);
+
+        AutoBidService spyService = mock(AutoBidService.class);
+        ReflectionTestUtils.setField(autoBidService, "self", spyService);
+
+        autoBidService.register("auctionId", "bidder1Id", req);
+
+        ArgumentCaptor<Double> amountCaptor = ArgumentCaptor.forClass(Double.class);
+        verify(spyService).executeAutoBid(eq("auctionId"), eq("ab1Id"), eq("bidder1Id"), amountCaptor.capture());
+        assertEquals(110.0, amountCaptor.getValue());
+    }
+
+    @Test
+    void testRegisterNew_AlreadyLeader_NoBidFired() {
+        // Fresh registration where the bidder is already the leader
+        // (e.g., they just placed a manual bid): no immediate bid, no synthetic event.
+        AutoBidRequest req = new AutoBidRequest(300.0);
+        when(auctionRepository.findById("auctionId")).thenReturn(Optional.of(auction));
+        when(userRepository.findById("bidder1Id")).thenReturn(Optional.of(bidder1));
+        when(autoBidRepository.findByAuctionAndBidder(auction, bidder1)).thenReturn(Optional.empty());
+        when(autoBidRepository.save(any(AutoBid.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // bidder1 IS the current leader.
+        ReflectionTestUtils.setField(auction, "leadingBidder", bidder1);
+        ReflectionTestUtils.setField(auction, "currentPrice", 100.0);
+
+        AutoBidService spyService = mock(AutoBidService.class);
+        ReflectionTestUtils.setField(autoBidService, "self", spyService);
+
+        autoBidService.register("auctionId", "bidder1Id", req);
+
+        verify(spyService, never()).executeAutoBid(any(), any(), any(), any(Double.class));
+        verify(eventPublisher, never()).publishEvent(any());
+    }
+
+    @Test
+    void testRegisterUpdate_NonLeader_ImmediateBidFired() {
+        // Bidder raises maxBid while NOT the leader: same trigger as a fresh
+        // registration — bid immediately at minimumNext (110).
+        AutoBid existing = new AutoBid(auction, bidder1, 150.0);
+        ReflectionTestUtils.setField(existing, "id", "ab1Id");
+
+        AutoBidRequest req = new AutoBidRequest(300.0);
+        when(auctionRepository.findById("auctionId")).thenReturn(Optional.of(auction));
+        when(userRepository.findById("bidder1Id")).thenReturn(Optional.of(bidder1));
+        when(autoBidRepository.findByAuctionAndBidder(auction, bidder1)).thenReturn(Optional.of(existing));
+        when(autoBidRepository.save(any(AutoBid.class))).thenReturn(existing);
+
+        User manualBidder = new User("manual", "m@example.com", "pw", "Manual", 100.0);
+        ReflectionTestUtils.setField(manualBidder, "id", "manualId");
+        ReflectionTestUtils.setField(auction, "leadingBidder", manualBidder);
+        ReflectionTestUtils.setField(auction, "currentPrice", 100.0);
+
+        AutoBidService spyService = mock(AutoBidService.class);
+        ReflectionTestUtils.setField(autoBidService, "self", spyService);
+
+        autoBidService.register("auctionId", "bidder1Id", req);
+
+        ArgumentCaptor<Double> amountCaptor = ArgumentCaptor.forClass(Double.class);
+        verify(spyService).executeAutoBid(eq("auctionId"), eq("ab1Id"), eq("bidder1Id"), amountCaptor.capture());
+        assertEquals(110.0, amountCaptor.getValue());
+    }
+
+    @Test
+    void testRegisterUpdate_Leader_SyntheticEventPublished() {
+        // Leader raises maxBid: no immediate bid needed for themselves.
+        // A synthetic BidEvent is published so onBidPlaced re-evaluates competitors
+        // that may have been capped out against the old ceiling.
+        AutoBid existing = new AutoBid(auction, bidder1, 250.0);
+        ReflectionTestUtils.setField(existing, "id", "ab1Id");
+
+        AutoBidRequest req = new AutoBidRequest(400.0);
+        when(auctionRepository.findById("auctionId")).thenReturn(Optional.of(auction));
+        when(userRepository.findById("bidder1Id")).thenReturn(Optional.of(bidder1));
+        when(autoBidRepository.findByAuctionAndBidder(auction, bidder1)).thenReturn(Optional.of(existing));
+        when(autoBidRepository.save(any(AutoBid.class))).thenReturn(existing);
+
+        // bidder1 IS the current leader at price 210.
+        ReflectionTestUtils.setField(auction, "leadingBidder", bidder1);
+        ReflectionTestUtils.setField(auction, "currentPrice", 210.0);
+
+        AutoBidService spyService = mock(AutoBidService.class);
+        ReflectionTestUtils.setField(autoBidService, "self", spyService);
+
+        autoBidService.register("auctionId", "bidder1Id", req);
+
+        // No direct bid for the leader.
+        verify(spyService, never()).executeAutoBid(any(), any(), any(), any(Double.class));
+
+        // Synthetic BidEvent must carry the current auction state.
+        ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        BidEvent synthetic = (BidEvent) eventCaptor.getValue();
+        assertEquals("auctionId", synthetic.auctionId());
+        assertEquals("bidder1Id", synthetic.bidderId());
+        assertEquals(210.0, synthetic.amount());
+    }
+
+    @Test
+    void testRegisterNew_NonLeader_MaxBidBelowMinimumNext_NoBidFired() {
+        // maxBid=105 passes the floor check (> currentPrice=100) but is below
+        // minimumNext=110: the bidder cannot place the first bid, so no executeAutoBid.
+        AutoBidRequest req = new AutoBidRequest(105.0);
+        when(auctionRepository.findById("auctionId")).thenReturn(Optional.of(auction));
+        when(userRepository.findById("bidder1Id")).thenReturn(Optional.of(bidder1));
+        when(autoBidRepository.findByAuctionAndBidder(auction, bidder1)).thenReturn(Optional.empty());
+        when(autoBidRepository.save(any(AutoBid.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        User manualBidder = new User("manual", "m@example.com", "pw", "Manual", 100.0);
+        ReflectionTestUtils.setField(manualBidder, "id", "manualId");
+        ReflectionTestUtils.setField(auction, "leadingBidder", manualBidder);
+        ReflectionTestUtils.setField(auction, "currentPrice", 100.0);
+
+        AutoBidService spyService = mock(AutoBidService.class);
+        ReflectionTestUtils.setField(autoBidService, "self", spyService);
+
+        autoBidService.register("auctionId", "bidder1Id", req);
+
+        verify(spyService, never()).executeAutoBid(any(), any(), any(), any(Double.class));
+        verify(eventPublisher, never()).publishEvent(any());
     }
 }
