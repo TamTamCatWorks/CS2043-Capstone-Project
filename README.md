@@ -1,8 +1,6 @@
 # CS2043-Capstone-Project
-Tóm Tắt Báo Cáo — Auction System (CS2043 · TamTamCatWorks)
 
-
-1. Mô tả bài toán và phạm vi hệ thống
+## Mô tả bài toán và phạm vi hệ thống
 
 Hệ thống là một nền tảng đấu giá trực tuyến full-stack, thời gian thực, cho phép nhiều người dùng cạnh tranh mua sản phẩm trong một khoảng thời gian xác định. Khác với thương mại giá cố định, giá cuối cùng được quyết định thông qua quá trình đặt giá cạnh tranh giữa các bidder đã đăng ký.
 
@@ -15,17 +13,22 @@ Phạm vi triển khai bao gồm:
 - Giao diện desktop JavaFX cho cả người dùng thông thường và quản trị viên
 
 
-2. Công nghệ sử dụng, môi trường chạy và yêu cầu cài đặt
+## Tech Stack
 
-Thành phần                                      Công nghệ
-Backend(Server)                                 Java 21, Spring Boot 3.2.5
-Frontend (Client)                               JavaFX 21, AtlantaFX
-Cơ sở dữ liệu                                   PostgreSQL 16
-Lưu trữ ảnh                                     MinIO(S3-compatible)
-Build tool                                      Apache Maven
-Container                                       Docker & Docker Compose
-CI/CD                                           GitHub Actions
-Test                                            JUnit5, Mockito
+| Layer | Technology | Rationale |
+|---|---|---|
+| Language | Java 21 | LTS release with virtual threads (Project Loom) |
+| Server framework | Spring Boot 3.2 | Convention over configuration, extensive ecosystem |
+| Security | Spring Security (session-based) | Stateful HTTP sessions; simpler than JWT for a desktop client |
+| Persistence | Spring Data JPA + Hibernate + PostgreSQL 16 | Full ORM with HQL/JPQL, migrations-free for prototyping |
+| Object storage | MinIO (S3-compatible) | Self-hosted, avoids cloud vendor lock-in |
+| Real-time | Spring WebSocket + STOMP | First-class support in Spring; SockJS fallback |
+| Build | Maven (multi-module) | Mature, IDE-agnostic, fine-grained module dependency control |
+| Client UI | JavaFX 21 + AtlantaFX | Rich desktop controls; AtlantaFX provides modern styling |
+| DTO mapping | MapStruct 1.6 | Compile-time, zero-reflection mapping |
+| Test | JUnit 5 + Mockito + Spring Boot Test | Standard Java testing stack |
+| Coverage | JaCoCo | Line/branch coverage reports on every `verify` |
+| Style | Google Checkstyle | Enforced at `validate` phase |
 
 Yêu cầu cài đặt trước khi chạy:
 - Java 21 (khuyến nghị dùng Eclipse Temurin 21)
@@ -38,8 +41,7 @@ Kiểm tra phiên bản trên terminal (Linux/macOS/Windows):
     docker --version
     docker compose version
 
-
-3. Cấu trúc các module chính
+## Cấu trúc các module chính
 
 Dự án sử dụng Maven multi-module, tổ chức theo thứ tự phụ thuộc từ dưới lên:
 CS2043-Capstone-Project/
@@ -56,14 +58,13 @@ CS2043-Capstone-Project/
 Chiều phụ thuộc module: shared ← model ← persist ← service ← api ← client
 
 
-4. Câu lệnh dòng lệnh để chạy chương trình
-(Tất cả lệnh dưới đây chạy được trên Linux, macOS và Windows (dùng terminal tương ứng: bash/zsh/PowerShell).)
+## Commands
 
-Bước 1 — Clone dự án:
-    git clone https://github.com/<your-org>/CS2043-Capstone-Project.git
+**Step 1**: Clone dự án:
+    git clone https://github.com/TamTamCatWorks/CS2043-Capstone-Project.git
     cd CS2043-Capstone-Project/auction-system
 
-Bước 2 — Khởi động PostgreSQL và MinIO bằng Docker Compose:
+**Step 2**: Khởi động PostgreSQL và MinIO bằng Docker Compose:
     docker compose up -d
 
     Lệnh này sẽ khởi động:
@@ -74,45 +75,24 @@ Bước 2 — Khởi động PostgreSQL và MinIO bằng Docker Compose:
     Kiểm tra container đã chạy:
         docker compose ps
 
-Bước 3 — Build toàn bộ dự án:
+**Step 3**: Build toàn bộ dự án:
     # Linux / macOS
     mvn clean package -DskipTests
 
     # Windows (PowerShell hoặc Command Prompt)
     mvn clean package "-DskipTests"
 
-Bước 4 — Chạy Server (API):
-    # Linux / macOS
-    java -jar api/target/api-*.jar
+**Step 4**: Chạy Server (API):
+    mvn -pl api spring-boot:run
 
-    # Windows (PowerShell)
-    java -jar (Get-Item api/target/api-*.jar).FullName
-
-    # Windows (Command Prompt) — cần chỉ tên file cụ thể, ví dụ:
-    java -jar api/target/api-1.0.1-SNAPSHOT.jar
-
-Bước 5 — Chạy Client (JavaFX):
+**Bước 5**: Chạy Client (JavaFX):
     # Linux / macOS
     mvn -pl client javafx:run
 
     # Windows (PowerShell hoặc Command Prompt)
     mvn -pl client javafx:run
 
-(Lưu ý trên Linux: Nếu chưa có môi trường đồ hoạ (ví dụ server không có GUI), cần cài thêm libgtk và các thư viện JavaFX native. Trên máy desktop thông thường (Ubuntu, Fedora) thì chạy bình thường.)
-
-
-5. Hướng dẫn khởi động theo thứ tự cụ thể
-
-Cần khởi động đúng thứ tự sau để tránh lỗi kết nối:
-[1] Docker Compose   →   [2] API Server   →   [3] JavaFX Client
-
-Bước                    Lệnh                                Chờ đến khi
-1. Hạ tầng              docker compose up -d                Cả hai container postgres và minio ở trạng thái healthy / running
-2. Server               java -jar api/target/api-*.jar      Console in ra Started Application hoặc Tomcat started on port 8080
-3. Client               mvn -pl client javafx:run           Cửa sổ đăng nhập JavaFX hiện lên
-
-Khi tắt, nên dừng theo thứ tự ngược lại: Client → Server → Docker.
-
+**Clean up**: 
 Để tắt Docker sau khi dùng xong: 
     docker compose down
 
@@ -122,31 +102,22 @@ Nếu muốn xoá luôn dữ liệu (database + ảnh MinIO):
 
 6. Danh sách chức năng đã hoàn thành
 
-    6.1. User/Item Management (1p)
-
-        - User Management
-        - Auction Item Management
-
-    6.2. Auction Functionalities (1p)
-
-        - Bidding
-        - Auction Closure & Management with Spring Scheduler
-        - Global Exception Handling with @RestControllerAdvice
-        - GUI with javaFX & atlantaFX
-
-    6.3. Concurrency & Realtime Update (1.5p)
-
-        - Concurrent Bidding Handling (Thanks to Spring) (1p)
-        - Realtime Update (Observer/Websockets) (0.5p)
-
-    6.4. Further Functionalities (0.5 per), max (1.5p)
-
-        - Admin Panel
-        - Anti-sniping
-        - Auto-bidding
-        - Bid History Visualization with Line chart
-        - Search & Pagination
-        - Object Storage with Minio
+| Feature | Module / Area | Status | Notes |
+|---|---:|:---:|---|
+| User Management | User/Item Management | Completed | Role-based (Buyer, Seller, Admin) |
+| Auction Item Management | User/Item Management | Completed | Item CRUD, image storage support |
+| Bidding | Auction Functionalities | Completed | Optimistic locking & fund reservation |
+| Auction Closure & Management | Auction Functionalities | Completed | Spring Scheduler-based lifecycle |
+| Global Exception Handling | API / Backend | Completed | @RestControllerAdvice |
+| GUI (JavaFX + AtlantaFX) | Client | Completed | Desktop UI for users & admins |
+| Concurrent Bidding Handling | Concurrency | Completed | Thread-safe bid processing |
+| Realtime Updates (WebSocket/STOMP) | Realtime | Completed | STOMP over SockJS updates |
+| Admin Panel | Further Functionalities | Completed | Admin controls implemented |
+| Anti-sniping | Further Functionalities | Completed | Auction extension / protection |
+| Auto-bidding | Further Functionalities | Completed | Automatic proxy bids |
+| Bid History Visualization | Client / UI | Completed | Line chart of bid history |
+| Search & Pagination | API / Client | Completed | Item search and paged results |
+| Object Storage (MinIO) | Infrastructure | Completed | Auction images stored in MinIO |
 
 
 7. Link báo cáo PDF và video demo
